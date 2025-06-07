@@ -9,7 +9,6 @@ import { environment } from '../../environments/environment';
 })
 export class MemberService {
   private http = inject(HttpClient);
-  private router = inject(Router);
   baseUrl = environment.apiUrl;
   
   getMemberByUniqueNameIdentifier(uNI: string) {

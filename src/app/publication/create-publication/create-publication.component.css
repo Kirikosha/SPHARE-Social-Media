@@ -1,0 +1,144 @@
+/* create-publication.component.css */
+
+.post-creator-container {
+  background-color: #0b3f4a;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+  margin-top: 10px
+}
+
+.post-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-content-area {
+  display: flex;
+  gap: 12px;
+}
+
+.profile-pic-wrapper .profile-pic {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+}
+
+.content-wrapper {
+  flex: 1;
+}
+
+.post-textarea {
+  min-height: 100px;
+  padding: 12px;
+  border: none;
+  outline: none;
+  font-size: 1.1rem;
+  resize: none;
+  width: 100%;
+}
+
+.post-textarea:empty:before {
+  content: attr(placeholder);
+  color: 	#126476;
+  pointer-events: none;
+  display: block;
+}
+
+.image-preview-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.image-preview {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.preview-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.remove-image {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  padding: 4px;
+}
+
+.post-options {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e6ecf0;
+  margin-top: 12px;
+}
+
+.option-button {
+  color: #1da1f2;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.option-button:hover {
+  color: #1991db;
+}
+
+.post-type-toggle {
+  margin-left: auto;
+}
+
+.schedule-options {
+  margin-left: 12px;
+}
+
+.schedule-input {
+  min-width: 200px;
+  border-radius: 20px;
+  padding: 6px 12px;
+}
+
+.post-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.post-button {
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-weight: 700;
+  min-width: 80px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .post-options {
+    flex-wrap: wrap;
+  }
+  
+  .post-type-toggle {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .schedule-options {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+  
+  .schedule-input {
+    width: 100%;
+  }
+}

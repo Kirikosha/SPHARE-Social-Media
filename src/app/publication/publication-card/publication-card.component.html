@@ -1,0 +1,50 @@
+<div class="publication-card" *ngIf="publication">
+  <div class="publication-content">
+    <!-- Author Info -->
+    <div class="author-info">
+      <div class="profile-pic-wrapper">
+        <img [src]="publication.author.profileImage.imageUrl || 'assets/user.png'" 
+             alt="Profile Picture" 
+             class="profile-pic rounded-circle">
+      </div>
+      <div class="author-details">
+        <span class="author-name">{{publication.author.username}}</span>
+        <span class="author-handle">&#64;{{publication.author.uniqueNameIdentifier}}</span>
+        <span class="post-time">· {{formatDate(publication.postedAt)}}</span>
+      </div>
+    </div>
+    
+    <!-- Publication Content -->
+    <div class="publication-text">
+      <p>{{publication.content}}</p>
+    </div>
+    
+    <!-- Images (if any) -->
+    <div class="publication-images" *ngIf="publication.images && publication.images.length > 0">
+      <div class="image-grid" [ngClass]="getImageGridClass(publication.images.length)">
+        <div class="image-container" *ngFor="let image of publication.images">
+          <img [src]="image.imageUrl" alt="Publication image" class="publication-image">
+        </div>
+      </div>
+    </div>
+    
+    <!-- Publication Actions -->
+    <div class="publication-actions">
+      <button class="action-button">
+        <i class="bi bi-chat"></i>
+        <span class="action-count">42</span>
+      </button>
+      <button class="action-button">
+        <i class="bi bi-arrow-repeat"></i>
+        <span class="action-count">12</span>
+      </button>
+      <button class="action-button">
+        <i class="bi bi-heart"></i>
+        <span class="action-count">256</span>
+      </button>
+      <button class="action-button">
+        <i class="bi bi-share"></i>
+      </button>
+    </div>
+  </div>
+</div>

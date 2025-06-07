@@ -1,0 +1,55 @@
+<div class="post-creator-container">
+  <form (submit)="createPost($event)" class="post-form">
+    <!-- Post Content Area -->
+    <div class="post-content-area">
+      <div class="content-wrapper">
+        <div #contentSpan 
+             class="post-textarea" 
+             contenteditable="true"
+             placeholder="What's happening?"></div>
+        
+        <!-- Image Preview -->
+        <div class="image-preview-container" *ngIf="imagePreviews.length > 0">
+          <div class="image-preview" *ngFor="let preview of imagePreviews; let i = index">
+            <img [src]="preview" class="preview-image">
+            <button type="button" class="btn-close remove-image" (click)="removeImage(i)"></button>
+          </div>
+        </div>
+        
+        <!-- Post Options -->
+        <div class="post-options">
+          <!-- Image Upload -->
+          <label for="image-upload" class="option-button">
+            <i class="bi bi-image"></i>
+            <input id="image-upload" type="file" multiple accept="image/*" (change)="handleImageUpload($event)" style="display: none;">
+          </label>
+          
+          <!-- Post Type Selection -->
+          <div class="btn-group post-type-toggle" role="group">
+            <input type="radio" class="btn-check" name="publicationType" id="ordinaryPost" 
+                   [(ngModel)]="publicationType" value="ordinary" checked>
+            <label class="btn btn-outline-danger" for="ordinaryPost">Post Now</label>
+            
+            <input type="radio" class="btn-check" name="publicationType" id="plannedPost" 
+                   [(ngModel)]="publicationType" value="planned">
+            <label class="btn btn-outline-danger" for="plannedPost">Schedule</label>
+          </div>
+          
+          <!-- Schedule Options (shown only when planned post is selected) -->
+          <div class="schedule-options" *ngIf="publicationType === 'planned'">
+            <input type="datetime-local" class="form-control schedule-input" 
+                   [min]="minScheduleDate" [(ngModel)]="scheduledDate" name="scheduledDate">
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Post Button -->
+    <div class="post-button-container">
+      <button type="submit" class="btn btn-success post-button" [disabled]="isPosting">
+        {{ publicationType === 'ordinary' ? 'Post' : 'Schedule' }}
+        <span *ngIf="isPosting" class="spinner-border spinner-border-sm ms-2"></span>
+      </button>
+    </div>
+  </form>
+</div>

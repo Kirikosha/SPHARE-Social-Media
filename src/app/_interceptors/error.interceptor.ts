@@ -3,8 +3,10 @@ import { inject } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs';
+import { AccountService } from '../_services/account.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  const accountService = inject(AccountService);
   const router = inject(Router);
   const toastr = inject(ToastrService);
   return next(req).pipe(
@@ -25,6 +27,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             }
             break;
           case 401:
+            if (localStorage.getItem('user')){
+                  localStorage.removeItem('user');
+                  accountService.currentUser.set(null);
+            }
             toastr.error('Unauthorized - Please login', error.status)
             router.navigateByUrl('/login');
             break;

@@ -3,11 +3,12 @@ import { MemberService } from '../../_services/member.service';
 import { MemberModel } from '../../_models/memberModel';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../../_services/account.service';
+import { ProfileTabsComponent } from "../profile-tabs/profile-tabs.component";
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [],
+  imports: [ProfileTabsComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -30,5 +31,13 @@ export class ProfileComponent implements OnInit {
         this.toastr.error(err.error);
       }
     })
+  }
+
+    formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'long', 
+      year: 'numeric' 
+    });
   }
 }

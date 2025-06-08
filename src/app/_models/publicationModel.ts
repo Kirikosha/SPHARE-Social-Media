@@ -6,6 +6,7 @@ export interface PublicationModel{
     content?: string;
     postedAt: Date;
     updatedAt?: Date;
+    remindAt?: Date;
     images?: ImageModel[];
     author: MemberModel;
 }

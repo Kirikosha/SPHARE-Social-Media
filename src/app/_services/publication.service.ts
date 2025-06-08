@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { CreatePublicationModel } from '../_models/createPublicationModel';
+import { PublicationModel } from '../_models/publicationModel';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +30,10 @@ createPublication(publicationModel: CreatePublicationModel) {
   }
   
   return this.http.post(this.baseUrl + '/publication/create-publication', formData);
+}
+
+getPublications(uniqueNameIdentifier: string) {
+  return this.http.get<PublicationModel[]>(this.baseUrl + '/publication/publication-of-' + uniqueNameIdentifier);
 }
   constructor() { }
 }

@@ -3,17 +3,26 @@
     <!-- Author Info -->
     <div class="author-info">
       <div class="profile-pic-wrapper">
-        <img [src]="publication.author.profileImage.imageUrl || 'assets/user.png'" 
-             alt="Profile Picture" 
-             class="profile-pic rounded-circle">
+        @if (publication.author.profileImage && publication.author.profileImage.imageUrl) {
+          <img [src]="publication.author.profileImage.imageUrl" 
+               alt="Profile Picture" 
+               class="profile-pic rounded-circle">
+        } @else {
+          <img src="assets/user.png" 
+               alt="Profile Picture" 
+               class="profile-pic rounded-circle">
+        }
       </div>
       <div class="author-details">
-        <span class="author-name">{{publication.author.username}}</span>
-        <span class="author-handle">&#64;{{publication.author.uniqueNameIdentifier}}</span>
-        <span class="post-time">· {{formatDate(publication.postedAt)}}</span>
+        <div class="d-flex align-items-center flex-wrap">
+          <span class="author-name">{{publication.author.username}}</span>
+          <span class="author-handle"> &#64;{{publication.author.uniqueNameIdentifier}}</span>
+          <span class="post-time"> · {{formatDate(publication.postedAt)}}</span>
+        </div>
       </div>
     </div>
     
+    <!-- Rest of your template remains the same -->
     <!-- Publication Content -->
     <div class="publication-text">
       <p>{{publication.content}}</p>

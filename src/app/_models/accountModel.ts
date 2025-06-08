@@ -1,6 +1,6 @@
 export interface AccountModel {
     username: string,
-    email: string,
+    uniqueNameIdentifier: string,
     token: string,
     role: string
 }

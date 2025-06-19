@@ -5,17 +5,24 @@
       
       <!-- Profile Info Section -->
       <div class="profile-info-section">
-        <div class="profile-pic-wrapper">
-          @if (memberModel.profileImage && memberModel.profileImage.imageUrl) {
-            <img [src]="memberModel.profileImage.imageUrl" 
-                 alt="Profile Picture" 
-                 class="profile-pic rounded-circle">
-          } @else {
-            <img [src]="'assets/user.png'" 
-                 alt="Profile Picture" 
-                 class="profile-pic rounded-circle">
-          }
-        </div>
+      <div class="profile-pic-wrapper">
+        @if (memberModel.profileImage && memberModel.profileImage.imageUrl) {
+          <img [src]="memberModel.profileImage.imageUrl" 
+              alt="Profile Picture" 
+              class="profile-pic rounded-circle"
+              [class.blocked-avatar]="memberModel.blocked">
+        } @else {
+          <img src="assets/user.png" 
+              alt="Profile Picture" 
+              class="profile-pic rounded-circle"
+              [class.blocked-avatar]="memberModel.blocked">
+        }
+        @if (memberModel.blocked) {
+          <div class="blocked-avatar-overlay">
+            <i class="bi bi-lock-fill"></i>
+          </div>
+        }
+      </div>
         
         <div class="profile-actions">
           @if (isCurrentUserProfile) {
@@ -23,21 +30,29 @@
               Edit profile
             </button>
           } @else {
-            <button class="btn rounded-pill follow-button" 
-                    [class.btn-primary]="!isFollowing"
-                    [class.btn-outline-primary]="isFollowing"
-                    (click)="toggleFollow()">
-              @if (isFollowing) {
-                Following
-              } @else {
-                Follow
-              }
-            </button>
+          <button class="btn rounded-pill follow-button" 
+                  [class.btn-primary]="!isFollowing"
+                  [class.btn-outline-primary]="isFollowing"
+                  [disabled]="memberModel.blocked || accountService.currentUser()?.blocked"
+                  (click)="toggleFollow()">
+            @if (isFollowing) {
+              Following
+            } @else {
+              Follow
+            }
+          </button>
           }
         </div>
         
         <div class="profile-details mt-4">
-          <h2 class="profile-name">{{memberModel.username}}</h2>
+          <div class="d-flex align-items-center">
+            <h2 class="profile-name">{{memberModel.username}}</h2>
+            @if (memberModel.blocked) {
+              <span class="badge bg-danger ms-2">
+                <i class="bi bi-lock-fill"></i> Blocked
+              </span>
+            }
+          </div>
           <h2 class="profile-unique-name">&#64;{{memberModel.uniqueNameIdentifier}}</h2>
           <p class="text-muted">Joined {{formatDate(memberModel.joinedAt)}}</p>
           

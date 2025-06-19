@@ -211,3 +211,15 @@
 .scheduled-time i {
   font-size: 0.9rem;
 }
+
+
+.publication-card {
+  position: relative; /* Needed for absolute positioning of admin button */
+  
+  .admin-actions-wrapper {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+  }
+}

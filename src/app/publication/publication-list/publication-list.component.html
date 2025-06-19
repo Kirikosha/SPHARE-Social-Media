@@ -23,6 +23,10 @@
       (editPublication)="onUpdatePublication($event)"
       (deletePublication)="onDeletePublication($event)"
       (likePublication)="onLikePublication($event)">
+        <app-create-violation 
+          [item]="publication" 
+          (itemDeleted)="onAdminPublicationDeleted($event)">
+        </app-create-violation>
     </app-publication-card>
   </div>
 </div>

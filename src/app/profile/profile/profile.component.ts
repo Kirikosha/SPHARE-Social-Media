@@ -18,7 +18,7 @@ export class ProfileComponent implements OnInit {
   private memberService = inject(MemberService);
   private toastr = inject(ToastrService);
   private router = inject(Router);
-  private accountService = inject(AccountService);
+  accountService = inject(AccountService);
   private subscriptionService = inject(SubscriptionService);
   private route = inject(ActivatedRoute);
 
@@ -77,13 +77,15 @@ export class ProfileComponent implements OnInit {
     this.isLoading = false;
   }
 
-    formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'long', 
-      year: 'numeric' 
-    });
-  }
+formatDate(dateString: string): string {
+  const [day, month, year] = dateString.split('.');
+  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day)); // month is 0-based
+  return date.toLocaleDateString('en-US', { 
+    month: 'long', 
+    year: 'numeric' 
+  });
+}
+
   goToUpdate() {
     this.router.navigate(['/edit-profile']);
   }
@@ -118,15 +120,23 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  toggleFollow() {
-    if (this.isCurrentUserProfile || this.accountService.currentUser()?.blocked) return;
-    if (this.isFollowing){
-      this.unfollowUser();
-    }
-    else{
-      this.followUser();
-    }
+toggleFollow() {
+  if (this.isCurrentUserProfile || this.accountService.currentUser()?.blocked) {
+    return;
   }
+  
+  if (this.memberModel.blocked) {
+    this.toastr.warning('You cannot follow a blocked account');
+    return;
+  }
+
+  if (this.isFollowing) {
+    this.unfollowUser();
+  } else {
+    this.followUser();
+  }
+}
+
 
   followUser() {
     this.subscriptionService.subscribe(this.memberModel.uniqueNameIdentifier).subscribe({

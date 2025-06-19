@@ -29,6 +29,12 @@ export class AdminUserCardComponent {
     this.router.navigate(['/admin/violation-list', this.user.id]);
   }
 
+getViolationPercentage(): number {
+  const max = 20;
+  return Math.min((this.user.violationScore / max) * 100, 100);
+}
+
+
   getViolationClass(): string {
     if (this.user.violationScore >= 15) return 'high-violation';
     if (this.user.violationScore >= 10) return 'medium-violation';

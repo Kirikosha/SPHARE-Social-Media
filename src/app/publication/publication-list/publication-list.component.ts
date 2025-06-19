@@ -7,18 +7,19 @@ import { CommonModule } from '@angular/common';
 import { PublicationCardComponent } from "../publication-card/publication-card.component";
 import { UpdatePublicationModel } from '../../_models/updatePublicationModel';
 import { ActivatedRoute } from '@angular/router';
+import { CreateViolationComponent } from "../../admin/create-violation/create-violation.component";
 
 @Component({
   selector: 'app-publication-my-list',
   standalone: true,
-  imports: [CommonModule, PublicationCardComponent],
+  imports: [CommonModule, PublicationCardComponent, CreateViolationComponent],
   templateUrl: './publication-list.component.html',
   styleUrl: './publication-list.component.css'
 })
 export class PublicationListComponent implements OnInit{
   private route = inject(ActivatedRoute);
   private publicationService = inject(PublicationService);
-  private accountService = inject(AccountService);
+  accountService = inject(AccountService);
   private toastr = inject(ToastrService);
   
   publications: PublicationModel[] = [];
@@ -38,20 +39,28 @@ export class PublicationListComponent implements OnInit{
     this.isCurrentUserProfile = currentUser?.uniqueNameIdentifier === uniqueNameIdentifier;
   }
 
-  loadPublications(uniqueNameIdentifier: string): void {
-    console.log(`Loading publications for user: ${uniqueNameIdentifier}`);
-    this.isLoading = true;
-    this.publicationService.getPublications(uniqueNameIdentifier).subscribe({
-      next: (publications) => {
-        this.publications = publications;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.toastr.error('Failed to load publications', error.message);
-        this.isLoading = false;
-      }
-    });
-  }
+loadPublications(uniqueNameIdentifier: string): void {
+  this.isLoading = true;
+  this.publicationService.getPublications(uniqueNameIdentifier).subscribe({
+    next: (publications) => {
+      const currentUser = this.accountService.currentUser();
+      const isOwnProfile = currentUser?.uniqueNameIdentifier === uniqueNameIdentifier;
+      const now = new Date();
+      
+      this.publications = publications.filter(p => 
+        !p.remindAt || 
+        new Date(p.remindAt) <= now || 
+        isOwnProfile
+      );
+      
+      this.isLoading = false;
+    },
+    error: (error) => {
+      this.toastr.error('Failed to load publications', error.message);
+      this.isLoading = false;
+    }
+  });
+}
 
   onUpdatePublication(publication: UpdatePublicationModel): void {
     this.publicationService.updatePublication(publication).subscribe({
@@ -95,5 +104,9 @@ export class PublicationListComponent implements OnInit{
         this.toastr.error('Failed to like publication', error.message);
       }
     });
+  }
+
+  onAdminPublicationDeleted(itemId: number): void {
+    this.publications = this.publications.filter(p => p.id !== itemId);
   }
 }

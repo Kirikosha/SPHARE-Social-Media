@@ -29,9 +29,11 @@
           <span class="me-2">Violation Score:</span>
           <div class="progress flex-grow-1 bg-dark" style="height: 10px;">
             <div class="progress-bar" 
-                 [ngClass]="getViolationClass()"
-                 [style.width.%]="user.violationScore > 20 ? 20 : user.violationScore">
+                [ngClass]="getViolationClass()"
+                [style.width]="getViolationPercentage() + '%'">
             </div>
+
+
           </div>
           <span class="ms-2">{{ user.violationScore }}</span>
         </div>

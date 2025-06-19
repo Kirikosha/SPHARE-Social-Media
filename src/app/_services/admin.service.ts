@@ -22,11 +22,11 @@ export class AdminService {
   }
 
   blockUser(userId: number){
-    return this.http.post(`${this.baseUrl}/admin/block-user`, { userId });
+    return this.http.post(`${this.baseUrl}/admin/block-user`, userId);
   }
 
   unblockUser(userId: number){
-    return this.http.post(`${this.baseUrl}/admin/unblock-user`, { userId });
+    return this.http.post(`${this.baseUrl}/admin/unblock-user`, userId);
   }
 
   deleteComment(violationData: CreateViolationModel){

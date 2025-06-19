@@ -5,6 +5,7 @@ import { PublicationModel } from '../../_models/publicationModel';
 import { PublicationService } from '../../_services/publication.service';
 import { CommonModule } from '@angular/common';
 import { CommentSectionComponent } from "../comment-section/comment-section.component";
+import { AccountService } from '../../_services/account.service';
 
 @Component({
   selector: 'app-publication-page',
@@ -14,6 +15,7 @@ import { CommentSectionComponent } from "../comment-section/comment-section.comp
   styleUrl: './publication-page.component.css'
 })
 export class PublicationPageComponent {
+  private accountService = inject(AccountService);
   private publicationService = inject(PublicationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -57,7 +59,7 @@ export class PublicationPageComponent {
   }
 
   likePublication() {
-    if (!this.publication) return;
+    if (!this.publication || this.accountService.currentUser()?.blocked) return;
 
     this.publicationService.likePublication(this.publication.id).subscribe({
       next: (like) => {

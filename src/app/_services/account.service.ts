@@ -55,6 +55,18 @@ register(model: FormData) {
     this.currentUser.set(null);
   }
 
+  forgotPassword(email: string){
+    return this.http.post(this.baseUrl + '/account/forgot-password', { email });
+  }
+
+  verifyResetCode(email: string, code: string){
+    return this.http.post(`${this.baseUrl}/account/verify-reset-code`, { email, code });
+  }
+
+  resetPassword(email: string, newPassword: string){
+    return this.http.post(this.baseUrl + '/account/reset-password', { email, newPassword });
+  }
+
   constructor(){
     const userJson = localStorage.getItem('user');
     if (userJson) {

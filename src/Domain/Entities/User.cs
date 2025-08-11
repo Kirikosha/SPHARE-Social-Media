@@ -1,0 +1,25 @@
+﻿namespace Domain.Entities;
+
+using Domain.Enums;
+using System;
+using System.Collections.Generic;
+
+public class User
+{
+    public int Id { get; set; }
+    public required string Username { get; set; }
+    public required string UniqueNameIdentifier { get; set; }
+    public required string Email { get; set; }
+    public byte[] PasswordHash { get; set; } = [];
+    public byte[] PaswordSalt { get; set; } = [];
+    public Roles Role { get; set; } = Roles.User;
+    public DateOnly DateOfCreation { get; set; } = DateOnly.FromDateTime(DateTime.UtcNow);
+    public List<Publication> CreatedPublications { get; set; } = [];
+    public List<Like> LikedPublications { get; set; } = [];
+    public int? ProfileImageId { get; set; }
+    public Image? ProfileImage { get; set; }
+    public int ViolationScore { get; set; } = 0;
+    public List<Violation> Violations { get; set; } = [];
+    public bool Blocked { get; set; } = false;
+    public DateTime? BlockedAt { get; set; }
+}

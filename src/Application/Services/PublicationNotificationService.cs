@@ -10,16 +10,16 @@ using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-public class NotificationService : BackgroundService
+public class PublicationNotificationService : BackgroundService
 {
-    private readonly ILogger<NotificationService> logger;
+    private readonly ILogger<PublicationNotificationService> logger;
     private readonly IMediator mediator;
     private readonly IEmailService emailService;
     private readonly ISubscriptionService subscriptionService;
     private readonly TimeSpan checkInterval = TimeSpan.FromSeconds(60);
     private const int BatchSize = 20;
 
-    public NotificationService(IServiceProvider services, ILogger<NotificationService> logger, IMediator mediator, 
+    public PublicationNotificationService(IServiceProvider services, ILogger<PublicationNotificationService> logger, IMediator mediator, 
         IEmailService emailService, ISubscriptionService subscriptionService)
     {
         this.logger = logger;

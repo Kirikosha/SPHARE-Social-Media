@@ -21,7 +21,7 @@ public class SetPublicationSentState
             if (publication == null) throw new Exception("Publication was not found");
 
             publication.WasSent = request.State;
-            await context.SaveChangesAsync(cancellationToken);
+            context.Publications.Update(publication);
         }
     }
 }

@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Users\Commands\" />
     <Folder Include="Helpers\" />
   </ItemGroup>
 

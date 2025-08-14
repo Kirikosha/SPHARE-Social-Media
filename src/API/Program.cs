@@ -1,8 +1,9 @@
 using Application.Features.Users.Queries;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Application;
 using Application.Core;
+using MediatR;
+using Application.Transaction;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,8 +32,10 @@ builder.Services.AddMediatR(x =>
 {
     x.RegisterServicesFromAssemblyContaining<GetUsersList.Handler>();
 });
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+
 
 var app = builder.Build();
 

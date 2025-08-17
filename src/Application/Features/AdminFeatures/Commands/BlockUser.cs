@@ -1,8 +1,6 @@
 ﻿namespace Application.Features.AdminFeatures.Commands;
 
-using Domain.Entities;
 using Infrastructure;
-using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 

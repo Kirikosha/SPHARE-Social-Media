@@ -1,8 +1,6 @@
 ﻿namespace Application.Features.Publications.Commands;
 
-using Domain.Entities;
 using Infrastructure;
-using MediatR;
 using System.Threading;
 
 public class SetPublicationSentState

@@ -2,9 +2,7 @@
 
 using AutoMapper;
 using Domain.DTOs.CommentDTOs;
-using Domain.Entities;
 using Infrastructure;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;

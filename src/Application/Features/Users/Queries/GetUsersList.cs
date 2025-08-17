@@ -2,9 +2,7 @@
 
 using AutoMapper;
 using Domain.DTOs.UserDTOs;
-using Domain.Entities;
 using Infrastructure;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;

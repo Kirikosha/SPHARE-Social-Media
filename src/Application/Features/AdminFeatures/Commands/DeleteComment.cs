@@ -1,11 +1,8 @@
 ﻿namespace Application.Features.AdminFeatures.Commands;
 
-using Application.Services.EmailService;
 using Application.Services.ViolationService;
 using Domain.DTOs.ViolationDTOs;
-using Domain.Entities;
 using Infrastructure;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;

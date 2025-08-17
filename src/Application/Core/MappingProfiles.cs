@@ -14,5 +14,7 @@ public class MappingProfiles : Profile
             .ForMember(a => a.AmountOfViolations, src => src.MapFrom(a => a.Violations.Count));
         CreateMap<Image, ImageDto>();
         CreateMap<Violation, ViolationDto>();
+        CreateMap<User, PublicUserDto>()
+            .ForMember(u => u.JoinedAt, opt => opt.MapFrom(u => u.DateOfCreation.ToString()));
     }
 }

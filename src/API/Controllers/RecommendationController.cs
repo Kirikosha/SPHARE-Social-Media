@@ -1,6 +1,5 @@
 ﻿namespace API.Controllers;
 
-using Application.Features.Publications.Queries;
 using Application.Features.Recommendations.Queries;
 using Application.Helpers;
 using Microsoft.AspNetCore.Mvc;

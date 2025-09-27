@@ -1,5 +1,6 @@
 ﻿namespace Application.Features.Comments.Commands;
 
+using Application.Core;
 using AutoMapper;
 using Domain.DTOs.CommentDTOs;
 using Infrastructure;
@@ -9,21 +10,21 @@ using System.Threading.Tasks;
 
 public class CreateComment
 {
-    public class Command : IRequest<CommentDto>
+    public class Command : IRequest<Result<CommentDto>>
     {
         public required int UserId { get; set; }
         public required CreateCommentDto Comment { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Command, CommentDto>
+    public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Command, Result<CommentDto>>
     {
-        public async Task<CommentDto> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<CommentDto>> Handle(Command request, CancellationToken cancellationToken)
         {
             User? user = await context.Users.Include(a => a.ProfileImage).FirstOrDefaultAsync(a => a.Id == request.UserId);
-            if (user == null) throw new Exception("User was not found");
+            if (user == null) return Result<CommentDto>.Failure("User was not found", 400);
 
             Publication? publication = await context.Publications.FindAsync(request.Comment.PublicationId);
-            if (publication == null) throw new Exception("Publication you are writing comment to no longer exist");
+            if (publication == null) return Result<CommentDto>.Failure("Publication you are trying to delete no longer exists", 400);
 
             Comment comment = new Comment
             {
@@ -35,7 +36,7 @@ public class CreateComment
 
             context.Comments.Add(comment);
 
-            return mapper.Map<CommentDto>(comment);
+            return Result<CommentDto>.Success(mapper.Map<CommentDto>(comment));
         }
     }
 }

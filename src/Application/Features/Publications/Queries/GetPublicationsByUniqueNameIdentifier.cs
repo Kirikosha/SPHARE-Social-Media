@@ -1,5 +1,6 @@
 ﻿namespace Application.Features.Publications.Queries;
 
+using Application.Core;
 using Application.Features.Likes.Queries;
 using AutoMapper;
 using Domain.DTOs.PublicationDTOs;
@@ -10,18 +11,20 @@ using System.Threading.Tasks;
 
 public class GetPublicationsByUniqueNameIdentifier
 {
-    public class Query : IRequest<List<PublicationDto>>
+    public class Query : IRequest<Result<List<PublicationDto>>>
     {
         public required string UniqueNameIdentifier { get; set; }
         public required int UserId { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper, IMediator mediator) : IRequestHandler<Query, List<PublicationDto>>
+    public class Handler(ApplicationDbContext context, IMapper mapper, IMediator mediator) 
+        : IRequestHandler<Query, Result<List<PublicationDto>>>
     {
-        public async Task<List<PublicationDto>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<List<PublicationDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
             User? user = await context.Users.FindAsync(request.UserId);
-            if (user == null) throw new Exception("User was not found");
+            if (user == null)
+                return Result<List<PublicationDto>>.Failure("User was not found", 404);
 
             List<Publication> publications = await context.Publications
                 .Include(a => a.Likes)
@@ -34,11 +37,18 @@ public class GetPublicationsByUniqueNameIdentifier
             var mappedPublications = mapper.Map<List<PublicationDto>>(publications);
             foreach(var publication in mappedPublications)
             {
-                publication.IsLikedByCurrentUser = await mediator.Send(
+                var isLikedResult = await mediator.Send(
                     new IsLikedBy.Query { PublicationId = publication.Id, UserId = request.UserId });
+
+                if (!isLikedResult.IsSuccess)
+                {
+                    return Result<List<PublicationDto>>.Failure(isLikedResult.Error!, isLikedResult.Code);
+                }
+
+                publication.IsLikedByCurrentUser = isLikedResult.Value;
             }
 
-            return mappedPublications;
+            return Result<List<PublicationDto>>.Success(mappedPublications);
         }
     }
 }

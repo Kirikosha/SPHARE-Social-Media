@@ -1,5 +1,6 @@
 ﻿namespace Application.Features.Users.Queries;
 
+using Application.Core;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -9,19 +10,20 @@ using System.Threading.Tasks;
 
 public class GetUserEmailsByIds
 {
-    public class Query : IRequest<List<string>>
+    public class Query : IRequest<Result<List<string>>>
     {
         public required List<int> Ids { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context) : IRequestHandler<Query, List<string>>
+    public class Handler(ApplicationDbContext context) 
+        : IRequestHandler<Query, Result<List<string>>>
     {
-        public async Task<List<string>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<List<string>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            return await context.Users
+            return Result<List<string>>.Success(await context.Users
             .Where(a => request.Ids.Contains(a.Id))
             .Select(a => a.Email)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken));
         }
     }
 }

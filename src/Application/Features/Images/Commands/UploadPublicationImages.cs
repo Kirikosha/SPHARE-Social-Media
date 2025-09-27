@@ -1,5 +1,6 @@
 ﻿namespace Application.Features.Images.Commands;
 
+using Application.Core;
 using Application.Services.PhotoService;
 using Infrastructure;
 using Microsoft.AspNetCore.Http;
@@ -8,14 +9,14 @@ using System.Threading.Tasks;
 
 public class UploadPublicationImages
 {
-    public class Command : IRequest<List<Image>>
+    public class Command : IRequest<Result<List<Image>>>
     {
         public required List<IFormFile> Images { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IPhotoService photoService) : IRequestHandler<Command, List<Image>>
+    public class Handler(ApplicationDbContext context, IPhotoService photoService) : IRequestHandler<Command, Result<List<Image>>>
     {
-        public async Task<List<Image>> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<List<Image>>> Handle(Command request, CancellationToken cancellationToken)
         {
             List<Image> uploadedImages = new List<Image>();
             List<string> successfulUploads = new List<string>();
@@ -37,12 +38,11 @@ public class UploadPublicationImages
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error - ${ex.Message}");
-                    throw;
+                    return Result<List<Image>>.Failure($"During image upload error arised. Error: {ex.Message}", 500);
                 }
             }
 
-            return uploadedImages;
+            return Result<List<Image>>.Success(uploadedImages);
         }
     }
 }

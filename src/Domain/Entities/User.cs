@@ -11,7 +11,7 @@ public class User
     public required string UniqueNameIdentifier { get; set; }
     public required string Email { get; set; }
     public byte[] PasswordHash { get; set; } = [];
-    public byte[] PaswordSalt { get; set; } = [];
+    public byte[] PasswordSalt { get; set; } = [];
     public Roles Role { get; set; } = Roles.User;
     public DateOnly DateOfCreation { get; set; } = DateOnly.FromDateTime(DateTime.UtcNow);
     public List<Publication> CreatedPublications { get; set; } = [];

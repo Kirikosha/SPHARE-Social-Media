@@ -1,5 +1,6 @@
 ﻿namespace Application.Features.Users.Queries;
 
+using Application.Core;
 using AutoMapper;
 using Domain.DTOs.UserDTOs;
 using Infrastructure;
@@ -9,14 +10,15 @@ using System.Threading.Tasks;
 
 public class GetUsersList
 {
-    public class Query : IRequest<List<AdminUserDto>> { }
+    public class Query : IRequest<Result<List<AdminUserDto>>> { }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Query, List<AdminUserDto>>
+    public class Handler(ApplicationDbContext context, IMapper mapper) 
+        : IRequestHandler<Query, Result<List<AdminUserDto>>>
     {
-        public async Task<List<AdminUserDto>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<List<AdminUserDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
             var users = await context.Users.Include(a => a.ProfileImage).ToListAsync(cancellationToken);
-            return mapper.Map<List<AdminUserDto>>(users);
+            return Result<List<AdminUserDto>>.Success(mapper.Map<List<AdminUserDto>>(users));
         }
     }
 }

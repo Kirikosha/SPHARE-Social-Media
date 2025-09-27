@@ -1,5 +1,6 @@
 ﻿namespace Application.Features.Users.Queries;
 
+using Application.Core;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.DTOs.UserDTOs;
@@ -10,16 +11,18 @@ using System.Threading.Tasks;
 
 public class GetUsersByUniqueNameIdentifier
 {
-    public class Query : IRequest<List<PublicUserDto>>
+    public class Query : IRequest<Result<List<PublicUserDto>>>
     {
         public required string UniqueNameIdentifier { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Query, List<PublicUserDto>>
+    public class Handler(ApplicationDbContext context, IMapper mapper) 
+        : IRequestHandler<Query, Result<List<PublicUserDto>>>
     {
-        public async Task<List<PublicUserDto>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<List<PublicUserDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(request.UniqueNameIdentifier)) return new List<PublicUserDto>();
+            if (string.IsNullOrEmpty(request.UniqueNameIdentifier)) 
+                return Result<List<PublicUserDto>>.Success(new List<PublicUserDto>());
 
             var users = await context.Users
                 .Include(a => a.ProfileImage)
@@ -27,7 +30,7 @@ public class GetUsersByUniqueNameIdentifier
                 .ProjectTo<PublicUserDto>(mapper.ConfigurationProvider)
                 .ToListAsync();
 
-            return users;
+            return Result<List<PublicUserDto>>.Success(users);
         }
     }
 }

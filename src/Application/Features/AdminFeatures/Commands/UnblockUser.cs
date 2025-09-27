@@ -1,5 +1,6 @@
 ﻿namespace Application.Features.AdminFeatures.Commands;
 
+using Application.Core;
 using Domain.Entities;
 using Infrastructure;
 using MediatR;
@@ -8,14 +9,14 @@ using System.Threading.Tasks;
 
 public class UnblockUser
 {
-    public class Command : IRequest<bool>
+    public class Command : IRequest<Result<bool>>
     {
         public required int UserId { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context) : IRequestHandler<Command, bool>
+    public class Handler(ApplicationDbContext context) : IRequestHandler<Command, Result<bool>>
     {
-        public async Task<bool> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             try
             {
@@ -27,11 +28,11 @@ public class UnblockUser
                 user.ViolationScore = 0;
 
                 context.Users.Update(user);
-                return true;
+                return Result<bool>.Success(true);
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                return Result<bool>.Failure($"Something went wrong during the process. Error: {ex.Message}", 500);
             }
         }
     }

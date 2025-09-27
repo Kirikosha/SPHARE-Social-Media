@@ -1,5 +1,6 @@
 ﻿namespace Application.Features.Publications.Commands;
 
+using Application.Core;
 using Application.Features.Likes.Queries;
 using AutoMapper;
 using Domain.DTOs.PublicationDTOs;
@@ -11,23 +12,24 @@ using System.Threading.Tasks;
 
 public class UpdatePublication
 {
-    public class Command : IRequest<PublicationDto>
+    public class Command : IRequest<Result<PublicationDto>>
     {
         public required UpdatePublicationDto Publication { get; set; }
         public required int UserId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context, IMapper mapper, IMediator mediator) 
-        : IRequestHandler<Command, PublicationDto>
+        : IRequestHandler<Command, Result<PublicationDto>>
     {
-        public async Task<PublicationDto> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<PublicationDto>> Handle(Command request, CancellationToken cancellationToken)
         {
             Publication? publication = await context.Publications
                 .Include(a => a.Images)
                 .Include(a => a.Author).ThenInclude(a => a.ProfileImage)
                 .FirstOrDefaultAsync(a => a.Id == request.Publication.Id);
 
-            if (publication == null) throw new Exception("Not found");
+            if (publication == null)
+                return Result<PublicationDto>.Failure("Publication was not found", 404);
 
             publication.Content = request.Publication.Content;
             if (publication.PublicationType == PublicationTypes.planned
@@ -40,10 +42,19 @@ public class UpdatePublication
             publication.UpdatedAt = DateTime.UtcNow;
             bool success = await context.SaveChangesAsync() > 0;
             var readyPublication = mapper.Map<PublicationDto>(publication);
-            readyPublication.IsLikedByCurrentUser = await mediator
+            var isLikedResult = await mediator
                 .Send(new IsLikedBy.Query { PublicationId = readyPublication.Id, UserId = request.UserId });
-            if (success) return readyPublication; 
-            throw new Exception("Update was not successful");
+            if (isLikedResult.IsSuccess)
+            {
+                readyPublication.IsLikedByCurrentUser = isLikedResult.Value;
+            }
+            else
+            {
+                return Result<PublicationDto>.Failure(isLikedResult.Error!, isLikedResult.Code);
+            }
+            if (success) return Result<PublicationDto>.Success(readyPublication);
+
+            return Result<PublicationDto>.Failure("Publication was not updated", 500);
 
         }
     }

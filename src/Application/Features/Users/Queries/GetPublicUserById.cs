@@ -22,6 +22,8 @@ public class GetPublicUserById
         {
             User? user = await context.Users
                 .Include(a => a.ProfileImage)
+                .Include(a => a.Address)
+                .Include(a => a.ProfileDetails)
                 .FirstAsync(a => a.Id == request.Id, cancellationToken);
 
             if (user == null)

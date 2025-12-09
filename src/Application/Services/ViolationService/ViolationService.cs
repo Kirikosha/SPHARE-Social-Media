@@ -15,15 +15,15 @@ public class ViolationService(IEmailService emailService, IMediator mediator) : 
         string body = MakeBody(isPublication, violation.ViolationText, item);
         try
         {
-            bool isViolationCreated = await mediator.Send(new CreateViolation.Command() { Violation = violation });
+            var violationCreationResult = await mediator.Send(new CreateViolation.Command() { Violation = violation });
 
-            bool isUserScoreUpdated = await mediator.Send(new UpdateViolationScore.Command()
+            var violationScoreUpdateResult = await mediator.Send(new UpdateViolationScore.Command()
             {
                 ScoreIncreaseValue = scoreIncrease,
                 UserId = user.Id
             });
 
-            if (!isViolationCreated || !isUserScoreUpdated) return false;
+            if (!violationCreationResult.Value || !violationScoreUpdateResult.Value) return false;
             await emailService.SendEmailAsync(
                 user.Email,
                 $"Your {item} was removed by administration",

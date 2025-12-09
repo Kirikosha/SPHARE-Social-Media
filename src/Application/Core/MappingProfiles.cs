@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Domain.DTOs;
+using Domain.DTOs.DetailedUserInfoDTOs;
 using Domain.DTOs.UserDTOs;
 using Domain.DTOs.ViolationDTOs;
 using Domain.Entities;
@@ -16,5 +17,7 @@ public class MappingProfiles : Profile
         CreateMap<Violation, ViolationDto>();
         CreateMap<User, PublicUserDto>()
             .ForMember(u => u.JoinedAt, opt => opt.MapFrom(u => u.DateOfCreation.ToString()));
+        CreateMap<UserProfileDetails, UserProfileDetailsDto>();
+        CreateMap<Address, AddressDto>();
     }
 }

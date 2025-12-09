@@ -11,8 +11,6 @@ public class RecommendationController : BaseApiController
     {
         int userId = User.GetUserId();
 
-        var publications = await Mediator.Send(new GetRecommendations.Query { UserId = userId });
-
-        return Ok(publications);
+        return HandleResult(await Mediator.Send(new GetRecommendations.Query { UserId = userId }));
     }
 }

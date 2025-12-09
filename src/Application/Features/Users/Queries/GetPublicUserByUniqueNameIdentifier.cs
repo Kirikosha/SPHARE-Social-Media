@@ -22,6 +22,8 @@ public class GetPublicUserByUniqueNameIdentifier
         {
             User? user = await context.Users
                 .Include(a => a.ProfileImage)
+                .Include(a => a.Address)
+                .Include(a => a.ProfileDetails)
                 .FirstOrDefaultAsync(a => a.UniqueNameIdentifier == request.UniqueNameIdentifier);
 
             if (user == null)

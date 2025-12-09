@@ -7,5 +7,4 @@ public class Like
     public Publication Publication { get; set; } = null!;
     public int LikedById { get; set; }
     public User LikedBy { get; set; } = null!;
-    public List<Comment>? Comments { get; set; }
 }

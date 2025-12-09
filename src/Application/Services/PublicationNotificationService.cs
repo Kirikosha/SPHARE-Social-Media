@@ -55,8 +55,13 @@ public class PublicationNotificationService : BackgroundService
         int lastId = 0;
         do
         {
-            publicationsBatch = await mediator.Send(new GetPublicationsToRemind.Query { BatchSize = BatchSize, LastId = lastId });
+            var result = await mediator.Send(new GetPublicationsToRemind.Query { BatchSize = BatchSize, LastId = lastId });
 
+            if (!result.IsSuccess || result.Value == null)
+            {
+                throw new Exception("To fix later - PublicationNotificationService.cs, line 62");
+            }
+            publicationsBatch = result.Value;
             foreach (var publication in publicationsBatch)
             {
                 if (!followersCache.TryGetValue(publication.AuthorId, out var followers))
@@ -82,19 +87,19 @@ public class PublicationNotificationService : BackgroundService
 
             if (!followers.Any()) return;
 
-            var emails = await mediator.Send(new GetUserEmailsByIds.Query { Ids = followers });
-            if (!emails.Any()) return;
+            var results = await mediator.Send(new GetUserEmailsByIds.Query { Ids = followers });
+            if (results.Value == null || !results.Value.Any()) return;
 
             string body = CreateBody(publication, "https://localhost:4200");
 
             // Send emails in batches
             var batchSize = 10;
-            for (int i = 0; i < emails.Count; i += batchSize)
+            for (int i = 0; i < results.Value.Count; i += batchSize)
             {
-                var batch = emails.Skip(i).Take(batchSize).ToList();
+                var batch = results.Value.Skip(i).Take(batchSize).ToList();
                 await emailService.SendEmailsAsync(batch, "New publication was published", body);
 
-                if (i + batchSize < emails.Count)
+                if (i + batchSize < results.Value.Count)
                 {
                     await Task.Delay(1000, stoppingToken); // Rate limiting
                 }

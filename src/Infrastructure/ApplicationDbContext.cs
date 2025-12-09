@@ -12,6 +12,8 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Image> Images { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Violation> Violations { get; set; }
+    public DbSet<UserProfileDetails> ProfileDetails { get; set; }
+    public DbSet<Address> Addresses { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

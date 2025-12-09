@@ -49,7 +49,7 @@ public class Register
             if (request.RegisterModel.Image != null)
             {
                 var imageUploadResult = await photoService.AddPhotoAsync(request.RegisterModel.Image);
-                
+
                 if (imageUploadResult.Error != null)
                 {
                     return Result<AccountClaimsDto>.Failure(imageUploadResult.Error.Message, 500);
@@ -63,30 +63,30 @@ public class Register
 
                 user.ProfileImage = newImage;
 
-                bool result = await CreateUser(user);
-                if (!result)
-                    return Result<AccountClaimsDto>.Failure("User was not created or something went wrong", 500);
-
-                try
-                {
-                    await subscriptionService.CreateUserNodeAsync(user.Id);
-                }
-                catch (Exception ex)
-                {
-                    return Result<AccountClaimsDto>.Failure(ex.Message, 500);
-                }
-
-                AccountClaimsDto account = new AccountClaimsDto
-                {
-                    UniqueNameIdentifier = user.UniqueNameIdentifier,
-                    Username = user.Username,
-                    Role = user.Role.ToString(),
-                    Token = tokenService.CreateToken(user),
-                    Blocked = false
-                };
-
-                return Result<AccountClaimsDto>.Success(account);
             }
+            bool result = await CreateUser(user);
+            if (!result)
+                return Result<AccountClaimsDto>.Failure("User was not created or something went wrong", 500);
+
+            try
+            {
+                await subscriptionService.CreateUserNodeAsync(user.Id);
+            }
+            catch (Exception ex)
+            {
+                return Result<AccountClaimsDto>.Failure(ex.Message, 500);
+            }
+
+            AccountClaimsDto account = new AccountClaimsDto
+            {
+                UniqueNameIdentifier = user.UniqueNameIdentifier,
+                Username = user.Username,
+                Role = user.Role.ToString(),
+                Token = tokenService.CreateToken(user),
+                Blocked = false
+            };
+
+            return Result<AccountClaimsDto>.Success(account);
         }
 
         private async Task<string> BuildUniqueNameIdentifier(string username)

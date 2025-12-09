@@ -11,8 +11,7 @@ public class CommentController : BaseApiController
     [HttpGet("{publicationId:int}")]
     public async Task<ActionResult> GetComments(int publicationId)
     {
-        List<CommentDto> comments = await Mediator.Send(new GetCommentsByPublicationId.Query() { PublicationId = publicationId });
-        return Ok(comments);
+        return HandleResult(await Mediator.Send(new GetCommentsByPublicationId.Query() { PublicationId = publicationId }));
     }
 
     [HttpPost]
@@ -20,15 +19,12 @@ public class CommentController : BaseApiController
     {
         var userId = User.GetUserId();
 
-        var comment = await Mediator.Send(new CreateComment.Command() { Comment = commentModel, UserId = userId });
-        if (comment == null) return BadRequest("Something went wrong during execution");
-        return Ok(comment);
+        return HandleResult(await Mediator.Send(new CreateComment.Command() { Comment = commentModel, UserId = userId }));
     }
 
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> DeleteComment(int id)
     {
-        bool result = await Mediator.Send(new DeleteComment.Command() { CommentId = id });
-        return result ? Ok() : BadRequest("Comment was not deleted due to an error");
+        return HandleResult(await Mediator.Send(new DeleteComment.Command() { CommentId = id }));
     }
 }

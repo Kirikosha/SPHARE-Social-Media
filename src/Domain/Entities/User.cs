@@ -22,4 +22,10 @@ public class User
     public List<Violation> Violations { get; set; } = [];
     public bool Blocked { get; set; } = false;
     public DateTime? BlockedAt { get; set; }
+
+    public UserProfileDetails? ProfileDetails { get; set; }
+    public int? ProfileDetailsId { get; set; }
+
+    public Address? Address { get; set; }
+    public int? AddressId { get; set; }
 }

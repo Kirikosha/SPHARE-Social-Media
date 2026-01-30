@@ -37,7 +37,13 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Country")
                         .HasColumnType("text");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Addresses");
                 });
@@ -60,6 +66,12 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("ParentCommentId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("PublicationId")
                         .HasColumnType("integer");
 
@@ -67,9 +79,66 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("PublicationId");
+                    b.HasIndex("ParentCommentId");
+
+                    b.HasIndex("PublicationId", "ParentCommentId", "CreationDate");
 
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("Domain.Entities.CommentClosure", b =>
+                {
+                    b.Property<int>("AncestorId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DescendantId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Depth")
+                        .HasColumnType("integer");
+
+                    b.HasKey("AncestorId", "DescendantId");
+
+                    b.HasIndex("AncestorId", "Depth");
+
+                    b.HasIndex("DescendantId", "Depth");
+
+                    b.ToTable("CommentTrees");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Complaints.Complaint", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ComplainedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ComplainerId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)");
+
+                    b.Property<string>("Explanation")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Complaints");
+
+                    b.HasDiscriminator().HasValue("Complaint");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Domain.Entities.ErrorLog", b =>
@@ -228,12 +297,6 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AddressId")
-                        .IsUnique();
-
-                    b.HasIndex("ProfileDetailsId")
-                        .IsUnique();
-
                     b.HasIndex("ProfileImageId")
                         .IsUnique();
 
@@ -249,7 +312,7 @@ namespace Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("date");
 
                     b.Property<List<string>>("Interests")
                         .IsRequired()
@@ -261,7 +324,13 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Pronouns")
                         .HasColumnType("text");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("ProfileDetails");
                 });
@@ -291,6 +360,45 @@ namespace Infrastructure.Migrations
                     b.ToTable("Violations");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Complaints.CommentComplaint", b =>
+                {
+                    b.HasBaseType("Domain.Entities.Complaints.Complaint");
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("integer");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("ComplainerId");
+
+                    b.HasDiscriminator().HasValue("CommentComplaint");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Complaints.PublicationComplaint", b =>
+                {
+                    b.HasBaseType("Domain.Entities.Complaints.Complaint");
+
+                    b.Property<int>("PublicationId")
+                        .HasColumnType("integer");
+
+                    b.HasIndex("ComplainerId");
+
+                    b.HasIndex("PublicationId");
+
+                    b.HasDiscriminator().HasValue("PublicationComplaint");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Address", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithOne("Address")
+                        .HasForeignKey("Domain.Entities.Address", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Entities.Comment", b =>
                 {
                     b.HasOne("Domain.Entities.User", "Author")
@@ -298,6 +406,11 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Domain.Entities.Comment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Domain.Entities.Publication", "Publication")
                         .WithMany("Comments")
@@ -307,7 +420,28 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("Author");
 
+                    b.Navigation("ParentComment");
+
                     b.Navigation("Publication");
+                });
+
+            modelBuilder.Entity("Domain.Entities.CommentClosure", b =>
+                {
+                    b.HasOne("Domain.Entities.Comment", "Ancestor")
+                        .WithMany("Descendants")
+                        .HasForeignKey("AncestorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Comment", "Descendant")
+                        .WithMany("Ancestors")
+                        .HasForeignKey("DescendantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ancestor");
+
+                    b.Navigation("Descendant");
                 });
 
             modelBuilder.Entity("Domain.Entities.Image", b =>
@@ -352,24 +486,23 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
-                    b.HasOne("Domain.Entities.Address", "Address")
-                        .WithOne("User")
-                        .HasForeignKey("Domain.Entities.User", "AddressId");
-
-                    b.HasOne("Domain.Entities.UserProfileDetails", "ProfileDetails")
-                        .WithOne("User")
-                        .HasForeignKey("Domain.Entities.User", "ProfileDetailsId");
-
                     b.HasOne("Domain.Entities.Image", "ProfileImage")
                         .WithOne("User")
                         .HasForeignKey("Domain.Entities.User", "ProfileImageId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.Navigation("Address");
-
-                    b.Navigation("ProfileDetails");
-
                     b.Navigation("ProfileImage");
+                });
+
+            modelBuilder.Entity("Domain.Entities.UserProfileDetails", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithOne("ProfileDetails")
+                        .HasForeignKey("Domain.Entities.UserProfileDetails", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.Violation", b =>
@@ -383,10 +516,53 @@ namespace Infrastructure.Migrations
                     b.Navigation("ViolatedBy");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Address", b =>
+            modelBuilder.Entity("Domain.Entities.Complaints.CommentComplaint", b =>
                 {
-                    b.Navigation("User")
+                    b.HasOne("Domain.Entities.Comment", "Comment")
+                        .WithMany("CommentComplaints")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "Complainer")
+                        .WithMany("CommentComplaintsMade")
+                        .HasForeignKey("ComplainerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("Complainer");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Complaints.PublicationComplaint", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "Complainer")
+                        .WithMany("PublicationComplaintsMade")
+                        .HasForeignKey("ComplainerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Publication", "Publication")
+                        .WithMany("PublicationComplaints")
+                        .HasForeignKey("PublicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Complainer");
+
+                    b.Navigation("Publication");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Comment", b =>
+                {
+                    b.Navigation("Ancestors");
+
+                    b.Navigation("CommentComplaints");
+
+                    b.Navigation("Descendants");
+
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("Domain.Entities.Image", b =>
@@ -401,21 +577,25 @@ namespace Infrastructure.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("Likes");
+
+                    b.Navigation("PublicationComplaints");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
+                    b.Navigation("Address");
+
+                    b.Navigation("CommentComplaintsMade");
+
                     b.Navigation("CreatedPublications");
 
                     b.Navigation("LikedPublications");
 
-                    b.Navigation("Violations");
-                });
+                    b.Navigation("ProfileDetails");
 
-            modelBuilder.Entity("Domain.Entities.UserProfileDetails", b =>
-                {
-                    b.Navigation("User")
-                        .IsRequired();
+                    b.Navigation("PublicationComplaintsMade");
+
+                    b.Navigation("Violations");
                 });
 #pragma warning restore 612, 618
         }

@@ -3,7 +3,9 @@
 using Application.Core;
 using Application.Features.Likes.Queries;
 using AutoMapper;
+using Domain.DTOs;
 using Domain.DTOs.PublicationDTOs;
+using Domain.DTOs.UserDTOs;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
@@ -25,30 +27,26 @@ public class GetPublicationsByUniqueNameIdentifier
             User? user = await context.Users.FindAsync(request.UserId);
             if (user == null)
                 return Result<List<PublicationDto>>.Failure("User was not found", 404);
-
-            List<Publication> publications = await context.Publications
+            var publications = await context.Publications
                 .Include(a => a.Likes)
                 .Include(a => a.Images)
-                .Include(a => a.Author).ThenInclude(a => a.ProfileImage)
                 .Include(a => a.Comments)
-                .Where(a => a.Author.UniqueNameIdentifier == request.UniqueNameIdentifier)
-                .ToListAsync();
-
-            var mappedPublications = mapper.Map<List<PublicationDto>>(publications);
-            foreach(var publication in mappedPublications)
-            {
-                var isLikedResult = await mediator.Send(
-                    new IsLikedBy.Query { PublicationId = publication.Id, UserId = request.UserId });
-
-                if (!isLikedResult.IsSuccess)
+                .Include(a => a.Author).ThenInclude(a => a.ProfileImage)
+                .Where(a => a.AuthorId == user.Id)
+                .Select(p => new PublicationDto
                 {
-                    return Result<List<PublicationDto>>.Failure(isLikedResult.Error!, isLikedResult.Code);
-                }
-
-                publication.IsLikedByCurrentUser = isLikedResult.Value;
-            }
-
-            return Result<List<PublicationDto>>.Success(mappedPublications);
+                    Id = p.Id,
+                    Content = p.Content,
+                    PostedAt = p.PostedAt,
+                    UpdatedAt = p.UpdatedAt,
+                    RemindAt = p.RemindAt,
+                    Images = mapper.Map<List<ImageDto>>(p.Images),
+                    Author = mapper.Map<PublicUserDto>(p.Author),
+                    LikesAmount = p.Likes.Count(),
+                    IsLikedByCurrentUser = p.Likes.Any(a => a.LikedById == request.UserId),
+                    CommentAmount = context.Comments.Count(c => c.PublicationId == p.Id)
+                }).ToListAsync(cancellationToken);
+            return Result<List<PublicationDto>>.Success(publications);
         }
     }
 }

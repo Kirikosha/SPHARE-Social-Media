@@ -1,20 +1,21 @@
-using Application.Features.Users.Queries;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using Application.Core;
-using MediatR;
-using Application.Transaction;
+using Application.Features.Users.Queries;
+using Application.Helpers;
 using Application.Services.EmailService;
 using Application.Services.PasswordResetService;
 using Application.Services.PhotoService;
 using Application.Services.SubscriptionService;
 using Application.Services.TokenService;
 using Application.Services.ViolationService;
-using Application.Helpers;
+using Application.Transaction;
+using Infrastructure;
 using Infrastructure.Neo4j;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Neo4j.Driver;
 using Serilog;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,6 +58,22 @@ builder.Services.AddAuthentication("Bearer")
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"]))
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/hubs/chat"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 
@@ -90,7 +107,10 @@ builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
 builder.Services.AddMemoryCache();
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

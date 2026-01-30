@@ -28,6 +28,7 @@ public class GetPublicUserById
 
             if (user == null)
                 return Result<PublicUserDto>.Failure("User was not found", 404);
+            var userDto = mapper.Map<PublicUserDto>(user);
             return Result<PublicUserDto>.Success(mapper.Map<PublicUserDto>(user));
         }
     }

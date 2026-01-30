@@ -24,7 +24,7 @@ public class PublicUserController : BaseApiController
     }
 
     [HttpPut("edit")]
-    public async Task<ActionResult<PublicUserDto>> UpdateProfile(UpdatePublicUserDto updateUser)
+    public async Task<ActionResult<PublicUserDto>> UpdateProfile([FromForm]UpdatePublicUserDto updateUser)
     {
         return HandleResult(await Mediator.Send(new UpdatePublicUser.Command { UpdateUserModel = updateUser }));
     }

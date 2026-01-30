@@ -1,5 +1,6 @@
 ﻿namespace Domain.Entities;
 
+using Domain.Entities.Complaints;
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -18,4 +19,5 @@ public class Publication
     public DateTime? UpdatedAt { get; set; }
     public List<Image>? Images { get; set; }
     public List<Comment>? Comments { get; set; }
+    public List<PublicationComplaint> PublicationComplaints { get; set; } = [];
 }

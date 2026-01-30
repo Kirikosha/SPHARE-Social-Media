@@ -28,8 +28,9 @@ public class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
             await context.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
-        catch
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }

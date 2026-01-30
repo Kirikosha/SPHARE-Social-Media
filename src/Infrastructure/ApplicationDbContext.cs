@@ -1,6 +1,7 @@
 ﻿namespace Infrastructure;
 
 using Domain.Entities;
+using Domain.Entities.Complaints;
 using Microsoft.EntityFrameworkCore;
 
 public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
@@ -14,6 +15,13 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Violation> Violations { get; set; }
     public DbSet<UserProfileDetails> ProfileDetails { get; set; }
     public DbSet<Address> Addresses { get; set; }
+    public DbSet<Complaint> Complaints { get; set; }
+    public DbSet<PublicationComplaint> PublicationComplaints { get; set; }
+    public DbSet<CommentComplaint> CommentComplaints { get; set; }
+    public DbSet<CommentClosure> CommentTrees { get; set; }
+    public DbSet<Chat> Chats { get; set; }
+    public DbSet<Message> Messages { get; set; }
+    public DbSet<ChatUser> ChatUsers { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -53,5 +61,83 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
             .HasForeignKey(a => a.PublicationId)
             .OnDelete(DeleteBehavior.Cascade);
         });
+
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.Address)
+            .WithOne(a => a.User)
+            .HasForeignKey<Address>(a => a.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.ProfileDetails)
+            .WithOne(d => d.User)
+            .HasForeignKey<UserProfileDetails>(d => d.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // complaints 
+        modelBuilder.Entity<PublicationComplaint>()
+            .HasOne(c => c.Publication)
+            .WithMany(a => a.PublicationComplaints)
+            .HasForeignKey(c => c.PublicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CommentComplaint>()
+            .HasOne(c => c.Comment)
+            .WithMany(a => a.CommentComplaints)
+            .HasForeignKey(c => c.CommentId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // comment trees
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.ParentComment)
+            .WithMany(c => c.Replies)
+            .HasForeignKey(c => c.ParentCommentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<CommentClosure>()
+            .HasKey(x => new { x.AncestorId, x.DescendantId });
+
+        modelBuilder.Entity<CommentClosure>()
+            .HasOne(x => x.Ancestor)
+            .WithMany(c => c.Descendants)
+            .HasForeignKey(x => x.AncestorId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CommentClosure>()
+            .HasOne(x => x.Descendant)
+            .WithMany(c => c.Ancestors)
+            .HasForeignKey(x => x.DescendantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CommentClosure>()
+            .HasIndex(x => new { x.AncestorId, x.Depth });
+
+
+        modelBuilder.Entity<CommentClosure>()
+            .HasIndex(x => new { x.DescendantId, x.Depth });
+
+        modelBuilder.Entity<Comment>()
+            .HasIndex(c => new { c.PublicationId, c.ParentCommentId, c.CreationDate });
+
+
+        modelBuilder.Entity<UserProfileDetails>()
+            .Property(x => x.DateOfBirth)
+            .HasColumnType("date");
+
+        modelBuilder.Entity<ChatUser>()
+            .HasKey(x => new { x.ChatId, x.UserId });
+
+        modelBuilder.Entity<ChatUser>()
+            .HasOne(x => x.Chat)
+            .WithMany(c => c.Participants)
+            .HasForeignKey(x => x.ChatId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ChatUser>()
+            .HasOne(x => x.User)
+            .WithMany(c => c.Chats)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }

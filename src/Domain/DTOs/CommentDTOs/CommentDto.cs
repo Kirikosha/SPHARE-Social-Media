@@ -9,4 +9,7 @@ public class CommentDto
     public PublicUserDto Author { get; set; } = null!;
     public int PublicationId { get; set; }
     public DateTime CreationDate { get; set; }
+    public bool IsDeleted { get; set; } = false;
+    public int RepliesAmount { get; set; }
+
 }

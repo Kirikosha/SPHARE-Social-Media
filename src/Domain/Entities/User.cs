@@ -1,5 +1,6 @@
 ﻿namespace Domain.Entities;
 
+using Domain.Entities.Complaints;
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
@@ -28,4 +29,9 @@ public class User
 
     public Address? Address { get; set; }
     public int? AddressId { get; set; }
+
+    public List<PublicationComplaint> PublicationComplaintsMade { get; set; } = [];
+    public List<CommentComplaint> CommentComplaintsMade { get; set; } = [];
+
+    public List<ChatUser> Chats { get; set; } = [];
 }

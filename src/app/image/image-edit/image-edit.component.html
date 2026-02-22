@@ -1,0 +1,39 @@
+<!-- Backdrop -->
+<div class="modal-backdrop" *ngIf="file"></div>
+
+<!-- Modal -->
+<div class="cropper-modal" *ngIf="file">
+  <div class="cropper-header">
+    <h5>Crop Image</h5>
+    <button type="button" class="btn-close" (click)="cancelCrop()"></button>
+  </div>
+
+  <div class="cropper-container">
+    <image-cropper
+      [imageFile]="file"
+      [maintainAspectRatio]="true"
+      [aspectRatio]="1"
+      format="jpeg"
+      (imageCropped)="imageCropped($event)"
+      [resizeToWidth]="800"
+      [onlyScaleDown]="true"
+      [cropperMinWidth]="256"
+      [alignImage]="'center'"
+      style="max-height: 60vh; width: 100%; display: block;">
+    </image-cropper>
+  </div>
+
+  <div class="cropper-controls d-flex justify-content-end gap-2 p-3">
+    <button type="button" class="btn btn-outline-secondary" (click)="cancelCrop()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="applyCrop()"
+      [disabled]="!croppedImage"
+    >
+      Apply Crop
+    </button>
+  </div>
+</div>

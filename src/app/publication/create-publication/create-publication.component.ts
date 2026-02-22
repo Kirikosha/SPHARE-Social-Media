@@ -5,11 +5,12 @@ import { CreatePublicationModel } from '../../_models/createPublicationModel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
+import { ImageEditComponent } from "../../image/image-edit/image-edit.component";
 
 @Component({
   selector: 'app-create-publication',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageCropperComponent],
+  imports: [CommonModule, FormsModule, ImageEditComponent],
   templateUrl: './create-publication.component.html',
   styleUrl: './create-publication.component.css'
 })
@@ -21,20 +22,14 @@ export class CreatePublicationComponent {
   
   @ViewChild('contentSpan') contentSpan!: ElementRef<HTMLSpanElement>;
   @ViewChild('imageUpload') imageUpload!: ElementRef<HTMLInputElement>;
-  @ViewChild(ImageCropperComponent) imageCropper!: ImageCropperComponent;
 
   publicationType: 'ordinary' | 'planned' = 'ordinary';
   scheduledDate: string = '';
   imagePreviews: string[] = [];
   selectedImages: File[] = [];
   isPosting: boolean = false;
-  showCropper = false;
-  currentCroppingIndex = 0;
-  
-  // Image cropper properties
-  imageChangedEvent: any = '';
-  croppedImage: any = '';
-  currentFile?: File;
+
+  editingFile: { file: File; index: number } | null = null;
   pendingFiles: File[] = [];
 
   createPost(event: Event) {
@@ -95,101 +90,64 @@ export class CreatePublicationComponent {
       }
 
       this.pendingFiles = [...files];
-      const file = this.pendingFiles.shift()!;
-      this.initiateCropping(file, this.selectedImages.length);
+      this.startEditingNext();
     }
   }
 
-  processNextFile() {
+    private startEditingNext() {
     if (this.pendingFiles.length === 0) {
       this.imageUpload.nativeElement.value = '';
       return;
     }
 
-    const file = this.pendingFiles.shift()!;
-    this.initiateCropping(file, this.selectedImages.length);
-  }
+    const file = this.pendingFiles[0];
+    // The index where this image will be placed (based on current array length)
+    const index = this.selectedImages.length;
 
-  initiateCropping(file: File, index: number) {
     if (!file.type.match('image.*')) {
       this.toastrService.error('Only image files are allowed');
-      this.processNextFile();
+      this.pendingFiles.shift();
+      this.startEditingNext();
       return;
     }
 
-    this.currentCroppingIndex = index;
-    this.currentFile = file;
-
-    const syntheticEvent = {
-      target: {
-        files: [file],
-        value: ''
-      }
-    };
-
-    this.imageChangedEvent = syntheticEvent;
-    this.showCropper = true;
-    this.cdr.detectChanges();
+    this.editingFile = { file, index };
   }
-imageCropped(event: ImageCroppedEvent) {
-    if (event.base64) {
-      this.croppedImage = event.base64;
-    } else if (event.blob) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.croppedImage = reader.result as string;
-        this.cdr.detectChanges();
-      };
-      reader.readAsDataURL(event.blob);
+
+
+  onCropApplied(event: { croppedFile: File; preview: string; index: number }) {
+    // Add or replace image at the given index
+    if (event.index >= this.selectedImages.length) {
+      this.selectedImages.push(event.croppedFile);
+      this.imagePreviews.push(event.preview);
+    } else {
+      this.selectedImages[event.index] = event.croppedFile;
+      this.imagePreviews[event.index] = event.preview;
     }
-    this.cdr.detectChanges();
+
+    // Remove the processed file and close modal
+    this.pendingFiles.shift();
+    this.editingFile = null;
+
+    // Continue with the next file (if any)
+    this.startEditingNext();
   }
 
+  onCropCancelled() {
+    // Skip the current file and move to the next
+    this.pendingFiles.shift();
+    this.editingFile = null;
+    this.startEditingNext();
+  }
 
-  async applyCrop() {
-    if (!this.croppedImage || !this.currentFile) return;
-
-    try {
-      const blob = await fetch(this.croppedImage).then(res => res.blob());
-
-      const croppedFile = new File([blob], this.currentFile.name, {
-        type: 'image/jpeg',
-        lastModified: Date.now()
-      });
-
-      if (this.currentCroppingIndex >= this.selectedImages.length) {
-        this.selectedImages.push(croppedFile);
-        this.imagePreviews.push(this.croppedImage);
-      } else {
-        this.selectedImages[this.currentCroppingIndex] = croppedFile;
-        this.imagePreviews[this.currentCroppingIndex] = this.croppedImage;
-      }
-
-      this.resetCropper();
-      this.processNextFile();
-    } catch (error) {
-      console.error('Error applying crop:', error);
-      this.toastrService.error('Failed to process image');
-      this.resetCropper();
+  removeImage(index: number): void {
+    if (index > -1 && index < this.imagePreviews.length) {
+      this.imagePreviews.splice(index, 1);
+      this.selectedImages.splice(index, 1);
     }
   }
 
-  cancelCrop() {
-    this.resetCropper();
-    if (this.currentCroppingIndex >= this.selectedImages.length) {
-      this.pendingFiles = [];
-    }
-    this.processNextFile();
-  }
-
-  resetCropper() {
-    this.showCropper = false;
-    this.croppedImage = '';
-    this.currentFile = undefined;
-    this.imageChangedEvent = '';
-  }
-
-  resetForm() {
+    resetForm() {
     this.contentSpan.nativeElement.innerText = '';
     this.imagePreviews = [];
     this.selectedImages = [];
@@ -197,16 +155,8 @@ imageCropped(event: ImageCroppedEvent) {
     this.publicationType = 'ordinary';
     this.scheduledDate = '';
     this.isPosting = false;
-    this.resetCropper();
     if (this.imageUpload) {
       this.imageUpload.nativeElement.value = '';
-    }
-  }
-
-  removeImage(index: number): void {
-    if (index > -1 && index < this.imagePreviews.length) {
-      this.imagePreviews.splice(index, 1);
-      this.selectedImages.splice(index, 1);
     }
   }
 

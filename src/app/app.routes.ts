@@ -13,6 +13,8 @@ import { RecommendationListComponent } from './recommendation/recommendation-lis
 import {HomeComponent} from "./home/home/home.component";
 import { ComplaintsListComponent } from './complaint/complaints-list-component/complaints-list-component.component';
 import { CommentPageComponent } from './publication/comment-page/comment-page.component';
+import { PrivateChatComponent } from '../chat/private-chat/private-chat.component';
+import { ChatListComponent } from '../chat/chat-list/chat-list.component';
 
 export const routes: Routes = [
     {path: 'login', component:LoginComponent},
@@ -28,5 +30,7 @@ export const routes: Routes = [
     {path: 'recommended-publications', component: RecommendationListComponent},
     {path: 'complaints', component: ComplaintsListComponent},
     {path: 'comments/:id', component: CommentPageComponent},
+    {path: 'chats', component: ChatListComponent},
+    {path: 'chat/:id', component: PrivateChatComponent},
     {path: '', component: HomeComponent}
        ];

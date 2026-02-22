@@ -1,1 +1,33 @@
-<p>message-view works!</p>
+<div class="message-wrapper" [class.own]="isOwnMessage" [class.other]="!isOwnMessage">
+  <!-- Avatar (optional, shown for other users) -->
+  <div *ngIf="showAvatar && !isOwnMessage" class="message-avatar">
+    <div *ngIf="avatarUrl; else avatarPlaceholder" class="avatar-image">
+      <img [src]="avatarUrl" [alt]="username">
+    </div>
+    <ng-template #avatarPlaceholder>
+      <div class="avatar-placeholder">
+        {{ username?.charAt(0)?.toUpperCase() || 'U' }}
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Message Bubble -->
+  <div class="message-bubble">
+    <!-- Sender name (only for group chats, but we keep it optional) -->
+    <div *ngIf="!isOwnMessage && username" class="message-sender">
+      {{ username }}
+    </div>
+
+    <!-- Message content -->
+    <div class="message-content">{{ message.content }}</div>
+
+    <!-- Footer: time, edited badge, read receipt -->
+    <div class="message-footer">
+      <span class="message-time">{{ messageTime }}</span>
+      <span *ngIf="message.wasEdited" class="edited-badge">edited</span>
+      <span *ngIf="isOwnMessage && message.isRead" class="read-receipt">
+        <i class="bi bi-check2-all"></i>
+      </span>
+    </div>
+  </div>
+</div>

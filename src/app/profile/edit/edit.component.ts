@@ -192,6 +192,7 @@ loadMember(): void {
         this.accountService.updateProfile({
           username: updateModel.username,
           uniqueNameIdentifier: updateModel.uniqueNameIdentifier,
+          userId: updateModel.id,
           token: '',
           role: '',
           blocked: this.memberModel.blocked

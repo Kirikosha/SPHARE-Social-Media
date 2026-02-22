@@ -6,6 +6,7 @@ import { AccountService } from '../../_services/account.service';
 import { ProfileTabsComponent } from "../profile-tabs/profile-tabs.component";
 import { ActivatedRoute, Router } from '@angular/router';
 import { SubscriptionService } from '../../_services/subscription.service';
+import { ChatService } from '../../_services/chatting/chat.service';
 
 @Component({
   selector: 'app-profile',
@@ -21,6 +22,7 @@ export class ProfileComponent implements OnInit {
   accountService = inject(AccountService);
   private subscriptionService = inject(SubscriptionService);
   private route = inject(ActivatedRoute);
+  private chatService = inject(ChatService)
 
   memberModel!: MemberModel;
   isCurrentUserProfile = false;
@@ -159,6 +161,20 @@ toggleFollow() {
       },
       error: (err) => {
         this.toastr.error("Failed to unfollow user: " + err.error);
+      }
+    })
+  }
+
+  openChat() {
+    this.chatService.startChat(this.memberModel.id)
+    .subscribe({
+      next: (chat) => {
+        console.log("Chat started")
+        this.router.navigateByUrl('chat/' + chat.id)
+      },
+      error: (err) => {
+        this.toastr.error("Failed to start chat: " + err.error)
+        console.error(err)
       }
     })
   }

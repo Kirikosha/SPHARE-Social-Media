@@ -1,1 +1,115 @@
-<p>private-chat works!</p>
+<div class="chat-container" *ngIf="!isLoading; else loading">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="d-flex align-items-center">
+      <a routerLink="/chats" class="btn btn-link back-btn me-2">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      
+      <!-- User Avatar -->
+      <div class="user-avatar me-2 position-relative">
+        <div *ngIf="otherUser?.profileImageUrl; else avatarPlaceholder" class="avatar-image">
+          <img [src]="otherUser?.profileImageUrl" [alt]="otherUser?.username">
+        </div>
+        <ng-template #avatarPlaceholder>
+          <div class="avatar-placeholder">
+            {{ otherUser?.username?.charAt(0)?.toUpperCase() || 'U' }}
+          </div>
+        </ng-template>
+        <span class="status-dot" 
+              [class.online]="otherUser?.isOnline"
+              [title]="otherUser?.isOnline ? 'Online' : 'Offline'">
+        </span>
+      </div>
+      
+      <!-- User Info -->
+      <div class="user-info">
+        <h5 class="mb-0">{{ otherUser?.username || 'User' }}</h5>
+        <small class="text-muted">
+          <span *ngIf="otherUser?.isOnline" class="online-text">Online</span>
+          <span *ngIf="!otherUser?.isOnline" class="offline-text">Offline</span>
+        </small>
+      </div>
+    </div>
+    
+    <!-- Connection Status -->
+    <div class="connection-status" [class.connected]="isConnected">
+      <i class="bi" [class.bi-wifi]="isConnected" [class.bi-wifi-off]="!isConnected"></i>
+      <span class="ms-1">{{ isConnected ? 'Connected' : 'Disconnected' }}</span>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+    {{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Messages Container -->
+  <div class="messages-container" #messagesContainer>
+    
+    <!-- Load More Button (older messages) -->
+    <div *ngIf="hasMoreMessages" class="text-center my-3">
+      <button class="btn btn-outline-primary btn-sm" 
+              (click)="loadMoreMessages()" 
+              [disabled]="isLoadingMore">
+        <i class="bi bi-arrow-up" [class.spin]="isLoadingMore"></i>
+        {{ isLoadingMore ? 'Loading...' : 'Load older messages' }}
+      </button>
+    </div>
+    
+    <!-- Messages -->
+    <div *ngFor="let message of messages; trackBy: trackByMessageId">
+      <app-message-view 
+        [message]="message"
+        [currentUserId]="currentUserId"
+        [showAvatar]="true"
+        [avatarUrl]="message.senderId === currentUserId ? null : otherUser?.profileImageUrl"
+        [username]="message.senderId === currentUserId ? null : otherUser?.username">
+      </app-message-view>
+    </div>
+    
+    <!-- Typing Indicator -->
+    <div *ngIf="otherUserIsTyping" class="typing-indicator">
+      <span>{{ otherUser?.username }} is typing</span>
+      <div class="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Input -->
+  <div class="message-input-container">
+    <div class="input-group">
+      <input 
+        type="text" 
+        class="form-control" 
+        placeholder="Type a message..." 
+        [(ngModel)]="newMessage"
+        (input)="onInputChange()"
+        (keyup.enter)="sendMessage()"
+        [disabled]="!isConnected || isSending">
+      
+      <button 
+        class="btn btn-primary" 
+        type="button"
+        (click)="sendMessage()"
+        [disabled]="!newMessage.trim() || !isConnected || isSending">
+        <i class="bi bi-send"></i>
+        <span class="ms-1 d-none d-md-inline">Send</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<ng-template #loading>
+  <div class="d-flex flex-column align-items-center justify-content-center" style="height: 100vh;">
+    <div class="spinner-border text-primary mb-3" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted">Loading conversation...</p>
+  </div>
+</ng-template>

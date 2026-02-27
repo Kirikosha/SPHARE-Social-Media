@@ -22,6 +22,8 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Chat> Chats { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<ChatUser> ChatUsers { get; set; }
+    public DbSet<SpamRating> SpamRatings { get; set; }
+    public DbSet<UserActionLog> UserLogs { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -139,5 +141,16 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<SpamRating>()
+            .HasOne(u => u.User)
+            .WithOne(s => s.SpamRating)
+            .HasForeignKey<SpamRating>(u => u.UserId)
+            .OnDelete(DeleteBehavior.Cascade); 
+
+        modelBuilder.Entity<User>()
+            .HasMany(c => c.ActionLogs)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

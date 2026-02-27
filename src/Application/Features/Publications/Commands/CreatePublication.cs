@@ -1,4 +1,7 @@
-﻿namespace Application.Features.Publications.Commands;
+﻿using Application.Repositories.SpamRepository;
+using Microsoft.EntityFrameworkCore;
+
+namespace Application.Features.Publications.Commands;
 
 using Application.Core;
 using Application.Features.Images.Commands;
@@ -10,6 +13,13 @@ using System.Threading.Tasks;
 
 public class CreatePublication
 {
+    // normal user
+    private const int PublicationNumberLimit = 3;
+    private const int PublicationTimeLimit = 5; // in minutes
+    
+    // new user
+    private const int NewUserPublicationNumberLimit = 1;
+    private const int NewUserPublicationTimeLimit = 10; // in minutes
     public class Command : IRequest<Result<bool>>
     {
         public required CreatePublicationDto Publication { get; set; }
@@ -17,14 +27,27 @@ public class CreatePublication
     }
 
     public class Handler(ApplicationDbContext context, IMapper mapper,
-        IMediator mediator) : IRequestHandler<Command, Result<bool>>
+        IMediator mediator, ISpamRepository spamRepository) : IRequestHandler<Command, Result<bool>>
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             User? user = await context.Users.FindAsync(request.CreatorId);
             if (user == null)
-                return Result<bool>.Failure("Account does not exist therefore publication cannot be created", 403);
+                return Result<bool>
+                    .Failure("Account does not exist therefore publication cannot be created", 403);
 
+            bool isPublicationSpamming = await IsPublicationSpamming(user.Id);
+            if (isPublicationSpamming)
+                return Result<bool>
+                    .Failure("You cannot make that many publications in short period of time", 400);
+
+            var res = await spamRepository.MakePublication(user.Id);
+            if (res == "Forbidden")
+            {
+                return Result<bool>.Failure(
+                    "You cannot make more publications for today due to our anti spam rules", 400);
+            }
+            
             Publication publication = mapper.Map<Publication>(request.Publication);
             publication.Author = user;
             publication.AuthorId = user.Id;
@@ -44,7 +67,56 @@ public class CreatePublication
             }
 
             context.Add(publication);
+            
+            
             return Result<bool>.Success(true);
+        }
+
+        private async Task<bool> IsUserNew(int userId)
+        {
+            var authorCreationDate = await context.Users
+                .Where(a => a.Id == userId)
+                .Select(a => a.DateOfCreation)
+                .FirstAsync();
+
+            var cutOff = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
+            if (authorCreationDate >= cutOff)
+            {
+                return true;
+            }
+
+            return false; 
+        }
+        private async Task<bool> IsPublicationSpamming(int userId)
+        {
+            bool isUserNew = await IsUserNew(userId);
+            
+            var cutOff = DateTime.UtcNow.AddMinutes(isUserNew ? NewUserPublicationTimeLimit : PublicationTimeLimit);
+            int publicationCount;
+            if (isUserNew)
+            {
+                publicationCount = await context.Publications
+                    .Where(a => a.AuthorId == userId
+                                && a.PostedAt > cutOff)
+                    .CountAsync();
+
+                if (publicationCount > NewUserPublicationNumberLimit)
+                    return true;
+
+                return false;
+            }
+            else
+            {
+                publicationCount = await context.Publications
+                    .Where(a => a.AuthorId == userId
+                                && a.PostedAt > cutOff)
+                    .CountAsync();
+
+                if (publicationCount > NewUserPublicationNumberLimit)
+                    return true;
+
+                return false;
+            }
         }
     }
 }

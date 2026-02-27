@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Comments.Commands;
+﻿using Application.Repositories.SpamRepository;
+
+namespace Application.Features.Comments.Commands;
 
 using Application.Core;
 using AutoMapper;
@@ -10,13 +12,15 @@ using System.Threading.Tasks;
 
 public class CreateComment
 {
+    private const int CommentRestrictionInSeconds = 10;
     public class Command : IRequest<Result<CommentDto>>
     {
         public required int UserId { get; set; }
         public required CreateCommentDto Comment { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper)
+    public class Handler(ApplicationDbContext context, IMapper mapper,
+    ISpamRepository spamRepository)
         : IRequestHandler<Command, Result<CommentDto>>
     {
         private const int MAX_DEPTH = 10;
@@ -36,6 +40,19 @@ public class CreateComment
             if (publication == null)
                 return Result<CommentDto>.Failure("Publication you are trying to delete no longer exists", 400);
 
+            bool isSpam = await CheckForCommentSpam(user.Id);
+            if (isSpam)
+            {
+                return Result<CommentDto>.Failure("You are sending comments too fast", 400);
+            }
+            
+            var res = await spamRepository.MakeComment(request.UserId);
+            if (res == "Forbidden")
+            {
+                return Result<CommentDto>.Failure(
+                    "You cannot make comments for today due to our antispam rules", 400);
+            }
+            
             Comment? parentComment = null;
             int? effectiveParentId = request.Comment.ParentCommentId;
 
@@ -101,6 +118,27 @@ public class CreateComment
             }
 
             return Result<CommentDto>.Success(mapper.Map<CommentDto>(comment));
+        }
+
+        // true - it is spam; false - it is not spam
+        private async Task<bool> CheckForCommentSpam(int userId)
+        {
+            var lastComment = await context.Comments.Where(a =>
+                    a.AuthorId == userId)
+                .OrderByDescending(x => x.CreationDate)
+                .FirstOrDefaultAsync();
+
+            if (lastComment == null)
+                return false;
+            
+
+            var cutOff = DateTime.UtcNow.AddSeconds(-CommentRestrictionInSeconds);
+            if (lastComment.CreationDate > cutOff)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 

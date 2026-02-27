@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Likes.Commands;
+﻿using Application.Repositories.SpamRepository;
+
+namespace Application.Features.Likes.Commands;
 
 using Application.Core;
 using Domain.DTOs.LikeDTOs;
@@ -15,7 +17,7 @@ public class LikePublication
         public required int UserId { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context) : IRequestHandler<Command, Result<LikeDto>>
+    public class Handler(ApplicationDbContext context, ISpamRepository spamRepository) : IRequestHandler<Command, Result<LikeDto>>
     {
         public async Task<Result<LikeDto>> Handle(Command request, CancellationToken cancellationToken)
         {
@@ -29,6 +31,13 @@ public class LikePublication
             var like = await context.Likes.FirstOrDefaultAsync(a => a.PublicationId == request.PublicationId
             && a.LikedById == request.UserId);
 
+            var res = await spamRepository.MakeLike(request.UserId);
+            if (res == "Forbidden")
+            {
+                return Result<LikeDto>.Failure(
+                    "You cannot like more for today due to our antispam rules", 400);
+            }
+            
             if (like != null)
             {
                 context.Likes.Remove(like);

@@ -17,10 +17,11 @@ using Microsoft.IdentityModel.Tokens;
 using Neo4j.Driver;
 using Serilog;
 using System.Text;
+using Application.MessagingWebSockets;
+using Application.Repositories.SpamRepository;
+using Application.Repositories.UserActivityLogRepository;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -35,9 +36,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
-        builder.AllowAnyOrigin()
+        builder.WithOrigins("http://localhost:4200")
                .AllowAnyHeader()
-               .AllowAnyMethod();
+               .AllowAnyMethod()
+               .AllowCredentials();
     });
 });
 
@@ -67,7 +69,7 @@ builder.Services.AddAuthentication("Bearer")
                 var path = context.HttpContext.Request.Path;
 
                 if (!string.IsNullOrEmpty(accessToken) &&
-                path.StartsWithSegments("/hubs/chat"))
+                path.StartsWithSegments("/chat"))
                 {
                     context.Token = accessToken;
                 }
@@ -83,6 +85,8 @@ builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddScoped<IPhotoService, PhotoService>(); // Cloudinary settings
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IViolationService, ViolationService>();
+builder.Services.AddScoped<ISpamRepository, SpamRepository>();
+builder.Services.AddScoped<IUserActivityLogRepository, UserActivityLogRepository>();
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
@@ -112,7 +116,6 @@ builder.Services.AddSignalR();
 var app = builder.Build();
 
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -126,5 +129,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/chat");
 
 app.Run();

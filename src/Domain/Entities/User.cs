@@ -34,4 +34,8 @@ public class User
     public List<CommentComplaint> CommentComplaintsMade { get; set; } = [];
 
     public List<ChatUser> Chats { get; set; } = [];
+    
+    public SpamRating SpamRating { get; set; } = null!;
+
+    public List<UserActionLog> ActionLogs { get; set; } = [];
 }

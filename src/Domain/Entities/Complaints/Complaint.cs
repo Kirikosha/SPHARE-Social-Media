@@ -7,4 +7,5 @@ public abstract class Complaint
     public int ComplainerId { get; set; }
     public User Complainer { get; set; } = null!;
     public DateTime ComplainedAt { get; set; } = DateTime.UtcNow;
+    public double ComplaintValue { get; set; }
 }

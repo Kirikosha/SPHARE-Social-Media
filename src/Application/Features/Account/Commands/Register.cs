@@ -77,10 +77,19 @@ public class Register
                 return Result<AccountClaimsDto>.Failure(ex.Message, 500);
             }
 
+            SpamRating rating = new SpamRating()
+            {
+                UserId = user.Id,
+                SpamValue = 0.0
+            };
+
+            await context.SpamRatings.AddAsync(rating, cancellationToken);
+
             AccountClaimsDto account = new AccountClaimsDto
             {
                 UniqueNameIdentifier = user.UniqueNameIdentifier,
                 Username = user.Username,
+                UserId = user.Id,
                 Role = user.Role.ToString(),
                 Token = tokenService.CreateToken(user),
                 Blocked = false

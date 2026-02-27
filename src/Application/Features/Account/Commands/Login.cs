@@ -39,6 +39,7 @@ public class Login
             {
                 UniqueNameIdentifier = user.UniqueNameIdentifier,
                 Username = user.Username,
+                UserId = user.Id,
                 Token = tokenService.CreateToken(user),
                 Role = user.Role.ToString(),
                 Blocked = user.Blocked

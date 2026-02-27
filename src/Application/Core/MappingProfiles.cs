@@ -1,4 +1,6 @@
-﻿namespace Application.Core;
+﻿using Domain.DTOs.MessagingDTOs;
+
+namespace Application.Core;
 
 using AutoMapper;
 using Domain.DTOs;
@@ -20,7 +22,7 @@ public class MappingProfiles : Profile
         CreateMap<Image, ImageDto>();
         CreateMap<Violation, ViolationDto>();
         CreateMap<User, PublicUserDto>()
-            .ForMember(u => u.JoinedAt, opt => opt.MapFrom(u => u.DateOfCreation.ToString()))
+            .ForMember(u => u.JoinedAt, opt => opt.MapFrom(u => u.DateOfCreation))
             .ForMember(u => u.UserProfileDetails, opt => opt.MapFrom(u => u.ProfileDetails));
         CreateMap<UserProfileDetails, UserProfileDetailsDto>();
         CreateMap<Address, AddressDto>();
@@ -42,5 +44,29 @@ public class MappingProfiles : Profile
             .ForMember(dest => dest.LikesAmount, opt => opt.MapFrom(u => u.Likes.Count));
         CreateMap<Comment, CommentDto>()
             .ForMember(dest => dest.RepliesAmount, opt => opt.MapFrom(src => src.Replies.Count));
+
+        CreateMap<Chat, ChatDto>()
+            .ForMember(dest => dest.Participants, opt => opt.MapFrom(src => src.Participants))
+            .ForMember(dest => dest.LastMessage, opt => opt.Ignore())
+            .ForMember(dest => dest.UnreadCount, opt => opt.Ignore());
+
+        CreateMap<Chat, ChatWithMessagesDto>()
+            .IncludeBase<Chat, ChatDto>()
+            .ForMember(dest => dest.Messages, opt =>
+                opt.MapFrom(src => src.Messages.OrderBy(m => m.SentAt)));
+        
+        CreateMap<ChatUser, ChatUserDto>()
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User != null ? src.User.Username : null))
+            .ForMember(dest => dest.UniqueNameIdentifier, opt => opt.MapFrom(src => src.User != null ? src.User.UniqueNameIdentifier : null))
+            .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => 
+                src.User != null && src.User.ProfileImage != null 
+                    ? src.User.ProfileImage.ImageUrl : null))
+            .ForMember(dest => dest.IsOnline, opt => opt.Ignore()); 
+        
+        CreateMap<Message, MessageDto>()
+            .ForMember(dest => dest.SendersUsername, opt => opt.MapFrom(src => 
+                src.Sender != null ? src.Sender.Username : null))
+            .ForMember(dest => dest.IsRead, opt => opt.Ignore()); 
+        
     }
 }

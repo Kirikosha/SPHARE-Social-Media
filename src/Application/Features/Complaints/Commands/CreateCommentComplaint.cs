@@ -1,4 +1,5 @@
 ﻿using Application.Core;
+using Application.Repositories.SpamRepository;
 using Domain.DTOs.ComplaintDTOs;
 using Domain.Entities.Complaints;
 using Infrastructure;
@@ -12,10 +13,17 @@ public class CreateCommentComplaint
         public required CreateComplaintDto Complaint { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context) : IRequestHandler<Command, Result<bool>>
+    public class Handler(ApplicationDbContext context, ISpamRepository spamRepository) : IRequestHandler<Command, Result<bool>>
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
+            var res = await spamRepository.MakeComplaint(request.UserId);
+            if (res == "Forbidden")
+            {
+                return Result<bool>.Failure(
+                    "You cannot complain for today due to our antispam rules", 400);
+            }
+            
             CommentComplaint complaint = new CommentComplaint
             {
                 Reason = request.Complaint.Reason,
@@ -24,6 +32,7 @@ public class CreateCommentComplaint
                 ComplainerId = request.UserId,
                 CommentId = request.Complaint.TargetId
             };
+
 
             await context.CommentComplaints.AddAsync(complaint, cancellationToken);
 

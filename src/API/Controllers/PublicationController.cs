@@ -71,4 +71,13 @@ public class PublicationController : BaseApiController
             UserId = userId
         }));
     }
+
+    // TODO: Think about setting sort of a query for date like a month or something like that instead of getting all
+    // planned publications
+    [HttpGet("planned-publications")]
+    public async Task<ActionResult> GetPlannedPublications()
+    {
+        var userId = User.GetUserId();
+        return HandleResult(await Mediator.Send(new GetPlannedPublications.Query { UserId = userId }));
+    }
 }

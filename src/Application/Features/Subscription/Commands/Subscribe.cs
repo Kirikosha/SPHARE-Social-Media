@@ -17,15 +17,20 @@ public class Subscribe
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
-            bool userExists = await context.Users.AnyAsync(a => a.Id == request.UserId);
+            bool userExists = await context.Users.AnyAsync(a => a.Id == request.UserId, cancellationToken);
             if (!userExists) return Result<bool>.Failure("User does not exist", 404);
 
-            int userToFollowId = await context.Users.Where(x => x.UniqueNameIdentifier == request.FollowUserUniqueNameIdentifier).Select(x => x.Id).FirstOrDefaultAsync();
-            if (userToFollowId == 0) return Result<bool>.Failure("User you want to follow does not exist", 400);
-
+            var userToFollow = await context.Users
+                .Where(x => x.UniqueNameIdentifier == request.FollowUserUniqueNameIdentifier).FirstOrDefaultAsync(cancellationToken);
+            if (userToFollow == null) return Result<bool>.Failure("User you want to follow does not exist", 400);
+            
             try
             {
-                await subscriptionService.FollowAsync(request.UserId, userToFollowId);
+                await subscriptionService.FollowAsync(request.UserId, userToFollow.Id);
+
+                var followerCount = await subscriptionService.GetFollowersAsync(userToFollow.Id);
+                userToFollow.SubscriberNumber = followerCount.Count;
+                context.Users.Update(userToFollow);
                 return Result<bool>.Success(true);
             }
             catch (Exception ex)

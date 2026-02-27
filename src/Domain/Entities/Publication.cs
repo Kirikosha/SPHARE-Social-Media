@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities;
+﻿using System.Numerics;
+
+namespace Domain.Entities;
 
 using Domain.Entities.Complaints;
 using Domain.Enums;
@@ -20,4 +22,9 @@ public class Publication
     public List<Image>? Images { get; set; }
     public List<Comment>? Comments { get; set; }
     public List<PublicationComplaint> PublicationComplaints { get; set; } = [];
+    
+    // Condition module
+    public ConditionType? ConditionType { get; set; }
+    public int? ConditionTarget { get; set; }
+    public ComparisonOperator? ConditionOperator { get; set; }
 }

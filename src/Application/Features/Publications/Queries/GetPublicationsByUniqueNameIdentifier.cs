@@ -44,7 +44,10 @@ public class GetPublicationsByUniqueNameIdentifier
                     Author = mapper.Map<PublicUserDto>(p.Author),
                     LikesAmount = p.Likes.Count(),
                     IsLikedByCurrentUser = p.Likes.Any(a => a.LikedById == request.UserId),
-                    CommentAmount = context.Comments.Count(c => c.PublicationId == p.Id)
+                    CommentAmount = context.Comments.Count(c => c.PublicationId == p.Id),
+                    ConditionTarget = p.ConditionTarget,
+                    ConditionType = p.ConditionType,
+                    ComparisonOperator = p.ConditionOperator
                 }).ToListAsync(cancellationToken);
             return Result<List<PublicationDto>>.Success(publications);
         }

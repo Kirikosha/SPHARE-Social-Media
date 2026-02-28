@@ -66,7 +66,9 @@ public class MappingProfiles : Profile
         CreateMap<Message, MessageDto>()
             .ForMember(dest => dest.SendersUsername, opt => opt.MapFrom(src => 
                 src.Sender != null ? src.Sender.Username : null))
-            .ForMember(dest => dest.IsRead, opt => opt.Ignore()); 
-        
+            .ForMember(dest => dest.IsRead, opt => opt.Ignore());
+
+        CreateMap<Publication, PublicationCalendarDto>();
+
     }
 }

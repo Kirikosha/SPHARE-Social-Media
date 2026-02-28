@@ -38,4 +38,6 @@ public class User
     public SpamRating SpamRating { get; set; } = null!;
 
     public List<UserActionLog> ActionLogs { get; set; } = [];
+
+    public int SubscriberNumber { get; set; } = 0;
 }

@@ -17,15 +17,19 @@ public class Unsubscribe
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
-            bool userExists = await context.Users.AnyAsync(a => a.Id == request.UserId);
+            bool userExists = await context.Users.AnyAsync(a => a.Id == request.UserId, cancellationToken);
             if (!userExists) return Result<bool>.Failure("User does not exist", 404);
 
-            int userToUnfollowId = await context.Users.Where(x => x.UniqueNameIdentifier == request.UnfollowUserUniqueNameIdentifier).Select(x => x.Id).FirstOrDefaultAsync();
-            if (userToUnfollowId == 0) return Result<bool>.Failure("User you want to follow does not exist", 400);
+            var userToUnfollow = await context.Users.Where(x => x.UniqueNameIdentifier == request.UnfollowUserUniqueNameIdentifier).FirstOrDefaultAsync(cancellationToken);
+            if (userToUnfollow == null) return Result<bool>.Failure("User you want to follow does not exist", 400);
 
             try
             {
-                await subscriptionService.UnfollowAsync(request.UserId, userToUnfollowId);
+                await subscriptionService.UnfollowAsync(request.UserId, userToUnfollow.Id);
+                var subscriberAmount = await subscriptionService.GetFollowersAsync(userToUnfollow.Id);
+                userToUnfollow.SubscriberNumber = subscriberAmount.Count;
+
+                context.Users.Update(userToUnfollow);
                 return Result<bool>.Success(true);
             }
             catch (Exception ex)

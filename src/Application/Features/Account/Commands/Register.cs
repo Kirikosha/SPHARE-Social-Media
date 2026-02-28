@@ -74,7 +74,7 @@ public class Register
             }
             catch (Exception ex)
             {
-                return Result<AccountClaimsDto>.Failure(ex.Message, 500);
+                return Result<AccountClaimsDto>.Failure(ex.Message + ex.InnerException, 500);
             }
 
             SpamRating rating = new SpamRating()

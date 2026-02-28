@@ -2,5 +2,6 @@
 public enum PublicationTypes
 {
     ordinary,
-    planned
+    planned,
+    plannedConditional
 }

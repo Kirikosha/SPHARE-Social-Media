@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Publications.Queries;
+﻿using Domain.Enums;
+
+namespace Application.Features.Publications.Queries;
 
 using Application.Core;
 using Infrastructure;
@@ -19,9 +21,13 @@ public class GetPublicationsToRemind
         {
             DateTime now = DateTime.UtcNow;
             return Result<List<Publication>>.Success(await context.Publications
-            .Include(a => a.Author).ThenInclude(a => a.ProfileImage)
-            .Include(a => a.Images)
-            .Where(p => p.RemindAt != null && p.RemindAt <= now && !p.WasSent && p.Id > request.LastId)
+            .Include(a => a.Author)
+            //.Include(a => a.Images)
+            .Where(p => ((p.RemindAt != null && p.RemindAt <= now) 
+                         || (p.ConditionType != null 
+                         && p.ConditionOperator == ComparisonOperator.GreaterThanOrEqual 
+                         && p.Author.SubscriberNumber >= p.ConditionTarget)) 
+                         && !p.WasSent && p.Id > request.LastId)
             .OrderBy(p => p.Id)
             .Take(request.BatchSize)
             .ToListAsync(cancellationToken));

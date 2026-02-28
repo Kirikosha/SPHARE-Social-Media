@@ -1,4 +1,6 @@
-﻿namespace API.Controllers;
+﻿using Domain.Entities;
+
+namespace API.Controllers;
 
 using Application.Core;
 using MediatR;
@@ -26,6 +28,6 @@ public class BaseApiController : ControllerBase
         if (!result.IsSuccess && result.Code == 404) return NotFound();
         if (result.IsSuccess && result.Value != null) return Ok(result.Value);
 
-        return BadRequest(result.Error);
+        return StatusCode(result.Code, new {Message = result.Error});
     }
 }

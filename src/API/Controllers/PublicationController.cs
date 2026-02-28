@@ -1,4 +1,6 @@
-﻿namespace API.Controllers;
+﻿using System.Reflection.Metadata;
+
+namespace API.Controllers;
 
 using Application.Features.Likes.Commands;
 using Application.Features.Publications.Commands;
@@ -79,5 +81,13 @@ public class PublicationController : BaseApiController
     {
         var userId = User.GetUserId();
         return HandleResult(await Mediator.Send(new GetPlannedPublications.Query { UserId = userId }));
+    }
+
+    [HttpGet("publication-calendar")]
+    public async Task<ActionResult> GetPublicationModelForCalendar()
+    {
+        var userId = User.GetUserId();
+
+        return HandleResult(await Mediator.Send(new GetPublicationsCalendar.Query { UserId = userId }));
     }
 }

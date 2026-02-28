@@ -16,7 +16,7 @@ public class Neo4jDataAccess : INeo4jDataAccess
     public Neo4jDataAccess(IDriver driver, IOptions<Neo4jSettings> settings)
     {
         _driver = driver;
-        _database = settings.Value.Neo4jDatabase ?? "social-network-db";
+        _database = settings.Value.Neo4jDatabase ?? "neo4j";
     }
 
     public async Task ClearDatabaseAsync()

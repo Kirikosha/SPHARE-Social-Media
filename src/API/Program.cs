@@ -132,4 +132,26 @@ app.MapControllers();
 
 app.MapHub<ChatHub>("/chat");
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    
+    var retryCount = 5;
+    var delay = TimeSpan.FromSeconds(2);
+    
+    for (int i = 0; i < retryCount; i++)
+    {
+        try
+        {
+            await dbContext.Database.MigrateAsync();
+            break;
+        }
+        catch (Exception ex) when (i < retryCount - 1)
+        {
+            Console.WriteLine($"Migration attempt {i + 1} failed: {ex.Message}. Retrying in {delay.TotalSeconds} seconds...");
+            await Task.Delay(delay);
+        }
+    }
+}
+
 app.Run();

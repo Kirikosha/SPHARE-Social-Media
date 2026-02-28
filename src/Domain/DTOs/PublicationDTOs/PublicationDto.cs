@@ -1,4 +1,6 @@
-﻿namespace Domain.DTOs.PublicationDTOs;
+﻿using Domain.Enums;
+
+namespace Domain.DTOs.PublicationDTOs;
 
 using Domain.DTOs.UserDTOs;
 using System;
@@ -16,4 +18,8 @@ public class PublicationDto
     public int LikesAmount { get; set; }
     public bool IsLikedByCurrentUser { get; set; }
     public int CommentAmount { get; set; }
+    
+    public ConditionType? ConditionType { get; set; }
+    public int? ConditionTarget { get; set; }
+    public ComparisonOperator? ComparisonOperator { get; set; }
 }

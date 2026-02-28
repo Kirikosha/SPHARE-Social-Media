@@ -281,6 +281,15 @@ namespace Infrastructure.Migrations
                     b.Property<int>("AuthorId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ConditionOperator")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ConditionTarget")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ConditionType")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Content")
                         .HasColumnType("text");
 
@@ -367,6 +376,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SubscriberNumber")
                         .HasColumnType("integer");
 
                     b.Property<string>("UniqueNameIdentifier")

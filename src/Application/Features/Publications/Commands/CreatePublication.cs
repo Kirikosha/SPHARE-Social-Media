@@ -1,4 +1,6 @@
 ﻿using Application.Repositories.SpamRepository;
+using Application.Services.UserActionLogger;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Publications.Commands;
@@ -27,7 +29,9 @@ public class CreatePublication
     }
 
     public class Handler(ApplicationDbContext context, IMapper mapper,
-        IMediator mediator, ISpamRepository spamRepository) : IRequestHandler<Command, Result<bool>>
+        IMediator mediator, ISpamRepository spamRepository, IUserActionLogger<CreatePublication> logger) : 
+        IRequestHandler<Command, 
+        Result<bool>>
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
@@ -67,7 +71,12 @@ public class CreatePublication
             }
 
             context.Add(publication);
-            
+
+            await logger.LogAsync(request.CreatorId, UserLogAction.CreatePublication, new
+            {
+                info = $"User {request
+                    .CreatorId} has created a publication {publication.Id}"
+            }, cancellationToken);
             
             return Result<bool>.Success(true);
         }

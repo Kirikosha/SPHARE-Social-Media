@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Publications.Commands;
+﻿using Application.Services.UserActionLogger;
+
+namespace Application.Features.Publications.Commands;
 
 using Application.Core;
 using Application.Features.Likes.Queries;
@@ -18,7 +20,8 @@ public class UpdatePublication
         public required int UserId { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper, IMediator mediator) 
+    public class Handler(ApplicationDbContext context, IMapper mapper, IMediator mediator, 
+        IUserActionLogger<UpdatePublication> logger) 
         : IRequestHandler<Command, Result<PublicationDto>>
     {
         public async Task<Result<PublicationDto>> Handle(Command request, CancellationToken cancellationToken)
@@ -26,7 +29,7 @@ public class UpdatePublication
             Publication? publication = await context.Publications
                 .Include(a => a.Images)
                 .Include(a => a.Author).ThenInclude(a => a.ProfileImage)
-                .FirstOrDefaultAsync(a => a.Id == request.Publication.Id);
+                .FirstOrDefaultAsync(a => a.Id == request.Publication.Id, cancellationToken);
 
             if (publication == null)
                 return Result<PublicationDto>.Failure("Publication was not found", 404);
@@ -40,10 +43,10 @@ public class UpdatePublication
             }
 
             publication.UpdatedAt = DateTime.UtcNow;
-            bool success = await context.SaveChangesAsync() > 0;
+            var success = await context.SaveChangesAsync(cancellationToken) > 0;
             var readyPublication = mapper.Map<PublicationDto>(publication);
             var isLikedResult = await mediator
-                .Send(new IsLikedBy.Query { PublicationId = readyPublication.Id, UserId = request.UserId });
+                .Send(new IsLikedBy.Query { PublicationId = readyPublication.Id, UserId = request.UserId }, cancellationToken);
             if (isLikedResult.IsSuccess)
             {
                 readyPublication.IsLikedByCurrentUser = isLikedResult.Value;
@@ -52,9 +55,14 @@ public class UpdatePublication
             {
                 return Result<PublicationDto>.Failure(isLikedResult.Error!, isLikedResult.Code);
             }
-            if (success) return Result<PublicationDto>.Success(readyPublication);
 
-            return Result<PublicationDto>.Failure("Publication was not updated", 500);
+            if (!success) return Result<PublicationDto>.Failure("Publication was not updated", 500);
+            await logger.LogAsync(request.UserId, UserLogAction.EditPublication, new
+            {
+                info = $"User {request
+                    .UserId} has updated publication {publication.Id}"
+            }, cancellationToken);
+            return Result<PublicationDto>.Success(readyPublication);
 
         }
     }

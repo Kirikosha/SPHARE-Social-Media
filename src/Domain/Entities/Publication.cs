@@ -30,4 +30,5 @@ public class Publication
     
     // View count module
     public int ViewCount { get; set; } = 0;
+    public bool IsDeleted { get; set; }
 }

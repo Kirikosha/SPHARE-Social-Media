@@ -20,8 +20,21 @@ using System.Text;
 using Application.MessagingWebSockets;
 using Application.Repositories.SpamRepository;
 using Application.Repositories.UserActivityLogRepository;
+using Microsoft.AspNetCore.Diagnostics;
+using Serilog.Events;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithThreadId()
+    .Enrich.WithEnvironmentName()
+    .WriteTo.Console()
+    .WriteTo.Seq("http://seq:5341")
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -115,6 +128,8 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+app.UseSerilogRequestLogging();
+app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

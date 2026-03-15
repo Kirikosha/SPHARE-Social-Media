@@ -9,7 +9,6 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<User> Users { get; set; }
     public DbSet<Publication> Publications { get; set; }
     public DbSet<Like> Likes { get; set; }
-    public DbSet<ErrorLog> ErrorLogs { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Violation> Violations { get; set; }
@@ -27,8 +26,6 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<ErrorLog>().ToTable("ErrorLogs", t => t.ExcludeFromMigrations());
-
         modelBuilder.Entity<Like>()
             .HasKey(k => new { k.LikedById, k.PublicationId });
 

@@ -5,5 +5,5 @@ public enum UserActionType
     MakeAPublication,
     LikeAPublication,
     MakeAComment,
-    MakeAComplaint
+    MakeAComplaint,
 }

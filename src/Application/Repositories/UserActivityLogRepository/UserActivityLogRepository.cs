@@ -5,14 +5,14 @@ namespace Application.Repositories.UserActivityLogRepository;
 
 public class UserActivityLogRepository(ApplicationDbContext context) : IUserActivityLogRepository
 {
-    public async Task<bool> LogUserResetRating(UserActionLogDto logDto)
+    public async Task<bool> LogUserAction(UserActionLogDto logDto)
     {
         UserActionLog log = new UserActionLog()
         {
             Id = Guid.NewGuid(),
             UserId = logDto.UserId,
             AdditionalDescription = logDto.AdditionalDescription ?? string.Empty,
-            Action = "RatingReset"
+            Action = logDto.ActionType.ToString()
         };
 
         try

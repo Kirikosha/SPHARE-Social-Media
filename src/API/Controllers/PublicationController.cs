@@ -90,4 +90,11 @@ public class PublicationController : BaseApiController
 
         return HandleResult(await Mediator.Send(new GetPublicationsCalendar.Query { UserId = userId }));
     }
+
+    [HttpGet("publication/view-update/{id:int}")]
+    public async Task<ActionResult> PublicationViewAdded(int id)
+    {
+        return HandleResult(await Mediator.Send(new UpdatePublicationViews.Command { PublicationId = id }));
+    }
+    
 }

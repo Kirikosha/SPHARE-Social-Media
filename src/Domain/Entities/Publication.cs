@@ -27,4 +27,7 @@ public class Publication
     public ConditionType? ConditionType { get; set; }
     public int? ConditionTarget { get; set; }
     public ComparisonOperator? ConditionOperator { get; set; }
+    
+    // View count module
+    public int ViewCount { get; set; } = 0;
 }

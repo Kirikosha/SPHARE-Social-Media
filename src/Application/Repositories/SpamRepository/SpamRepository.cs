@@ -80,7 +80,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
             }
         }
 
-        await logRepository.LogUserResetRating(
+        await logRepository.LogUserAction(
             new UserActionLogDto() { UserId = userId, ExecutedAt = DateTime.UtcNow });
     }
 

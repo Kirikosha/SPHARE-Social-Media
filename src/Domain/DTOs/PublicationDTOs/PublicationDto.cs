@@ -22,4 +22,6 @@ public class PublicationDto
     public ConditionType? ConditionType { get; set; }
     public int? ConditionTarget { get; set; }
     public ComparisonOperator? ComparisonOperator { get; set; }
+    
+    public int ViewCount { get; set; }
 }

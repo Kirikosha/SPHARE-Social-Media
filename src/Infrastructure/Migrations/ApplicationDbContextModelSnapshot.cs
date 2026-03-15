@@ -305,6 +305,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("WasSent")
                         .HasColumnType("boolean");
 

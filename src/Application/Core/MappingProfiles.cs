@@ -39,7 +39,8 @@ public class MappingProfiles : Profile
         CreateMap<UserProfileDetails, UserProfileDetails>();
         CreateMap<PublicationComplaint, PublicationComplaintDto>();
         CreateMap<CommentComplaint, CommentComplaintDto>();
-        CreateMap<CreatePublicationDto, Publication>();
+        CreateMap<CreatePublicationDto, Publication>()
+            .ForMember(dest => dest.Images, opt => opt.Ignore());
         CreateMap<Publication, PublicationDto>()
             .ForMember(dest => dest.LikesAmount, opt => opt.MapFrom(u => u.Likes.Count));
         CreateMap<Comment, CommentDto>()

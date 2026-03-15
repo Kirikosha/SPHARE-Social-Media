@@ -1,4 +1,10 @@
 ﻿using Application.Repositories.SpamRepository;
+using Application.Repositories.UserActivityLogRepository;
+using Application.Services.UserActionLogger;
+using Domain.DTOs;
+using Domain.Enums;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Application.Features.Comments.Commands;
 
@@ -20,7 +26,7 @@ public class CreateComment
     }
 
     public class Handler(ApplicationDbContext context, IMapper mapper,
-    ISpamRepository spamRepository)
+    ISpamRepository spamRepository, IUserActionLogger<CreateComment> logger)
         : IRequestHandler<Command, Result<CommentDto>>
     {
         private const int MAX_DEPTH = 10;
@@ -116,6 +122,13 @@ public class CreateComment
                 WHERE ""DescendantId"" = {effectiveParentId};
             ", cancellationToken);
             }
+
+            await logger.LogAsync(request.UserId, UserLogAction.CreateComment, new
+            {
+                info = $"Comment {comment.Id} was created" +
+                       $" by user {request.UserId}"
+            }, cancellationToken);
+            
 
             return Result<CommentDto>.Success(mapper.Map<CommentDto>(comment));
         }

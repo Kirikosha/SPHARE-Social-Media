@@ -1,4 +1,5 @@
 ﻿using Application.Repositories.UserActivityLogRepository;
+using Application.Services.UserActionLogger;
 using Domain.DTOs;
 using Domain.Enums;
 using Microsoft.Extensions.Logging;
@@ -19,8 +20,7 @@ public class DeleteComment
         public required int CommentId { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IUserActivityLogRepository logRepository, 
-        ILogger<DeleteComment> logger) : 
+    public class Handler(ApplicationDbContext context, IUserActionLogger<DeleteComment> logger) : 
         IRequestHandler<Command, 
         Result<bool>>
     {
@@ -33,20 +33,14 @@ public class DeleteComment
 
             context.Update(comment);
 
-            var res = await logRepository.LogUserAction(new UserActionLogDto()
+            await logger.LogAsync(comment.AuthorId, UserLogAction.DeleteComment, new
             {
-                UserId = comment.AuthorId,
-                ActionType = UserLogAction.DeleteComment,
-                AdditionalDescription = JsonConvert.SerializeObject(new { info = "Deletion was successful" }),
-                ExecutedAt = DateTime.UtcNow
-            });
-
-            if (!res)
-            {
-                logger.Log(LogLevel.Error, "User action was not logged. User id: " + comment.AuthorId);
-            }
+                info = $"Comment {comment.Id} was " +
+                       $"deleted by user {comment.AuthorId}"
+            }, cancellationToken);
             
             return Result<bool>.Success(true);
         }
+        
     }
 }

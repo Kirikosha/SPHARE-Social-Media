@@ -2,6 +2,6 @@
 public class CreateCommentDto
 {
     public string Content { get; set; } = string.Empty;
-    public int PublicationId { get; set; }
-    public int? ParentCommentId { get; set; }
+    public string PublicationId { get; set; } = string.Empty;
+    public string? ParentCommentId { get; set; }
 }

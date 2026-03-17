@@ -2,7 +2,6 @@
 using Application.Features.Subscription.Queries;
 using Application.Helpers;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;

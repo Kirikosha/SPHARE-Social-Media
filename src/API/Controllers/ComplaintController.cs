@@ -3,7 +3,6 @@ using Application.Features.Complaints.Queries;
 using Application.Helpers;
 using Domain.DTOs.ComplaintDTOs;
 using Microsoft.AspNetCore.Mvc;
-using System.Runtime.CompilerServices;
 
 namespace API.Controllers;
 public class ComplaintController : BaseApiController
@@ -42,6 +41,6 @@ public class ComplaintController : BaseApiController
     public async Task<ActionResult> GetPublicationComplaintsGrouped()
     {
         return HandleResult(await Mediator
-            .Send(new GetGroupedComplaints.Query()));;;;
+            .Send(new GetGroupedComplaints.Query()));
     }
 }

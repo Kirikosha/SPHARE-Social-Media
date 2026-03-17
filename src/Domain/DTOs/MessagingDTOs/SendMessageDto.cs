@@ -2,7 +2,7 @@
 
 public class SendMessageDto
 {
-    public Guid? ChatId { get; set; }
-    public int ReceiverId { get; set; }
+    public string? ChatId { get; set; }
+    public string ReceiverId { get; set; } = string.Empty;
     public string MessageContent { get; set; } = string.Empty;
 }

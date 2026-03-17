@@ -47,9 +47,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", builder =>
+    options.AddPolicy("AllowAll", builderI =>
     {
-        builder.WithOrigins("http://localhost:4200")
+        builderI.WithOrigins("http://localhost:4200")
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();
@@ -61,6 +61,8 @@ builder.Services.AddMediatR(x =>
     x.RegisterServicesFromAssemblyContaining<GetUsersList.Handler>();
 });
 
+var tokenKey = builder.Configuration["TokenKey"]
+               ?? throw new InvalidOperationException("TokenKey is not configured");
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -71,7 +73,7 @@ builder.Services.AddAuthentication("Bearer")
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"]))
+                Encoding.UTF8.GetBytes(tokenKey))
         };
 
         options.Events = new JwtBearerEvents
@@ -108,11 +110,11 @@ var settings = new Neo4jSettings();
 builder.Configuration.GetSection("Neo4jSettings").Bind(settings);
 try
 {
-    var neo4jDriver = GraphDatabase.Driver(
+    var neo4JDriver = GraphDatabase.Driver(
         settings.Neo4jConnection,
         AuthTokens.Basic(settings.Neo4juser, settings.Neo4jPassword)
     );
-    builder.Services.AddSingleton(neo4jDriver);
+    builder.Services.AddSingleton(neo4JDriver);
     builder.Services.AddTransient<INeo4jDataAccess, Neo4jDataAccess>();
     builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 }

@@ -2,7 +2,7 @@
 
 public class PublicationCalendarDto
 {
-    public int Id { get; set; } 
+    public string Id { get; set; } = string.Empty;
     public string? Content { get; set; }
     public DateTime? RemindAt { get; set; }
 }

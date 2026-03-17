@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 public class PublicUserController : BaseApiController
 {
     [HttpGet("by-uni")]
-    public async Task<ActionResult<PublicUserDto>> GetPublicUserByUni([FromQuery]string uNI)
+    public async Task<ActionResult<PublicUserDto>> GetPublicUserByUni([FromQuery]string uNi)
     {
         return HandleResult(await Mediator.Send(
-            new GetPublicUserByUniqueNameIdentifier.Query() { UniqueNameIdentifier = uNI }));
+            new GetPublicUserByUniqueNameIdentifier.Query() { UniqueNameIdentifier = uNi }));
     }
 
     [HttpGet("my-profile")]

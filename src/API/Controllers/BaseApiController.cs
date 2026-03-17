@@ -1,6 +1,4 @@
-﻿using Domain.Entities;
-
-namespace API.Controllers;
+﻿namespace API.Controllers;
 
 using Application.Core;
 using MediatR;
@@ -19,7 +17,7 @@ public class BaseApiController : ControllerBase
             {
                 _mediator = HttpContext.RequestServices.GetService<IMediator>();
             }
-            return _mediator;
+            return _mediator!;
         }
     }
 

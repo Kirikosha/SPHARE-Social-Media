@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 public class PublicationDto
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = string.Empty;
     public string? Content { get; set; }
     public DateTime PostedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

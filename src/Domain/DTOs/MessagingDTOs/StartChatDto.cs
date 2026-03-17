@@ -2,5 +2,5 @@
 
 public class StartChatDto
 {
-    public int OtherUserId { get; set; }
+    public required string OtherUserId { get; set; }
 }

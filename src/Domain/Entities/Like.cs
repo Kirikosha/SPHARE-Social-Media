@@ -1,10 +1,9 @@
 ﻿namespace Domain.Entities;
-using System.Collections.Generic;
 
 public class Like
 {
-    public int PublicationId { get; set; }
+    public string PublicationId { get; set; } = string.Empty;
     public Publication Publication { get; set; } = null!;
-    public int LikedById { get; set; }
+    public string LikedById { get; set; } = string.Empty;
     public User LikedBy { get; set; } = null!;
 }

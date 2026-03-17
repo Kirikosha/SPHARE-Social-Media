@@ -3,9 +3,9 @@ using System;
 
 public class Violation
 {
-    public int Id { get; set; }
-    public int ViolatedById { get; set; }
-    public User ViolatedBy { get; set; }
-    public string ViolationText { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public string ViolatedById { get; set; } = string.Empty;
+    public User ViolatedBy { get; set; } = null!;
+    public string ViolationText { get; set; } = "Some violation was made. Please contact the administration";
     public DateTime ViolatedAt { get; set; }
 }

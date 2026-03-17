@@ -1,13 +1,11 @@
-﻿namespace Domain.Entities;
-
-using Domain.Entities.Complaints;
+﻿using Domain.Entities.Complaints;
 using Domain.Enums;
-using System;
-using System.Collections.Generic;
+
+namespace Domain.Entities;
 
 public class User
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public required string Username { get; set; }
     public required string UniqueNameIdentifier { get; set; }
     public required string Email { get; set; }
@@ -17,15 +15,15 @@ public class User
     public DateOnly DateOfCreation { get; set; } = DateOnly.FromDateTime(DateTime.UtcNow);
     public List<Publication> CreatedPublications { get; set; } = [];
     public List<Like> LikedPublications { get; set; } = [];
-    public int? ProfileImageId { get; set; }
+    public string? ProfileImageId { get; set; }
     public Image? ProfileImage { get; set; }
-    public int ViolationScore { get; set; } = 0;
+    public int ViolationScore { get; set; }
     public List<Violation> Violations { get; set; } = [];
-    public bool Blocked { get; set; } = false;
+    public bool Blocked { get; set; }
     public DateTime? BlockedAt { get; set; }
 
     public UserProfileDetails? ProfileDetails { get; set; }
-    public int? ProfileDetailsId { get; set; }
+    public string? ProfileDetailsId { get; set; }
 
     public Address? Address { get; set; }
     public int? AddressId { get; set; }
@@ -39,5 +37,5 @@ public class User
 
     public List<UserActionLog> ActionLogs { get; set; } = [];
 
-    public int SubscriberNumber { get; set; } = 0;
+    public int SubscriberNumber { get; set; }
 }

@@ -1,8 +1,8 @@
 ﻿namespace Domain.Entities;
 public class ChatUser
 {
-    public Guid ChatId { get; set; }
+    public string ChatId { get; set; } = string.Empty;
     public Chat Chat { get; set; } = null!;
-    public int UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
     public User User { get; set; } = null!;
 }

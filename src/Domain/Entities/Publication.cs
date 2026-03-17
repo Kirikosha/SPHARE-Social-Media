@@ -1,23 +1,19 @@
-﻿using System.Numerics;
+﻿using Domain.Entities.Complaints;
+using Domain.Enums;
 
 namespace Domain.Entities;
 
-using Domain.Entities.Complaints;
-using Domain.Enums;
-using System;
-using System.Collections.Generic;
-
 public class Publication
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string? Content { get; set; }
-    public int AuthorId { get; set; }
+    public string AuthorId { get; set; } = string.Empty;
     public User Author { get; set; } = null!;
     public List<Like> Likes { get; set; } = [];
     public DateTime PostedAt { get; set; } = DateTime.UtcNow; // Creation date
     public PublicationTypes PublicationType { get; set; } = PublicationTypes.ordinary;
     public DateTime? RemindAt { get; set; }
-    public bool WasSent { get; set; } = false;
+    public bool WasSent { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public List<Image>? Images { get; set; }
     public List<Comment>? Comments { get; set; }
@@ -29,6 +25,6 @@ public class Publication
     public ComparisonOperator? ConditionOperator { get; set; }
     
     // View count module
-    public int ViewCount { get; set; } = 0;
+    public int ViewCount { get; set; }
     public bool IsDeleted { get; set; }
 }

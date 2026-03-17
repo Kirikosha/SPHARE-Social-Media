@@ -18,10 +18,9 @@ public class PublicationDto
     public int LikesAmount { get; set; }
     public bool IsLikedByCurrentUser { get; set; }
     public int CommentAmount { get; set; }
-    
     public ConditionType? ConditionType { get; set; }
     public int? ConditionTarget { get; set; }
     public ComparisonOperator? ComparisonOperator { get; set; }
-    
     public int ViewCount { get; set; }
+    public bool IsDeleted { get; set; }
 }

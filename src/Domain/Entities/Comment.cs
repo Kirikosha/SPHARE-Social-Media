@@ -3,11 +3,11 @@
 namespace Domain.Entities;
 public class Comment
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string Content { get; set; } = string.Empty;
-    public int AuthorId { get; set; }
+    public string AuthorId { get; set; }
     public User Author { get; set; } = null!;
-    public int PublicationId { get; set; }
+    public string PublicationId { get; set; }
     public Publication Publication { get; set; } = null!;
     public DateTime CreationDate { get; set; }
     public bool IsDeleted { get; set; } = false;
@@ -15,7 +15,7 @@ public class Comment
     public List<CommentComplaint> CommentComplaints { get; set; } = [];
 
     // Comment tree impl
-    public int? ParentCommentId { get; set; }
+    public string? ParentCommentId { get; set; }
     public Comment? ParentComment { get; set; }
     public List<Comment> Replies { get; set; } = [];
 

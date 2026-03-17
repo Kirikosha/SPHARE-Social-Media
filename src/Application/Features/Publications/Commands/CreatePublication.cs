@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Publications.Commands;
 
-using Application.Core;
+using Core;
 using Application.Features.Images.Commands;
 using AutoMapper;
 using Domain.DTOs.PublicationDTOs;
@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 public class CreatePublication
 {
     // normal user
-    private const int PublicationNumberLimit = 3;
+    //private const int PublicationNumberLimit = 3;
     private const int PublicationTimeLimit = 5; // in minutes
     
     // new user
@@ -25,7 +25,7 @@ public class CreatePublication
     public class Command : IRequest<Result<bool>>
     {
         public required CreatePublicationDto Publication { get; set; }
-        public required int CreatorId { get; set; }
+        public required string CreatorId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context, IMapper mapper,
@@ -35,7 +35,7 @@ public class CreatePublication
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
-            User? user = await context.Users.FindAsync(request.CreatorId);
+            User? user = await context.Users.FindAsync(request.CreatorId, cancellationToken);
             if (user == null)
                 return Result<bool>
                     .Failure("Account does not exist therefore publication cannot be created", 403);
@@ -81,7 +81,7 @@ public class CreatePublication
             return Result<bool>.Success(true);
         }
 
-        private async Task<bool> IsUserNew(int userId)
+        private async Task<bool> IsUserNew(string userId)
         {
             var authorCreationDate = await context.Users
                 .Where(a => a.Id == userId)
@@ -96,7 +96,7 @@ public class CreatePublication
 
             return false; 
         }
-        private async Task<bool> IsPublicationSpamming(int userId)
+        private async Task<bool> IsPublicationSpamming(string userId)
         {
             bool isUserNew = await IsUserNew(userId);
             

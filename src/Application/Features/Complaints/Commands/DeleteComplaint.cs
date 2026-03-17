@@ -6,14 +6,14 @@ public class DeleteComplaint
 {
     public class Command : IRequest<Result<bool>>
     {
-        public int TargetId { get; set; }
+        public string TargetId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context) : IRequestHandler<Command, Result<bool>>
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var complaint = await context.Complaints.FindAsync(request.TargetId);
+            var complaint = await context.Complaints.FindAsync(request.TargetId, cancellationToken);
             if (complaint == null)
             {
                 return Result<bool>.Failure("Complaint was not found", 404);

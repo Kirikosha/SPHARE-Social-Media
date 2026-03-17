@@ -4,10 +4,13 @@ using System.Security.Claims;
 
 public static class ClaimsPrincipalExtensions
 {
-    public static int GetUserId(this ClaimsPrincipal user)
+    public static string GetUserId(this ClaimsPrincipal user)
     {
-        var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)
-            ?? throw new ArgumentException("Cannot get id from token"));
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            throw new Exception("User id was not received from the claims");
+        }
         return userId;
     }
 }

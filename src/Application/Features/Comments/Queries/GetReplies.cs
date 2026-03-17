@@ -1,5 +1,4 @@
 ﻿using Application.Core;
-using AutoMapper;
 using Domain.DTOs;
 using Domain.DTOs.CommentDTOs;
 using Domain.DTOs.UserDTOs;
@@ -11,10 +10,10 @@ public class GetReplies
 {
     public class Query : IRequest<Result<List<CommentDto>>>
     {
-        public int ParentId { get; set; }
+        public required string ParentId { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Query, Result<List<CommentDto>>>
+    public class Handler(ApplicationDbContext context) : IRequestHandler<Query, Result<List<CommentDto>>>
     {
         public async Task<Result<List<CommentDto>>> Handle(Query request, CancellationToken cancellationToken)
         {

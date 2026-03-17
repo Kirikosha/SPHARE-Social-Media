@@ -2,12 +2,10 @@
 using Application.Services.PhotoService;
 using Application.Services.SubscriptionService;
 using Application.Services.TokenService;
-using CloudinaryDotNet.Actions;
 using Domain.DTOs.AccountDTOs;
 using Domain.Enums;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -22,7 +20,7 @@ public class Register
     public class Handler(ApplicationDbContext context, ITokenService tokenService, IPhotoService photoService,
         ISubscriptionService subscriptionService) : IRequestHandler<Command, Result<AccountClaimsDto>>
     {
-        const int RANDOM_NAME_IDENTIFIER_KEY_VALUE_LENGTH = 7;
+        const int RandomNameIdentifierKeyValueLength = 7;
         public async Task<Result<AccountClaimsDto>> Handle(Command request, CancellationToken cancellationToken)
         {
             bool exists = await context.Users
@@ -119,7 +117,7 @@ public class Register
             int randCharValue;
             int randCaseValue;
             char letter;
-            for (int i = 0; i < RANDOM_NAME_IDENTIFIER_KEY_VALUE_LENGTH; i++)
+            for (int i = 0; i < RandomNameIdentifierKeyValueLength; i++)
             {
                 randCharValue = rand.Next(0, 26);
                 randCaseValue = rand.Next(0, 1);

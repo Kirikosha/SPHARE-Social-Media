@@ -12,7 +12,7 @@ public class GetPublicationsCalendar
 {
     public class Query : IRequest<Result<List<PublicationCalendarDto>>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
     }
     
     public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Query, Result<List<PublicationCalendarDto>>>

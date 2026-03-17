@@ -1,8 +1,8 @@
 ﻿namespace Application.Features.Users.Commands;
 
-using Application.Core;
+using Core;
 using Application.Features.Images.Commands;
-using Application.Services.PhotoService;
+using Services.PhotoService;
 using AutoMapper;
 using Domain.DTOs.UserDTOs;
 using Infrastructure;
@@ -26,7 +26,7 @@ public class UpdatePublicUser
                 .Include(a => a.ProfileImage)
                 .Include(a => a.ProfileDetails)
                 .Include(a => a.Address)
-                .FirstOrDefaultAsync(x => x.Id == request.UpdateUserModel.Id);
+                .FirstOrDefaultAsync(x => x.Id == request.UpdateUserModel.Id, cancellationToken);
 
             if (user == null)
                 return Result<PublicUserDto>.Failure("User was not found", 404);
@@ -39,7 +39,7 @@ public class UpdatePublicUser
 
             if (request.UpdateUserModel.Action == Domain.Enums.ImageAction.New)
             {
-                var response = await photoService.AddPhotoAsync(request.UpdateUserModel.ProfileImage);
+                var response = await photoService.AddPhotoAsync(request.UpdateUserModel.ProfileImage!);
                 if (response.Error != null)
                     return Result<PublicUserDto>.Failure("Image was not uploaded", 500);
 
@@ -47,7 +47,8 @@ public class UpdatePublicUser
 
                 if (user.ProfileImage != null)
                 {
-                    var result = await mediator.Send(new DeleteProfileImage.Command { PublicId = user.ProfileImage.PublicId });
+                    var result = await mediator.Send(new DeleteProfileImage.Command { PublicId = user.ProfileImage
+                        .PublicId! });
                     if (!result.IsSuccess)
                         return Result<PublicUserDto>.Failure(result.Error!, result.Code);
                 }
@@ -56,9 +57,10 @@ public class UpdatePublicUser
             }
             else if (request.UpdateUserModel.Action == Domain.Enums.ImageAction.Delete && user.ProfileImage != null)
             {
-                var result = await mediator.Send(new DeleteProfileImage.Command { PublicId = user.ProfileImage.PublicId });
+                var result = await mediator.Send(new DeleteProfileImage.Command { PublicId = user.ProfileImage
+                    .PublicId! });
                 if (!result.IsSuccess)
-                    return Result<PublicUserDto>.Failure(result.Error, 500);
+                    return Result<PublicUserDto>.Failure(result.Error!, 500);
                 user.ProfileImage = null;
             }
 

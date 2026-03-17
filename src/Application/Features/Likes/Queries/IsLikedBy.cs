@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Likes.Queries;
 
-using Application.Core;
+using Core;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
@@ -10,8 +10,8 @@ public class IsLikedBy
 {
     public class Query : IRequest<Result<bool>>
     {
-        public required int UserId { get; set; }
-        public required int PublicationId { get; set; }
+        public required string UserId { get; set; }
+        public required string PublicationId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context) : IRequestHandler<Query, Result<bool>>
@@ -21,11 +21,11 @@ public class IsLikedBy
             try
             {
                 bool result = await context.Likes.AnyAsync(a => a.LikedById == request.UserId
-                && a.PublicationId == request.PublicationId);
+                && a.PublicationId == request.PublicationId, cancellationToken);
 
                 return Result<bool>.Success(result);
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 return Result<bool>.Failure("During getting info if the post is liked by an error happened", 500);
             }

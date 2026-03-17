@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata;
-
-namespace API.Controllers;
+﻿namespace API.Controllers;
 
 using Application.Features.Likes.Commands;
 using Application.Features.Publications.Commands;
@@ -15,7 +13,7 @@ public class PublicationController : BaseApiController
     [HttpPost("create-publication")]
     public async Task<ActionResult> CreatePublication(CreatePublicationDto publication)
     {
-        int userId = User.GetUserId();
+        string userId = User.GetUserId();
 
         return HandleResult(await Mediator.Send(new CreatePublication.Command { CreatorId = userId, Publication = publication }));
     }
@@ -44,10 +42,10 @@ public class PublicationController : BaseApiController
         ));
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<PublicationDto>> GetPublicationById(int id)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<PublicationDto>> GetPublicationById(string id)
     {
-        int userId = User.GetUserId();
+        string userId = User.GetUserId();
 
         return HandleResult(await Mediator.Send(new GetPublicationById.Query
         {
@@ -56,14 +54,14 @@ public class PublicationController : BaseApiController
         }));
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<ActionResult> DeletePublication(int id)
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeletePublication(string id)
     {
         return HandleResult(await Mediator.Send(new DeletePublication.Command { Id = id }));
     }
 
-    [HttpGet("like/{id:int}")]
-    public async Task<ActionResult<LikeDto>> LikePublication(int id)
+    [HttpGet("like/{id}")]
+    public async Task<ActionResult<LikeDto>> LikePublication(string id)
     {
         var userId = User.GetUserId();
 
@@ -91,8 +89,8 @@ public class PublicationController : BaseApiController
         return HandleResult(await Mediator.Send(new GetPublicationsCalendar.Query { UserId = userId }));
     }
 
-    [HttpGet("publication/view-update/{id:int}")]
-    public async Task<ActionResult> PublicationViewAdded(int id)
+    [HttpGet("publication/view-update/{id}")]
+    public async Task<ActionResult> PublicationViewAdded(string id)
     {
         return HandleResult(await Mediator.Send(new UpdatePublicationViews.Command { PublicationId = id }));
     }

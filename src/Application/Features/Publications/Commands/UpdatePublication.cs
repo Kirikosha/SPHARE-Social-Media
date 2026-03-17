@@ -2,7 +2,7 @@
 
 namespace Application.Features.Publications.Commands;
 
-using Application.Core;
+using Core;
 using Application.Features.Likes.Queries;
 using AutoMapper;
 using Domain.DTOs.PublicationDTOs;
@@ -17,7 +17,7 @@ public class UpdatePublication
     public class Command : IRequest<Result<PublicationDto>>
     {
         public required UpdatePublicationDto Publication { get; set; }
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context, IMapper mapper, IMediator mediator, 

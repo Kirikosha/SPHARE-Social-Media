@@ -1,12 +1,10 @@
-﻿namespace Application.Features.AdminFeatures.Commands;
-
-using Application.Core;
+﻿using Application.Core;
 using Application.Services.ViolationService;
 using Domain.DTOs.ViolationDTOs;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
-using System.Threading.Tasks;
+
+namespace Application.Features.AdminFeatures.Commands;
 
 public class DeletePublication
 {
@@ -22,12 +20,12 @@ public class DeletePublication
             try
             {
                 Publication? publication = await context.Publications.Include(a => a.Author)
-                    .FirstOrDefaultAsync(a => a.Id == request.Violation.ItemToRemoveId);
+                    .FirstOrDefaultAsync(a => a.Id == request.Violation.ItemToRemoveId, cancellationToken);
 
-                if (publication == null || publication.Author == null) return Result<bool>.Failure("Publication to delete was not found", 404);
+                if (publication == null) return Result<bool>.Failure("Publication to delete was not found", 404);
 
-                string email = publication.Author.Email;
-                context.Publications.Remove(publication);
+                publication.IsDeleted = true;
+                context.Publications.Update(publication);
 
                 Violation violation = new Violation
                 {

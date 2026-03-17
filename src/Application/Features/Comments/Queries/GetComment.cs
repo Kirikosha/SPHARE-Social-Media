@@ -10,7 +10,7 @@ public class GetComment
 {
     public class Query : IRequest<Result<CommentDto>>
     {
-        public int Id { get; set; }
+        public required string Id { get; init; }
     }
 
     public class Handler(ApplicationDbContext context) : IRequestHandler<Query, Result<CommentDto>>
@@ -45,10 +45,10 @@ public class GetComment
 
                     RepliesAmount = context.CommentTrees
                         .Count(cc => cc.AncestorId == c.Id && cc.Depth > 0)
-                }).SingleOrDefaultAsync();
+                }).SingleOrDefaultAsync(cancellationToken);
 
-            if (comment == null) return Result<CommentDto>.Failure("Comment was not found", 404);
-            return Result<CommentDto>.Success(comment);
+            return comment == null ? Result<CommentDto>.Failure("Comment was not found", 404) 
+                : Result<CommentDto>.Success(comment);
         }
     }
 }

@@ -1,14 +1,10 @@
 ﻿using Application.Repositories.SpamRepository;
-using Application.Repositories.UserActivityLogRepository;
 using Application.Services.UserActionLogger;
-using Domain.DTOs;
 using Domain.Enums;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace Application.Features.Comments.Commands;
 
-using Application.Core;
+using Core;
 using AutoMapper;
 using Domain.DTOs.CommentDTOs;
 using Infrastructure;
@@ -21,7 +17,7 @@ public class CreateComment
     private const int CommentRestrictionInSeconds = 10;
     public class Command : IRequest<Result<CommentDto>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
         public required CreateCommentDto Comment { get; set; }
     }
 
@@ -29,7 +25,7 @@ public class CreateComment
     ISpamRepository spamRepository, IUserActionLogger<CreateComment> logger)
         : IRequestHandler<Command, Result<CommentDto>>
     {
-        private const int MAX_DEPTH = 10;
+        private const int MaxDepth = 10;
 
         public async Task<Result<CommentDto>> Handle(Command request, CancellationToken cancellationToken)
         {
@@ -59,8 +55,8 @@ public class CreateComment
                     "You cannot make comments for today due to our antispam rules", 400);
             }
             
-            Comment? parentComment = null;
-            int? effectiveParentId = request.Comment.ParentCommentId;
+            Comment? parentComment;
+            string? effectiveParentId = request.Comment.ParentCommentId;
 
             if (effectiveParentId != null)
             {
@@ -78,9 +74,9 @@ public class CreateComment
                     .Where(x => x.DescendantId == parentComment.Id)
                     .MaxAsync(x => x.Depth, cancellationToken);
 
-                if (parentDepth + 1 > MAX_DEPTH)
+                if (parentDepth + 1 > MaxDepth)
                 {
-                    var targetParentDepth = MAX_DEPTH - 1;
+                    var targetParentDepth = MaxDepth - 1;
                     var distanceUp = parentDepth - targetParentDepth;
 
                     var newParentId = await context.CommentTrees
@@ -134,7 +130,7 @@ public class CreateComment
         }
 
         // true - it is spam; false - it is not spam
-        private async Task<bool> CheckForCommentSpam(int userId)
+        private async Task<bool> CheckForCommentSpam(string userId)
         {
             var lastComment = await context.Comments.Where(a =>
                     a.AuthorId == userId)

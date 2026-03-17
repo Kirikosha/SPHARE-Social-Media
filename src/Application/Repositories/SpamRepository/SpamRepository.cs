@@ -22,7 +22,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
 
     private const double SpamLimit = 1.0;
 
-    private async Task<string> VerifyThePermissionToMakeAction(UserActionType actionType, int userId)
+    private async Task<string> VerifyThePermissionToMakeAction(UserActionType actionType, string userId)
     {
         var rating = await context.SpamRatings.FirstOrDefaultAsync(a => a.UserId == userId);
         if (rating == null) throw new Exception("There is no such record of user and spamratings");
@@ -54,7 +54,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
         return "Allowed";
     }
 
-    private async Task ResetSpamRating(int userId)
+    private async Task ResetSpamRating(string userId)
     {
         var rating = await context.SpamRatings.FirstOrDefaultAsync(a => a.UserId == userId);
         if (rating == null) throw new Exception("There is no such record of user and spamratings");
@@ -84,13 +84,13 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
             new UserActionLogDto() { UserId = userId, ExecutedAt = DateTime.UtcNow });
     }
 
-    private async Task ResetQuery(int userId)
+    private async Task ResetQuery(string userId)
     {
         await context.SpamRatings.Where(a => a.UserId == userId).ExecuteUpdateAsync(setters =>
             setters.SetProperty(s => s.SpamValue, 0.0));
     }
 
-    public async Task<string> MakePublication(int userId)
+    public async Task<string> MakePublication(string userId)
     {
         await ResetSpamRating(userId);
 
@@ -99,7 +99,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
         return response;
     }
 
-    public async Task<string> MakeComment(int userId)
+    public async Task<string> MakeComment(string userId)
     {
         await ResetSpamRating(userId);
 
@@ -108,7 +108,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
         return response;
     }
 
-    public async Task<string> MakeLike(int userId)
+    public async Task<string> MakeLike(string userId)
     {
         await ResetSpamRating(userId);
 
@@ -117,7 +117,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
         return response;
     }
     
-    public async Task<string> MakeComplaint(int userId)
+    public async Task<string> MakeComplaint(string userId)
     {
         await ResetSpamRating(userId);
 

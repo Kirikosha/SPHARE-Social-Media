@@ -9,7 +9,7 @@ public class CreateCommentComplaint
 {
     public class Command : IRequest<Result<bool>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
         public required CreateComplaintDto Complaint { get; set; }
     }
 

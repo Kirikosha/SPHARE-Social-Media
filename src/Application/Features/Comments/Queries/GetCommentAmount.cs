@@ -1,24 +1,19 @@
 ﻿using Application.Core;
 using Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Features.Comments.Queries;
 public class GetCommentAmount
 {
     public class Query : IRequest<Result<int>>
     {
-        public int Id { get; set; }
+        public required string Id { get; init; }
     }
 
     public class Handler(ApplicationDbContext context) : IRequestHandler<Query, Result<int>>
     {
         public async Task<Result<int>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var amount = context.Comments.Where(a => a.PublicationId == request.Id).Count();
+            var amount = context.Comments.Count(a => a.PublicationId == request.Id);
             return Result<int>.Success(amount);
         }
     }

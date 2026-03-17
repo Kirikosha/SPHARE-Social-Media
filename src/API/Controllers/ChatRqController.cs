@@ -1,4 +1,4 @@
-﻿using Application.Features.Messaging.Command;
+﻿using Application.Features.Messaging.Commands;
 using Application.Features.Messaging.Queries;
 using Application.Helpers;
 using Domain.DTOs;
@@ -21,7 +21,7 @@ public class ChatRqController : BaseApiController
     }
 
     [HttpGet("{chatId}/messages")]
-    public async Task<ActionResult> GetMessages(Guid chatId, PageDto pageParameters)
+    public async Task<ActionResult> GetMessages(string chatId, PageDto pageParameters)
     {
         var userId = User.GetUserId();
         // returns if success: List<MessageDto>
@@ -30,7 +30,7 @@ public class ChatRqController : BaseApiController
     }
 
     [HttpGet("{chatId}/open-chat")]
-    public async Task<ActionResult> GetChat(Guid chatId)
+    public async Task<ActionResult> GetChat(string chatId)
     {
         return HandleResult(await Mediator.Send(new GetChat.Query { ChatId = chatId }));
     }

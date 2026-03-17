@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Users.Queries;
 
-using Application.Core;
+using Core;
 using AutoMapper;
 using Domain.DTOs.UserDTOs;
 using Infrastructure;

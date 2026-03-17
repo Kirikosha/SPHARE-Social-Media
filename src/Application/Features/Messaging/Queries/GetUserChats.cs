@@ -10,7 +10,7 @@ public class GetUserChats
 {
     public class Query : IRequest<Result<List<ChatDto>>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Query, Result<List<ChatDto>>>
@@ -32,8 +32,8 @@ public class GetUserChats
             {
                 var chat = chats.First(c => c.Id == chatDto.Id);
 
-                chatDto.LastMessage = chat.Messages.Any() 
-                    ? mapper.Map<MessageDto>(chat.Messages.OrderByDescending(m => m.SentAt).First()).Content! 
+                chatDto.LastMessage = chat.Messages.Count != 0
+                    ? mapper.Map<MessageDto>(chat.Messages.OrderByDescending(m => m.SentAt).First()).Content 
                     : null;
 
                 chatDto.UnreadCount = await GetUnreadCount(chat.Id, request.UserId);
@@ -42,7 +42,7 @@ public class GetUserChats
             return Result<List<ChatDto>>.Success(chatDtos);
         }
 
-        private async Task<int> GetUnreadCount(Guid chatId, int userId)
+        private async Task<int> GetUnreadCount(string chatId, string userId)
         {
             return await context.Messages
                 .Where(m => m.ChatId == chatId

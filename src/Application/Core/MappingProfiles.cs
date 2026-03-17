@@ -57,16 +57,16 @@ public class MappingProfiles : Profile
                 opt.MapFrom(src => src.Messages.OrderBy(m => m.SentAt)));
         
         CreateMap<ChatUser, ChatUserDto>()
-            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User != null ? src.User.Username : null))
-            .ForMember(dest => dest.UniqueNameIdentifier, opt => opt.MapFrom(src => src.User != null ? src.User.UniqueNameIdentifier : null))
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.User.Username))
+            .ForMember(dest => dest.UniqueNameIdentifier, opt => opt.MapFrom(src => src.User.UniqueNameIdentifier))
             .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => 
-                src.User != null && src.User.ProfileImage != null 
+                src.User.ProfileImage != null 
                     ? src.User.ProfileImage.ImageUrl : null))
             .ForMember(dest => dest.IsOnline, opt => opt.Ignore()); 
         
         CreateMap<Message, MessageDto>()
             .ForMember(dest => dest.SendersUsername, opt => opt.MapFrom(src => 
-                src.Sender != null ? src.Sender.Username : null))
+                src.Sender.Username))
             .ForMember(dest => dest.IsRead, opt => opt.Ignore());
 
         CreateMap<Publication, PublicationCalendarDto>();

@@ -2,7 +2,7 @@
 
 namespace Application.Features.Publications.Queries;
 
-using Application.Core;
+using Core;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
@@ -12,7 +12,7 @@ public class GetPublicationsToRemind
 {
     public class Query : IRequest<Result<List<Publication>>>
     {
-        public int LastId { get; set; }
+        public DateTime PostedAt { get; set; }
         public int BatchSize { get; set; }
     }
     public class Handler(ApplicationDbContext context) : IRequestHandler<Query, Result<List<Publication>>>
@@ -27,7 +27,7 @@ public class GetPublicationsToRemind
                          || (p.ConditionType != null 
                          && p.ConditionOperator == ComparisonOperator.GreaterThanOrEqual 
                          && p.Author.SubscriberNumber >= p.ConditionTarget)) 
-                         && !p.WasSent && p.Id > request.LastId)
+                         && !p.WasSent && p.PostedAt > request.PostedAt)
             .OrderBy(p => p.Id)
             .Take(request.BatchSize)
             .ToListAsync(cancellationToken));

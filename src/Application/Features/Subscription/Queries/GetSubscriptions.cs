@@ -18,14 +18,18 @@ public class GetSubscriptions
     {
         public async Task<Result<List<PublicUserDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            int userId = await context.Users.Where(x => x.UniqueNameIdentifier == request.UniqueNameIdentifier).Select(x => x.Id).FirstOrDefaultAsync();
-            if (userId == 0) return Result<List<PublicUserDto>>.Failure("User, for whom we are looking for all the subscriptions, does not exist", 400);
+            string? userId = await context.Users.Where(x => x.UniqueNameIdentifier == request.UniqueNameIdentifier)
+                .Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            
+            if (string.IsNullOrEmpty(userId)) return Result<List<PublicUserDto>>.Failure("User, for whom we are looking " +
+                "for all the " +
+                "subscriptions, does not exist", 400);
 
             try
             {
-                var subscriptedUsersIds = await subscriptionService.GetFollowingAsync(userId);
+                var subscribedUserIds = await subscriptionService.GetFollowingAsync(userId);
                 var users = await context.Users.Include(a => a.ProfileImage)
-                    .Where(a => subscriptedUsersIds.Contains(a.Id))
+                    .Where(a => subscribedUserIds.Contains(a.Id))
                     .ProjectTo<PublicUserDto>(mapper.ConfigurationProvider)
                     .ToListAsync();
                 return Result<List<PublicUserDto>>.Success(users);

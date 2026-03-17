@@ -1,4 +1,6 @@
-﻿namespace API.Controllers;
+﻿using Application.Helpers;
+
+namespace API.Controllers;
 
 using Application.Features.AdminFeatures.Commands;
 using Application.Features.Users.Queries;
@@ -29,9 +31,10 @@ public class AdminController : BaseApiController
     }
 
     [HttpPost("block-user")]
-    public async Task<ActionResult> BlockUser([FromBody] int userId)
+    public async Task<ActionResult> BlockUser([FromBody] string userId)
     {
-        return HandleResult(await Mediator.Send(new BlockUser.Command { UserId = userId }));
+        var adminId = User.GetUserId();
+        return HandleResult(await Mediator.Send(new BlockUser.Command { UserToBlockId = userId, BlockedById = adminId}));
     }
 
     [HttpPost("unblock-user")]
@@ -40,8 +43,8 @@ public class AdminController : BaseApiController
         return HandleResult(await Mediator.Send(new UnblockUser.Command { UserId = userId }));
     }
 
-    [HttpGet("violations/{id:int}")]
-    public async Task<ActionResult<List<ViolationDto>>> GetViolationsByUserId(int id)
+    [HttpGet("violations/{id}")]
+    public async Task<ActionResult<List<ViolationDto>>> GetViolationsByUserId(string id)
     {
          return HandleResult(await Mediator.Send(new GetViolationsByUserId.Query { UserId = id }));
     }

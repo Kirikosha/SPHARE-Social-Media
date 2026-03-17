@@ -1,13 +1,9 @@
-﻿using Application.Repositories.UserActivityLogRepository;
-using Application.Services.UserActionLogger;
-using Domain.DTOs;
+﻿using Application.Services.UserActionLogger;
 using Domain.Enums;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace Application.Features.Comments.Commands;
 
-using Application.Core;
+using Core;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
@@ -17,7 +13,7 @@ public class DeleteComment
 {
     public class Command : IRequest<Result<bool>>
     {
-        public required int CommentId { get; set; }
+        public required string CommentId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context, IUserActionLogger<DeleteComment> logger) : 

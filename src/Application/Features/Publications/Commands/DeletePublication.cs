@@ -3,8 +3,8 @@ using Domain.Enums;
 
 namespace Application.Features.Publications.Commands;
 
-using Application.Core;
-using Application.Services.PhotoService;
+using Core;
+using Services.PhotoService;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
@@ -14,7 +14,7 @@ public class DeletePublication
 {
     public class Command : IRequest<Result<Unit>>
     {
-        public required int Id { get; set; }
+        public required string Id { get; set; }
     }
 
     public class Handler(ApplicationDbContext context, IPhotoService photoService, 
@@ -36,7 +36,6 @@ public class DeletePublication
                 }
             }
 
-            // TODO: update here
             publication.IsDeleted = true;
             context.Publications.Update(publication);
 

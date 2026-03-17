@@ -8,7 +8,7 @@ public class Subscribe
 {
     public class Command : IRequest<Result<bool>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
         public required string FollowUserUniqueNameIdentifier { get; set; }
     }
 

@@ -1,7 +1,5 @@
 ﻿using Application.Core;
 using Application.Repositories.SpamRepository;
-using Application.Repositories.UserActivityLogRepository;
-using AutoMapper;
 using Domain.DTOs.ComplaintDTOs;
 using Domain.Entities.Complaints;
 using Infrastructure;
@@ -12,15 +10,15 @@ public class CreatePublicationComplaint
 {
     private const double BaseComplaintValue = 1.0;
     private const double NewAuthorMultiplier = 2.0;
-    private const double ComplaintLimit = 20.0;
+    //private const double ComplaintLimit = 20.0;
     // Изменить возвращаемый тип на дтошку
     public class Command : IRequest<Result<bool>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
         public required CreateComplaintDto Complaint { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper, ISpamRepository spamRepository) : IRequestHandler<Command, Result<bool>>
+    public class Handler(ApplicationDbContext context, ISpamRepository spamRepository) : IRequestHandler<Command, Result<bool>>
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
@@ -56,12 +54,10 @@ public class CreatePublicationComplaint
 
             await context.PublicationComplaints.AddAsync(complaint);
 
-            var mappedComplaint = mapper.Map<PublicationComplaintDto>(complaint);
-
             return Result<bool>.Success(true);
         }
         
-        private async Task<bool> IsNewAuthor(int publicationId)
+        private async Task<bool> IsNewAuthor(string publicationId)
         {
             var authorCreationDate = await context.PublicationComplaints
                 .Include(a => a.Publication)

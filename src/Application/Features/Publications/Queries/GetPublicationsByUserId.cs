@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Publications.Queries;
 
-using Application.Core;
+using Core;
 using AutoMapper;
 using Domain.DTOs;
 using Domain.DTOs.PublicationDTOs;
@@ -14,7 +14,7 @@ public class GetPublicationsByUserId
 {
     public class Query : IRequest<Result<List<PublicationDto>>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context, IMapper mapper)

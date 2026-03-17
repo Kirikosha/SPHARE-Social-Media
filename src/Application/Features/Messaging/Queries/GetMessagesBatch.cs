@@ -11,8 +11,8 @@ public class GetMessagesBatch
 {
     public class Query : IRequest<Result<List<MessageDto>>>
     {
-        public required Guid ChatId { get; set; }
-        public required int UserId { get; set; }
+        public required string ChatId { get; set; }
+        public required string UserId { get; set; }
         public PageDto Page { get; set; } = null!;
     }
 
@@ -23,7 +23,7 @@ public class GetMessagesBatch
         {
             var isParticipant = await context.ChatUsers
                 .AnyAsync(cu => cu.ChatId == request.ChatId &&
-                                cu.UserId == request.UserId);
+                                cu.UserId == request.UserId, cancellationToken);
 
             if (!isParticipant)
             {
@@ -38,9 +38,9 @@ public class GetMessagesBatch
                 .Take(request.Page.PageSize)
                 .ToListAsync(cancellationToken);
 
-            var messageDtos = mapper.Map<List<MessageDto>>(messages);
+            var messageDtoList = mapper.Map<List<MessageDto>>(messages);
 
-            return Result<List<MessageDto>>.Success(messageDtos);
+            return Result<List<MessageDto>>.Success(messageDtoList);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Comments.Queries;
 
-using Application.Core;
+using Core;
 using AutoMapper;
 using Domain.DTOs;
 using Domain.DTOs.CommentDTOs;
@@ -14,7 +14,7 @@ public class GetCommentsByPublicationId
 {
     public class Query : IRequest<Result<List<CommentDto>>>
     {
-        public required int PublicationId { get; set; }
+        public required string PublicationId { get; init; }
     }
     public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Query, Result<List<CommentDto>>>
     {
@@ -38,7 +38,7 @@ public class GetCommentsByPublicationId
                         Blocked = c.Author.Blocked,
                         ProfileImage = new ImageDto
                         {
-                            Id = c.Author.ProfileImage == null ? -1 : c.Author.ProfileImage.Id,
+                            Id = c.Author.ProfileImage == null ? string.Empty : c.Author.ProfileImage.Id,
                             PublicId = c.Author.ProfileImage!.PublicId!,
                             ImageUrl = c.Author.ProfileImage.ImageUrl
                         },

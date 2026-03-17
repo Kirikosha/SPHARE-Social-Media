@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Users.Queries;
 
-using Application.Core;
+using Core;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ public class GetUserEmailsByIds
 {
     public class Query : IRequest<Result<List<string>>>
     {
-        public required List<int> Ids { get; set; }
+        public required List<string> Ids { get; set; }
     }
 
     public class Handler(ApplicationDbContext context) 

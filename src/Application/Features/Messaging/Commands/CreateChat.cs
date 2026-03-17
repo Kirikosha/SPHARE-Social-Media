@@ -1,14 +1,14 @@
 ﻿using Application.Core;
 using Infrastructure;
 
-namespace Application.Features.Messaging.Command;
+namespace Application.Features.Messaging.Commands;
 
 public class CreateChat
 {
     public class Command : IRequest<Result<Chat>>
     {
-        public required int User1Id { get; set; }
-        public required int User2Id { get; set; }
+        public required string User1Id { get; init; }
+        public required string User2Id { get; init; }
     }
     
     public class Handler(ApplicationDbContext context) : IRequestHandler<Command, Result<Chat>>
@@ -17,11 +17,11 @@ public class CreateChat
         {
             Chat chat = new Chat
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.NewGuid().ToString(),
                 Participants = new List<ChatUser>
                 {
-                    new ChatUser { UserId = request.User1Id },
-                    new ChatUser { UserId = request.User2Id }
+                    new() { UserId = request.User1Id },
+                    new() { UserId = request.User2Id }
                 }
             };
 

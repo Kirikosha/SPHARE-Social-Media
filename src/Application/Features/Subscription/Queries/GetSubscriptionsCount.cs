@@ -15,8 +15,9 @@ public class GetSubscriptionsCount
     {
         public async Task<Result<int>> Handle(Query request, CancellationToken cancellationToken)
         {
-            int userId = await context.Users.Where(x => x.UniqueNameIdentifier == request.UniqueNameIdentifier).Select(x => x.Id).FirstOrDefaultAsync();
-            if (userId == 0) return Result<int>.Failure("Such user was not found", 400);
+            string? userId = await context.Users.Where(x => x.UniqueNameIdentifier == request.UniqueNameIdentifier)
+                .Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            if (string.IsNullOrEmpty(userId)) return Result<int>.Failure("Such user was not found", 400);
 
             try
             {

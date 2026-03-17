@@ -1,7 +1,7 @@
 ﻿namespace Application.Features.AdminFeatures.Commands;
 
-using Application.Core;
-using Application.Services.ViolationService;
+using Core;
+using Services.ViolationService;
 using Domain.DTOs.ViolationDTOs;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +21,12 @@ public class DeleteComment
         {
             try {
                 Comment? comment = await context.Comments.Include(a => a.Author)
-                    .FirstOrDefaultAsync(a => a.Id == request.Violation.ItemToRemoveId);
+                    .FirstOrDefaultAsync(a => a.Id == request.Violation.ItemToRemoveId, cancellationToken);
 
-                if (comment == null || comment.Author == null) return Result<bool>.Failure("Comment that was requested to be deleted was not found", 404);
+                if (comment == null) return Result<bool>.Failure("Comment that was requested to be deleted was not found", 404);
 
-                string email = comment.Author.Email;
-                context.Comments.Remove(comment);
+                comment.IsDeleted = true;
+                context.Comments.Update(comment);
 
                 Violation violation = new Violation
                 {

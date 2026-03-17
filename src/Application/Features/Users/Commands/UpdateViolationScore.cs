@@ -1,16 +1,16 @@
 ﻿namespace Application.Features.Users.Commands;
 
-using Application.Core;
+using Core;
 using Infrastructure;
 using System.Threading;
 using System.Threading.Tasks;
 
 public class UpdateViolationScore
 {
-    const int VIOLATION_LIMIT = 20;
+    private const int ViolationLimit = 20;
     public class Command : IRequest<Result<bool>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
         public required int ScoreIncreaseValue { get; set; }
     }
     public class Handler(ApplicationDbContext context) 
@@ -23,7 +23,7 @@ public class UpdateViolationScore
 
             user.ViolationScore += request.ScoreIncreaseValue;
 
-            if (user.ViolationScore >= VIOLATION_LIMIT)
+            if (user.ViolationScore >= ViolationLimit)
             {
                 user.Blocked = true;
                 user.BlockedAt = DateTime.UtcNow;

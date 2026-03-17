@@ -2,7 +2,7 @@
 
 namespace Application.Features.Likes.Commands;
 
-using Application.Core;
+using Core;
 using Domain.DTOs.LikeDTOs;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -13,8 +13,8 @@ public class LikePublication
 {
     public class Command : IRequest<Result<LikeDto>>
     {
-        public required int PublicationId { get; set; }
-        public required int UserId { get; set; }
+        public required string PublicationId { get; set; }
+        public required string UserId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context, ISpamRepository spamRepository) : IRequestHandler<Command, Result<LikeDto>>
@@ -23,13 +23,13 @@ public class LikePublication
         {
             bool isLikedByUser = false;
 
-            var postExists = await context.Publications.AnyAsync(a => a.Id == request.PublicationId);
-            var userExists = await context.Users.AnyAsync(a => a.Id == request.UserId);
+            var postExists = await context.Publications.AnyAsync(a => a.Id == request.PublicationId, cancellationToken);
+            var userExists = await context.Users.AnyAsync(a => a.Id == request.UserId, cancellationToken);
             if (!postExists) return Result<LikeDto>.Failure("Post you are trying to like does not exist", 404);
             if (!userExists) return Result<LikeDto>.Failure("Attempt to like a post of an unauthorized user is impossible", 403);
 
             var like = await context.Likes.FirstOrDefaultAsync(a => a.PublicationId == request.PublicationId
-            && a.LikedById == request.UserId);
+            && a.LikedById == request.UserId, cancellationToken);
 
             var res = await spamRepository.MakeLike(request.UserId);
             if (res == "Forbidden")
@@ -48,16 +48,16 @@ public class LikePublication
                 {
                     LikedById = request.UserId,
                     PublicationId = request.PublicationId
-                });
+                }, cancellationToken);
                 isLikedByUser = true;
             }
 
-            bool sucess = await context.SaveChangesAsync() > 0;
-            if (sucess)
+            bool success = await context.SaveChangesAsync(cancellationToken) > 0;
+            if (success)
             {
                 int countOfLikes = await context.Publications
                     .Include(a => a.Likes).Where(a => a.Id == request.PublicationId)
-                    .Select(a => a.Likes.Count()).FirstOrDefaultAsync();
+                    .Select(a => a.Likes.Count()).FirstOrDefaultAsync(cancellationToken);
 
                 LikeDto result = new LikeDto
                 {

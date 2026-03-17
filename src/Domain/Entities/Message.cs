@@ -9,6 +9,6 @@ public class Message
     public string SenderId { get; set; } = string.Empty;
     public User Sender { get; set; } = null!;
 
-    public Guid ChatId { get; set; } = Guid.NewGuid();
+    public string ChatId { get; set; } = Guid.NewGuid().ToString();
     public Chat Chat { get; set; } = null!;
  } 

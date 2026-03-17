@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 public interface ISubscriptionService
 {
-    Task FollowAsync(int followerId, int followedId);
-    Task UnfollowAsync(int followerId, int followedId);
-    Task<List<int>> GetFollowersAsync(int userId);
-    Task<List<int>> GetFollowingAsync(int userId);
-    Task CreateUserNodeAsync(int userId);
-    Task<bool> IsFollowing(int userId, int followedId);
+    Task FollowAsync(string followerId, string followedId);
+    Task UnfollowAsync(string followerId, string followedId);
+    Task<List<string>> GetFollowersAsync(string userId);
+    Task<List<string>> GetFollowingAsync(string userId);
+    Task CreateUserNodeAsync(string userId);
+    Task<bool> IsFollowing(string userId, string followedId);
 }

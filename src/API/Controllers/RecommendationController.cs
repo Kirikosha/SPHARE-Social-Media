@@ -9,7 +9,7 @@ public class RecommendationController : BaseApiController
     [HttpGet]
     public async Task<ActionResult> GetRecommendations()
     {
-        int userId = User.GetUserId();
+        string userId = User.GetUserId();
 
         return HandleResult(await Mediator.Send(new GetRecommendations.Query { UserId = userId }));
     }

@@ -8,7 +8,7 @@ namespace Application.Services.UserActionLogger;
 
 public class UserActionLogger<T>(IUserActivityLogRepository logRepository, ILogger<T> logger) : IUserActionLogger<T>
 {
-    public async Task LogAsync(int userId, UserLogAction actionType, object?
+    public async Task LogAsync(string userId, UserLogAction actionType, object?
         additionalData = null, CancellationToken ct = default)
     {
         if (additionalData == null)

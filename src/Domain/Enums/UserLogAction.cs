@@ -9,5 +9,7 @@ public enum UserLogAction
     DeletePublication,
     CreateComment,
     DeleteComment,
-    RatingReset
+    RatingReset,
+    BlockUser,
+    UnblockUser
 }

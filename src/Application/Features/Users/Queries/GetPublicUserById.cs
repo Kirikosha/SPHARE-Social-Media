@@ -12,7 +12,7 @@ public class GetPublicUserById
 {
     public class Query : IRequest<Result<PublicUserDto>>
     {
-        public required int Id { get; set; }
+        public required string Id { get; set; }
     }
 
     public class Handler(ApplicationDbContext context, IMapper mapper) 
@@ -24,12 +24,12 @@ public class GetPublicUserById
                 .Include(a => a.ProfileImage)
                 .Include(a => a.Address)
                 .Include(a => a.ProfileDetails)
-                .FirstAsync(a => a.Id == request.Id, cancellationToken);
+                .FirstOrDefaultAsync(a => a.Id == request.Id, cancellationToken);
 
             if (user == null)
                 return Result<PublicUserDto>.Failure("User was not found", 404);
             var userDto = mapper.Map<PublicUserDto>(user);
-            return Result<PublicUserDto>.Success(mapper.Map<PublicUserDto>(user));
+            return Result<PublicUserDto>.Success(mapper.Map<PublicUserDto>(userDto));
         }
     }
 }

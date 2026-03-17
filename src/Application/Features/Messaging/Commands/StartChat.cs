@@ -4,14 +4,14 @@ using Domain.DTOs.MessagingDTOs;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Features.Messaging.Command;
+namespace Application.Features.Messaging.Commands;
 
 public class StartChat
 {
     public class Command : IRequest<Result<ChatDto>>
     {
         public required StartChatDto ChatRequest { get; set; }
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
     }
     
     public class Handler(ApplicationDbContext context, IMapper mapper)
@@ -35,11 +35,11 @@ public class StartChat
 
             var chat = new Chat()
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.NewGuid().ToString(),
                 Participants = new List<ChatUser>
                 {
-                    new ChatUser() { UserId = request.UserId },
-                    new ChatUser() { UserId = request.ChatRequest.OtherUserId }
+                    new() { UserId = request.UserId },
+                    new() { UserId = request.ChatRequest.OtherUserId }
                 }
             };
 

@@ -18,7 +18,7 @@ public class PublicUserController : BaseApiController
     [HttpGet("my-profile")]
     public async Task<ActionResult> GetMyProfile()
     {
-        int id = User.GetUserId();
+        string id = User.GetUserId();
 
         return HandleResult(await Mediator.Send(new GetPublicUserById.Query() { Id = id }));
     }

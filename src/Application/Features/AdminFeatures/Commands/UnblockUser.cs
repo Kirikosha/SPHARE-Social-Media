@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.AdminFeatures.Commands;
 
-using Application.Core;
+using Core;
 using Domain.Entities;
 using Infrastructure;
 using MediatR;

@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Publications.Queries;
 
-using Application.Core;
+using Core;
 using Application.Features.Likes.Queries;
 using AutoMapper;
 using Domain.DTOs.PublicationDTOs;
@@ -13,8 +13,8 @@ public class GetPublicationById
 {
     public class Query : IRequest<Result<PublicationDto>>
     {
-        public required int PublicationId { get; set; }
-        public required int UserId { get; set; }
+        public required string PublicationId { get; set; }
+        public required string UserId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context, IMapper mapper, IMediator mediator) 

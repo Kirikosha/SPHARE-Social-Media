@@ -1,8 +1,7 @@
 ﻿namespace Application.Features.Images.Commands;
 
-using Application.Core;
-using Application.Services.PhotoService;
-using Infrastructure;
+using Core;
+using Services.PhotoService;
 using Microsoft.AspNetCore.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,12 +13,11 @@ public class UploadPublicationImages
         public required List<IFormFile> Images { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IPhotoService photoService) : IRequestHandler<Command, Result<List<Image>>>
+    public class Handler(IPhotoService photoService) : IRequestHandler<Command, Result<List<Image>>>
     {
         public async Task<Result<List<Image>>> Handle(Command request, CancellationToken cancellationToken)
         {
-            List<Image> uploadedImages = new List<Image>();
-            List<string> successfulUploads = new List<string>();
+            var uploadedImages = new List<Image>();
 
             foreach (var image in request.Images)
             {
@@ -33,8 +31,6 @@ public class UploadPublicationImages
                         PublicId = response.PublicId,
                         ImageUrl = response.Url.AbsoluteUri
                     });
-
-                    successfulUploads.Add(response.PublicId);
                 }
                 catch (Exception ex)
                 {

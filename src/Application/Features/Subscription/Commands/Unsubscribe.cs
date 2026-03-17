@@ -8,7 +8,7 @@ public class Unsubscribe
 {
     public class Command : IRequest<Result<bool>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
         public required string UnfollowUserUniqueNameIdentifier { get; set; }
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Users.Queries;
 
-using Application.Core;
+using Core;
 using AutoMapper;
 using Domain.DTOs.UserDTOs;
 using Infrastructure;
@@ -24,12 +24,11 @@ public class GetPublicUserByUniqueNameIdentifier
                 .Include(a => a.ProfileImage)
                 .Include(a => a.Address)
                 .Include(a => a.ProfileDetails)
-                .FirstOrDefaultAsync(a => a.UniqueNameIdentifier == request.UniqueNameIdentifier);
+                .FirstOrDefaultAsync(a => a.UniqueNameIdentifier == request.UniqueNameIdentifier,
+                    cancellationToken);
 
-            if (user == null)
-                return Result<PublicUserDto>.Failure("User was not found", 404);
-            return Result<PublicUserDto>.Success(mapper.Map<PublicUserDto>(user));
-
+            return user == null ? Result<PublicUserDto>.Failure("User was not found", 404) 
+                : Result<PublicUserDto>.Success(mapper.Map<PublicUserDto>(user));
         }
     }
 }

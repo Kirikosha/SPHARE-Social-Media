@@ -1,15 +1,13 @@
-﻿using System.Text.RegularExpressions;
-using Application.Features.Messaging.Command;
+﻿using Application.Features.Messaging.Commands;
 using Application.Helpers;
 using Infrastructure;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Tls;
 
 namespace Application.MessagingWebSockets;
 public class ChatHub(IMediator mediator, ApplicationDbContext context) : Hub
 {
-    public async Task SendMessage(Guid? chatId, int receiverId, string message)
+    public async Task SendMessage(string? chatId, string receiverId, string message)
     {
         var userId = Context.User!.GetUserId();
 
@@ -19,7 +17,7 @@ public class ChatHub(IMediator mediator, ApplicationDbContext context) : Hub
         if (savingResult.IsSuccess)
         {
             // Send to both participants
-            await Clients.Group(savingResult.Value.ChatId.ToString())
+            await Clients.Group(savingResult.Value!.ChatId)
                 .SendAsync("ReceiveMessage", savingResult.Value);
                 
             // Also send a notification to the receiver if they're not connected
@@ -70,7 +68,7 @@ public class ChatHub(IMediator mediator, ApplicationDbContext context) : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    private async Task NotifyContacts(int userId, bool isOnline)
+    private async Task NotifyContacts(string userId, bool isOnline)
     {
         var contactIds = await context.ChatUsers
             .Where(cu => cu.UserId == userId)
@@ -82,18 +80,18 @@ public class ChatHub(IMediator mediator, ApplicationDbContext context) : Hub
 
         foreach (var contactId in contactIds)
         {
-            await Clients.User(contactId.ToString()).SendAsync("ContactPresenceChanged", userId, isOnline);
+            await Clients.User(contactId).SendAsync("ContactPresenceChanged", userId, isOnline);
         }
     }
 
-    private async Task SendNotificationIfOffline(int receiverId, int senderId, string content)
+    private async Task SendNotificationIfOffline(string receiverId, string senderId, string content)
     {
         // TODO: Make logic here about situation when the user is not online yet the message should
         // be delivered. Consider using SSE (Server Sent Event) here
     }
     
 
-    public async Task JoinChat(Guid chatId)
+    public async Task JoinChat(string chatId)
     {
         var userId = Context.User.GetUserId();
 
@@ -105,31 +103,31 @@ public class ChatHub(IMediator mediator, ApplicationDbContext context) : Hub
             throw new HubException("Not authorized to join this chat");
         }
 
-        await Groups.AddToGroupAsync(Context.ConnectionId, chatId.ToString());
+        await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
 
-        await Clients.Group(chatId.ToString())
+        await Clients.Group(chatId)
             .SendAsync("UserJoinedChat", userId);
     }
 
-    public async Task LeaveChat(Guid chatId)
+    public async Task LeaveChat(string chatId)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId.ToString());
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId);
 
         var userId = Context.User.GetUserId();
-        await Clients.Group(chatId.ToString()).SendAsync("UserLeftChat", userId);
+        await Clients.Group(chatId).SendAsync("UserLeftChat", userId);
     }
 
-    public async Task SendTypingIndicator(Guid chatId)
+    public async Task SendTypingIndicator(string chatId)
     {
         var userId = Context.User!.GetUserId();
-        await Clients.Group(chatId.ToString())
+        await Clients.Group(chatId)
             .SendAsync("UserTyping", userId, chatId);
     }
     
-    public async Task StopTypingIndicator(Guid chatId)
+    public async Task StopTypingIndicator(string chatId)
     {
         var userId = Context.User!.GetUserId();
-        await Clients.Group(chatId.ToString())
+        await Clients.Group(chatId)
             .SendAsync("UserStoppedTyping", userId, chatId);
     }
 }

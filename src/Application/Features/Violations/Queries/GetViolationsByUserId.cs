@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Violations.Queries;
 
-using Application.Core;
+using Core;
 using AutoMapper;
 using Domain.DTOs.ViolationDTOs;
 using Domain.Entities;
@@ -14,7 +14,7 @@ public class GetViolationsByUserId
 {
     public class Query : IRequest<Result<List<ViolationDto>>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
     }
     public class Handler(ApplicationDbContext context, IMapper mapper) 
         : IRequestHandler<Query, Result<List<ViolationDto>>>

@@ -1,5 +1,4 @@
 ﻿using Application.Core;
-using Application.Features.Messaging.Command;
 using AutoMapper;
 using Domain.DTOs.MessagingDTOs;
 using Infrastructure;
@@ -11,7 +10,7 @@ public class GetChat
 {
     public class Query : IRequest<Result<ChatWithMessagesDto>>
     {
-        public required Guid ChatId { get; set; }
+        public required string ChatId { get; set; }
     }
     
     public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Query, Result<ChatWithMessagesDto>>

@@ -1,7 +1,6 @@
 ﻿namespace Application.Features.Publications.Queries;
 
-using Application.Core;
-using Application.Features.Likes.Queries;
+using Core;
 using AutoMapper;
 using Domain.DTOs;
 using Domain.DTOs.PublicationDTOs;
@@ -16,10 +15,10 @@ public class GetPublicationsByUniqueNameIdentifier
     public class Query : IRequest<Result<List<PublicationDto>>>
     {
         public required string UniqueNameIdentifier { get; set; }
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper, IMediator mediator) 
+    public class Handler(ApplicationDbContext context, IMapper mapper) 
         : IRequestHandler<Query, Result<List<PublicationDto>>>
     {
         public async Task<Result<List<PublicationDto>>> Handle(Query request, CancellationToken cancellationToken)
@@ -32,7 +31,7 @@ public class GetPublicationsByUniqueNameIdentifier
                 .Include(a => a.Images)
                 .Include(a => a.Comments)
                 .Include(a => a.Author).ThenInclude(a => a.ProfileImage)
-                .Where(a => a.AuthorId == user.Id)
+                .Where(a => a.Author.UniqueNameIdentifier == request.UniqueNameIdentifier)
                 .Select(p => new PublicationDto
                 {
                     Id = p.Id,

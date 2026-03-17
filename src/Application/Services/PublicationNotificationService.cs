@@ -1,36 +1,34 @@
-﻿namespace Application.Services;
-
-using Application.Features.Publications.Commands;
+﻿using Application.Features.Publications.Commands;
 using Application.Features.Publications.Queries;
 using Application.Features.Users.Queries;
 using Application.Services.EmailService;
 using Application.Services.SubscriptionService;
-using Domain.Entities;
-using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+namespace Application.Services;
+
 public class PublicationNotificationService : BackgroundService
 {
-    private readonly ILogger<PublicationNotificationService> logger;
-    private readonly IMediator mediator;
-    private readonly IEmailService emailService;
-    private readonly ISubscriptionService subscriptionService;
-    private readonly TimeSpan checkInterval = TimeSpan.FromSeconds(60);
+    private readonly ILogger<PublicationNotificationService> _logger;
+    private readonly IMediator _mediator;
+    private readonly IEmailService _emailService;
+    private readonly ISubscriptionService _subscriptionService;
+    private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(60);
     private const int BatchSize = 20;
 
-    public PublicationNotificationService(IServiceProvider services, ILogger<PublicationNotificationService> logger, IMediator mediator, 
+    public PublicationNotificationService(ILogger<PublicationNotificationService> logger, IMediator mediator, 
         IEmailService emailService, ISubscriptionService subscriptionService)
     {
-        this.logger = logger;
-        this.mediator = mediator;
-        this.emailService = emailService;
-        this.subscriptionService = subscriptionService;
+        _logger = logger;
+        _mediator = mediator;
+        _emailService = emailService;
+        _subscriptionService = subscriptionService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Notification Service started");
+        _logger.LogInformation("Notification Service started");
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -40,22 +38,23 @@ public class PublicationNotificationService : BackgroundService
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                logger.LogError(ex, "Error in notification service main loop");
+                _logger.LogError(ex, "Error in notification service main loop");
             }
 
-            await Task.Delay(checkInterval, cancellationToken);
+            await Task.Delay(_checkInterval, cancellationToken);
         }
     }
 
     private async Task ProcessPublicationsAsync(CancellationToken stoppingToken)
     {
-        var followersCache = new Dictionary<int, List<int>>(); // Key - author id, value - list of follower ids
+        var followersCache = new Dictionary<string, List<string>>(); // Key - author id, value - list of follower ids
         List<Publication> publicationsBatch;
 
-        int lastId = 0;
+        var lastDate = DateTime.UtcNow;
         do
         {
-            var result = await mediator.Send(new GetPublicationsToRemind.Query { BatchSize = BatchSize, LastId = lastId });
+            var result = await _mediator.Send(new GetPublicationsToRemind.Query { BatchSize = BatchSize, PostedAt = 
+                lastDate});
 
             if (!result.IsSuccess || result.Value == null)
             {
@@ -73,12 +72,14 @@ public class PublicationNotificationService : BackgroundService
             }
 
             if (publicationsBatch.Count > 0)
-                lastId = publicationsBatch[^1].Id;
+                lastDate = publicationsBatch[^1].PostedAt;
 
         } while (publicationsBatch.Count == BatchSize && !stoppingToken.IsCancellationRequested);
     }
 
-    private async Task ProcessSinglePublicationAsync(Publication publication, List<int> followers, CancellationToken stoppingToken)
+    private async Task ProcessSinglePublicationAsync(Publication? publication, List<string> followers, 
+        CancellationToken 
+            stoppingToken)
     {
         try
         {
@@ -87,7 +88,7 @@ public class PublicationNotificationService : BackgroundService
 
             if (!followers.Any()) return;
 
-            var results = await mediator.Send(new GetUserEmailsByIds.Query { Ids = followers });
+            var results = await _mediator.Send(new GetUserEmailsByIds.Query { Ids = followers });
             if (results.Value == null || !results.Value.Any()) return;
 
             string body = CreateBody(publication, "https://localhost:4200");
@@ -97,7 +98,7 @@ public class PublicationNotificationService : BackgroundService
             for (int i = 0; i < results.Value.Count; i += batchSize)
             {
                 var batch = results.Value.Skip(i).Take(batchSize).ToList();
-                await emailService.SendEmailsAsync(batch, "New publication was published", body);
+                await _emailService.SendEmailsAsync(batch, "New publication was published", body);
 
                 if (i + batchSize < results.Value.Count)
                 {
@@ -105,19 +106,19 @@ public class PublicationNotificationService : BackgroundService
                 }
             }
 
-            await mediator.Send(new SetPublicationSentState.Query { Id = publication.Id, State = true });
+            await _mediator.Send(new SetPublicationSentState.Query { Id = publication.Id, State = true });
 
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing publication {PublicationId}", publication.Id);
+            _logger.LogError(ex, "Error processing publication {PublicationId}", publication!.Id);
         }
     }
 
-    private async Task<List<int>> GetFollowersIds(int authorId)
+    private async Task<List<string>> GetFollowersIds(string authorId)
     {
-        List<int> ids = await subscriptionService.GetFollowersAsync(authorId);
-        return ids ?? new List<int>();
+        List<string> ids = await _subscriptionService.GetFollowersAsync(authorId);
+        return ids;
     }
 
 

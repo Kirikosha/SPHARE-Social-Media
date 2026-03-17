@@ -9,7 +9,7 @@ public class UserActivityLogRepository(ApplicationDbContext context) : IUserActi
     {
         UserActionLog log = new UserActionLog()
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.NewGuid().ToString(),
             UserId = logDto.UserId,
             AdditionalDescription = logDto.AdditionalDescription ?? string.Empty,
             Action = logDto.ActionType.ToString()

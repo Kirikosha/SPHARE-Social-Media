@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 public class SubscriptionService(INeo4jDataAccess neo4j) : ISubscriptionService
 {
 
-    public async Task<List<int>> GetFollowersAsync(int userId)
+    public async Task<List<string>> GetFollowersAsync(string userId)
     {
         var query = @"
             MATCH (f:User)-[:FOLLOWS]->(u:User {id: $userId})
@@ -23,10 +23,10 @@ public class SubscriptionService(INeo4jDataAccess neo4j) : ISubscriptionService
             }
         });
 
-        return result.Select(int.Parse).ToList();
+        return result.ToList();
     }
 
-    public async Task<List<int>> GetFollowingAsync(int userId)
+    public async Task<List<string>> GetFollowingAsync(string userId)
     {
         var query = @"
             MATCH (u:User {id: $userId})-[:FOLLOWS]->(f:User)
@@ -37,10 +37,10 @@ public class SubscriptionService(INeo4jDataAccess neo4j) : ISubscriptionService
             { "userId", userId }
         });
 
-        return result.Select(int.Parse).ToList();
+        return result.ToList();
     }
 
-    public async Task FollowAsync(int followerId, int followedId)
+    public async Task FollowAsync(string followerId, string followedId)
     {
         var query = @"
             MATCH (a:User {id: $followerId}), (b:User {id: $followedId})
@@ -53,7 +53,7 @@ public class SubscriptionService(INeo4jDataAccess neo4j) : ISubscriptionService
         });
     }
 
-    public async Task UnfollowAsync(int followerId, int followedId)
+    public async Task UnfollowAsync(string followerId, string followedId)
     {
         var query = @"
             MATCH (a:User {id: $followerId})-[r:FOLLOWS]->(b:User {id: $followedId})
@@ -66,7 +66,7 @@ public class SubscriptionService(INeo4jDataAccess neo4j) : ISubscriptionService
         });
     }
 
-    public async Task CreateUserNodeAsync(int userId)
+    public async Task CreateUserNodeAsync(string userId)
     {
         var query = @"
         MERGE (u:User {id: $id})";
@@ -77,7 +77,7 @@ public class SubscriptionService(INeo4jDataAccess neo4j) : ISubscriptionService
         });
     }
 
-    public async Task<bool> IsFollowing(int userId, int followedId)
+    public async Task<bool> IsFollowing(string userId, string followedId)
     {
         var query = @"
         MATCH (a:User {id: $userId})-[:FOLLOWS]->(b:User {id: $followedId})

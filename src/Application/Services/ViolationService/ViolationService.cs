@@ -1,11 +1,8 @@
-﻿namespace Application.Services.ViolationService;
-
-using Application.Features.Users.Commands;
+﻿using Application.Features.Users.Commands;
 using Application.Features.Violations.Commands;
 using Application.Services.EmailService;
-using Domain.Entities;
-using MediatR;
-using System.Threading.Tasks;
+
+namespace Application.Services.ViolationService;
 
 public class ViolationService(IEmailService emailService, IMediator mediator) : IViolationService
 {
@@ -15,9 +12,9 @@ public class ViolationService(IEmailService emailService, IMediator mediator) : 
         string body = MakeBody(isPublication, violation.ViolationText, item);
         try
         {
-            var violationCreationResult = await mediator.Send(new CreateViolation.Command() { Violation = violation });
+            var violationCreationResult = await mediator.Send(new CreateViolation.Command { Violation = violation });
 
-            var violationScoreUpdateResult = await mediator.Send(new UpdateViolationScore.Command()
+            var violationScoreUpdateResult = await mediator.Send(new UpdateViolationScore.Command
             {
                 ScoreIncreaseValue = scoreIncrease,
                 UserId = user.Id

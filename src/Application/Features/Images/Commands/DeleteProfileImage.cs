@@ -1,7 +1,7 @@
 ﻿namespace Application.Features.Images.Commands;
 
-using Application.Core;
-using Application.Services.PhotoService;
+using Core;
+using Services.PhotoService;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
@@ -22,7 +22,8 @@ public class DeleteProfileImage
             if (result.Error != null)
                 return Result<bool>.Failure($"Image was not deleted due to an error. Error: {result.Error}", 500);
 
-            var image = await context.Images.FirstOrDefaultAsync(a => a.PublicId == request.PublicId);
+            var image = await context.Images.FirstOrDefaultAsync(a => a.PublicId == request.PublicId, cancellationToken);
+            if (image == null) return Result<bool>.Failure($"Image does not exist in the database", 500);
             context.Images.Remove(image);
             return Result<bool>.Success(true);
         }

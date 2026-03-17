@@ -8,7 +8,7 @@ public class UpdatePublicationViews
 {
     public class Command : IRequest<Result<int>>
     {
-        public required int PublicationId { get; set; }
+        public required string PublicationId { get; set; }
     }
     
     public class Handler(ApplicationDbContext context) : IRequestHandler<Command, Result<int>>

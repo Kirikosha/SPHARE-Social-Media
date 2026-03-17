@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Users.Queries;
 
-using Application.Core;
+using Core;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.DTOs.UserDTOs;
@@ -28,7 +28,7 @@ public class GetUsersByUniqueNameIdentifier
                 .Include(a => a.ProfileImage)
                 .Where(a => a.UniqueNameIdentifier.Contains(request.UniqueNameIdentifier))
                 .ProjectTo<PublicUserDto>(mapper.ConfigurationProvider)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             return Result<List<PublicUserDto>>.Success(users);
         }

@@ -18,6 +18,7 @@ public class CreatePublication
     // normal user
     //private const int PublicationNumberLimit = 3;
     private const int PublicationTimeLimit = 5; // in minutes
+    private const int PublicationNumberLimit = 50;
     
     // new user
     private const int NewUserPublicationNumberLimit = 1;
@@ -40,12 +41,12 @@ public class CreatePublication
                 return Result<bool>
                     .Failure("Account does not exist therefore publication cannot be created", 403);
 
-            bool isPublicationSpamming = await IsPublicationSpamming(user.Id);
+            bool isPublicationSpamming = await IsPublicationSpamming(user.Id, user.DateOfCreation, cancellationToken);
             if (isPublicationSpamming)
                 return Result<bool>
                     .Failure("You cannot make that many publications in short period of time", 400);
 
-            var res = await spamRepository.MakePublication(user.Id);
+            var res = await spamRepository.MakePublication(user.Id, cancellationToken);
             if (!res)
             {
                 return Result<bool>.Failure(
@@ -58,7 +59,8 @@ public class CreatePublication
 
             if (request.Publication.Images != null && request.Publication.Images.Count > 0)
             {
-                var images = await mediator.Send(new UploadPublicationImages.Command { Images = request.Publication.Images! });
+                var images = await mediator.Send(new UploadPublicationImages.Command { Images = request.Publication
+                    .Images! }, cancellationToken);
                 if (images.IsSuccess)
                 {
                     publication.Images = images.Value;
@@ -81,51 +83,22 @@ public class CreatePublication
             return Result<bool>.Success(true);
         }
 
-        private async Task<bool> IsUserNew(string userId)
+        private async Task<bool> IsPublicationSpamming(string userId, DateOnly userCreationDate, CancellationToken ct)
         {
-            var authorCreationDate = await context.Users
-                .Where(a => a.Id == userId)
-                .Select(a => a.DateOfCreation)
-                .FirstAsync();
-
-            var cutOff = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-            if (authorCreationDate >= cutOff)
-            {
-                return true;
-            }
-
-            return false; 
-        }
-        private async Task<bool> IsPublicationSpamming(string userId)
-        {
-            bool isUserNew = await IsUserNew(userId);
+            bool isUserNew = userCreationDate >= DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
             
-            var cutOff = DateTime.UtcNow.AddMinutes(isUserNew ? NewUserPublicationTimeLimit : PublicationTimeLimit);
-            int publicationCount;
-            if (isUserNew)
-            {
-                publicationCount = await context.Publications
-                    .Where(a => a.AuthorId == userId
-                                && a.PostedAt > cutOff)
-                    .CountAsync();
+            // Set limits based on user status
+            int timeLimitMinutes = isUserNew ? NewUserPublicationTimeLimit : PublicationTimeLimit;
+            int? maxPublications = isUserNew ? NewUserPublicationNumberLimit : PublicationNumberLimit;
 
-                if (publicationCount > NewUserPublicationNumberLimit)
-                    return true;
+            // BUG FIX: Subtract minutes to look into the past, not the future
+            var cutOffTime = DateTime.UtcNow.AddMinutes(-timeLimitMinutes);
 
-                return false;
-            }
-            else
-            {
-                publicationCount = await context.Publications
-                    .Where(a => a.AuthorId == userId
-                                && a.PostedAt > cutOff)
-                    .CountAsync();
+            // Run a single, clean query
+            int recentPublicationCount = await context.Publications
+                .CountAsync(a => a.AuthorId == userId && a.PostedAt >= cutOffTime, ct);
 
-                if (publicationCount > NewUserPublicationNumberLimit)
-                    return true;
-
-                return false;
-            }
+            return recentPublicationCount >= maxPublications;
         }
     }
 }

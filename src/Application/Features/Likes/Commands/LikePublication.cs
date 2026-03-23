@@ -25,63 +25,59 @@ public class LikePublication
     {
         public async Task<Result<LikeDto>> Handle(Command request, CancellationToken cancellationToken)
         {
-            bool isLikedByUser = false;
-
             var postExists = await context.Publications.AnyAsync(a => a.Id == request.PublicationId, cancellationToken);
-            var userExists = await context.Users.AnyAsync(a => a.Id == request.UserId, cancellationToken);
             if (!postExists) return Result<LikeDto>.Failure("Post you are trying to like does not exist", 404);
+
+            var userExists = await context.Users.AnyAsync(a => a.Id == request.UserId, cancellationToken);
             if (!userExists) return Result<LikeDto>.Failure("Attempt to like a post of an unauthorized user is impossible", 403);
 
-            var like = await context.Likes.FirstOrDefaultAsync(a => a.PublicationId == request.PublicationId
-            && a.LikedById == request.UserId, cancellationToken);
+            var like = await context.Likes
+                .FirstOrDefaultAsync(a => a.PublicationId == request.PublicationId && a.LikedById == request.UserId, cancellationToken);
 
-            bool liked = like != null;
+            bool alreadyLiked = like != null;
+            bool isLikedByUser = false;
 
-            var res = await spamRepository.MakeLike(request.UserId);
-            if (!res)
+            if (!alreadyLiked)
             {
-                return Result<LikeDto>.Failure(
-                    "You cannot like more for today due to our antispam rules", 400);
-            }
-            
-            if (liked)
-            {
-                context.Likes.Remove(like!);
-            }
-            else
-            {
-                await context.Likes.AddAsync(new Like
+                var canLike = await spamRepository.MakeLike(request.UserId);
+                if (!canLike)
+                {
+                    return Result<LikeDto>.Failure("You cannot like more for today due to our antispam rules", 400);
+                }
+                
+                context.Likes.Add(new Like
                 {
                     LikedById = request.UserId,
                     PublicationId = request.PublicationId
-                }, cancellationToken);
+                });
                 isLikedByUser = true;
+            }
+            else
+            {
+                context.Likes.Remove(like!);
             }
 
             bool success = await context.SaveChangesAsync(cancellationToken) > 0;
+            
             if (success)
             {
-                int countOfLikes = await context.Publications
-                    .Include(a => a.Likes).Where(a => a.Id == request.PublicationId)
-                    .Select(a => a.Likes.Count()).FirstOrDefaultAsync(cancellationToken);
+                int countOfLikes = await context.Likes
+                    .CountAsync(a => a.PublicationId == request.PublicationId, cancellationToken);
 
-                LikeDto result = new LikeDto
+                var logAction = alreadyLiked ? UserLogAction.DislikePublication : UserLogAction.LikePublication;
+                
+                await _logger.LogAsync(request.UserId, logAction, new
+                {
+                    info = $"User {request.UserId} has set a like for publication {request.PublicationId} to {!alreadyLiked}"
+                }, request.PublicationId);
+                
+                return Result<LikeDto>.Success(new LikeDto
                 {
                     AmountOfLikes = countOfLikes,
                     IsLikedByCurrentUser = isLikedByUser
-                };
-
-                await _logger.LogAsync(request.UserId, liked
-                    ? UserLogAction.LikePublication
-                    : UserLogAction
-                        .DislikePublication, new
-                {
-                    info = $"User {request.UserId} has set a like for publication {request
-                        .PublicationId} to {!liked}",
-                }, request.PublicationId);
-                
-                return Result<LikeDto>.Success(result);
+                });
             }
+
             return Result<LikeDto>.Failure("Action was not registered in the Database", 500);
         }
     }

@@ -43,7 +43,7 @@ public class DeletePublication
             {
                 info = $"Publication " +
                        $"was deleted by {publication.AuthorId}"
-            }, cancellationToken);
+            }, publication.Id, cancellationToken);
             return Result<Unit>.Success(Unit.Value);
         }
     }

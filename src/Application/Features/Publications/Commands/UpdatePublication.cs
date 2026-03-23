@@ -61,7 +61,7 @@ public class UpdatePublication
             {
                 info = $"User {request
                     .UserId} has updated publication {publication.Id}"
-            }, cancellationToken);
+            }, publication.Id, cancellationToken);
             return Result<PublicationDto>.Success(readyPublication);
 
         }

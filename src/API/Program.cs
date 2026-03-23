@@ -20,8 +20,10 @@ using System.Text;
 using Application.MessagingWebSockets;
 using Application.Repositories.SpamRepository;
 using Application.Repositories.UserActivityLogRepository;
-using Microsoft.AspNetCore.Diagnostics;
+using Application.Services.UserActionLogger;
+using Application.Services.UserInterestsUpdateService;
 using Serilog.Events;
+using API.Middleware;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -102,6 +104,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IViolationService, ViolationService>();
 builder.Services.AddScoped<ISpamRepository, SpamRepository>();
 builder.Services.AddScoped<IUserActivityLogRepository, UserActivityLogRepository>();
+builder.Services.AddScoped(typeof(IUserActionLogger<>), typeof(UserActionLogger<>));
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
@@ -128,10 +131,12 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddSignalR();
 
+builder.Services.AddHostedService<UserInterestUpdateJob>();
+
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
-app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

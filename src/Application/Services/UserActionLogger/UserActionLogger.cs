@@ -9,7 +9,7 @@ namespace Application.Services.UserActionLogger;
 public class UserActionLogger<T>(IUserActivityLogRepository logRepository, ILogger<T> logger) : IUserActionLogger<T>
 {
     public async Task LogAsync(string userId, UserLogAction actionType, object?
-        additionalData = null, CancellationToken ct = default)
+        additionalData = null, string? targetId = null,  CancellationToken ct = default)
     {
         if (additionalData == null)
         {
@@ -20,7 +20,8 @@ public class UserActionLogger<T>(IUserActivityLogRepository logRepository, ILogg
             UserId = userId,
             ActionType = actionType,
             AdditionalDescription = JsonConvert.SerializeObject(additionalData),
-            ExecutedAt = DateTime.UtcNow
+            ExecutedAt = DateTime.UtcNow,
+            TargetId = targetId
         };
             
         var res = await logRepository.LogUserAction(dto);

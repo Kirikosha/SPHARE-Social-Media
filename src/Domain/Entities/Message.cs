@@ -6,9 +6,10 @@ public class Message
     public DateTime SentAt { get; set; } = DateTime.UtcNow;
     public DateTime? EditedAt { get; set; }
     public bool WasEdited { get; set; }
+    
+    // Navigation properties
     public string SenderId { get; set; } = string.Empty;
     public User Sender { get; set; } = null!;
-
     public string ChatId { get; set; } = Guid.NewGuid().ToString();
     public Chat Chat { get; set; } = null!;
  } 

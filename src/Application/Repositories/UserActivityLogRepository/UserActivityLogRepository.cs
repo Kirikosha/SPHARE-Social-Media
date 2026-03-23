@@ -12,7 +12,8 @@ public class UserActivityLogRepository(ApplicationDbContext context) : IUserActi
             Id = Guid.NewGuid().ToString(),
             UserId = logDto.UserId,
             AdditionalDescription = logDto.AdditionalDescription ?? string.Empty,
-            Action = logDto.ActionType.ToString()
+            Action = logDto.ActionType.ToString(),
+            TargetId = logDto.TargetId
         };
 
         try

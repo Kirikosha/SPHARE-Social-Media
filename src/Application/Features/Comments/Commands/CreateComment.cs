@@ -122,8 +122,8 @@ public class CreateComment
             await logger.LogAsync(request.UserId, UserLogAction.CreateComment, new
             {
                 info = $"Comment {comment.Id} was created" +
-                       $" by user {request.UserId}"
-            }, cancellationToken);
+                       $" by user {request.UserId}",
+            }, comment.PublicationId, cancellationToken);
             
 
             return Result<CommentDto>.Success(mapper.Map<CommentDto>(comment));

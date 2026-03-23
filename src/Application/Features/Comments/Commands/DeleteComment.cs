@@ -33,7 +33,7 @@ public class DeleteComment
             {
                 info = $"Comment {comment.Id} was " +
                        $"deleted by user {comment.AuthorId}"
-            }, cancellationToken);
+            }, comment.Id, cancellationToken);
             
             return Result<bool>.Success(true);
         }

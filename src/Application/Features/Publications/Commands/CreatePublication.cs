@@ -76,7 +76,7 @@ public class CreatePublication
             {
                 info = $"User {request
                     .CreatorId} has created a publication {publication.Id}"
-            }, cancellationToken);
+            }, publication.Id, cancellationToken);
             
             return Result<bool>.Success(true);
         }

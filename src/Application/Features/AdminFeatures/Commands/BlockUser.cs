@@ -35,7 +35,7 @@ public class BlockUser
                 {
                     info = $"User " +
                            $"{request.UserToBlockId} was blocked by {request.BlockedById} at {user.BlockedAt}"
-                }, cancellationToken);
+                }, request.UserToBlockId, cancellationToken);
                 
                 return Result<bool>.Success(true);
             }

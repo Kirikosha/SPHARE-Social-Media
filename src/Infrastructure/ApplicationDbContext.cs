@@ -1,4 +1,6 @@
-﻿namespace Infrastructure;
+﻿using Domain.Entities.RecomendationEntities;
+
+namespace Infrastructure;
 
 using Domain.Entities;
 using Domain.Entities.Complaints;
@@ -23,6 +25,12 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<ChatUser> ChatUsers { get; set; }
     public DbSet<SpamRating> SpamRatings { get; set; }
     public DbSet<UserActionLog> UserLogs { get; set; }
+    public DbSet<PublicationTag> PublicationTags { get; set; }
+    public DbSet<Tag> Tags { get; set; }
+    public DbSet<UserInterestTag> UserInterestTags { get; set; }
+    public DbSet<PublicationView> PublicationViews { get; set; }
+    
+    public DbSet<JobCheckpoint> JobCheckpoints { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -149,5 +157,58 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<PublicationTag>()
+            .HasKey(pt => new { pt.PublicationId, pt.TagId });
+
+        modelBuilder.Entity<PublicationTag>()
+            .HasOne(pt => pt.Publication)
+            .WithMany(p => p.PublicationTags)
+            .HasForeignKey(pt => pt.PublicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PublicationTag>()
+            .HasOne(pt => pt.Tag)
+            .WithMany(t => t.Publications)
+            .HasForeignKey(pt => pt.TagId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // UserInterestTag — composite key
+        modelBuilder.Entity<UserInterestTag>()
+            .HasKey(ui => new { ui.UserId, ui.TagId });
+
+        modelBuilder.Entity<UserInterestTag>()
+            .HasOne(ui => ui.User)
+            .WithMany(u => u.InterestTags)
+            .HasForeignKey(ui => ui.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserInterestTag>()
+            .HasOne(ui => ui.Tag)
+            .WithMany(t => t.UserInterests)
+            .HasForeignKey(ui => ui.TagId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // PublicationView
+        modelBuilder.Entity<PublicationView>()
+            .HasOne(pv => pv.User)
+            .WithMany(u => u.ViewedPublications)
+            .HasForeignKey(pv => pv.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PublicationView>()
+            .HasOne(pv => pv.Publication)
+            .WithMany(p => p.Views)
+            .HasForeignKey(pv => pv.PublicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserInterestTag>()
+            .HasIndex(ui => new { ui.UserId, ui.Weight });
+
+        modelBuilder.Entity<PublicationView>()
+            .HasIndex(pv => new { pv.UserId, pv.ViewedAt });
+        
+        modelBuilder.Entity<JobCheckpoint>()
+            .HasKey(j => j.JobName);
     }
 }

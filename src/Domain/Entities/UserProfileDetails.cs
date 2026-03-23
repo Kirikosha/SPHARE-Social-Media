@@ -7,6 +7,7 @@ public class UserProfileDetails
     public List<string> Interests { get; set; } = [];
     public DateTime? DateOfBirth { get; set; }
 
+    // Navigation properties
     public string UserId { get; set; } = string.Empty;
     public User User { get; set; } = null!;
 }

@@ -1,4 +1,6 @@
 ﻿using Application.Repositories.SpamRepository;
+using Application.Services.UserActionLogger;
+using Domain.Enums;
 
 namespace Application.Features.Likes.Commands;
 
@@ -17,7 +19,9 @@ public class LikePublication
         public required string UserId { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, ISpamRepository spamRepository) : IRequestHandler<Command, Result<LikeDto>>
+    public class Handler(ApplicationDbContext context, ISpamRepository spamRepository, 
+        IUserActionLogger<LikePublication> _logger) : 
+        IRequestHandler<Command, Result<LikeDto>>
     {
         public async Task<Result<LikeDto>> Handle(Command request, CancellationToken cancellationToken)
         {
@@ -31,6 +35,8 @@ public class LikePublication
             var like = await context.Likes.FirstOrDefaultAsync(a => a.PublicationId == request.PublicationId
             && a.LikedById == request.UserId, cancellationToken);
 
+            bool liked = like != null;
+
             var res = await spamRepository.MakeLike(request.UserId);
             if (res == "Forbidden")
             {
@@ -38,9 +44,9 @@ public class LikePublication
                     "You cannot like more for today due to our antispam rules", 400);
             }
             
-            if (like != null)
+            if (liked)
             {
-                context.Likes.Remove(like);
+                context.Likes.Remove(like!);
             }
             else
             {
@@ -64,6 +70,16 @@ public class LikePublication
                     AmountOfLikes = countOfLikes,
                     IsLikedByCurrentUser = isLikedByUser
                 };
+
+                await _logger.LogAsync(request.UserId, liked
+                    ? UserLogAction.LikePublication
+                    : UserLogAction
+                        .DislikePublication, new
+                {
+                    info = $"User {request.UserId} has set a like for publication {request
+                        .PublicationId} to {!liked}",
+                }, request.PublicationId);
+                
                 return Result<LikeDto>.Success(result);
             }
             return Result<LikeDto>.Failure("Action was not registered in the Database", 500);

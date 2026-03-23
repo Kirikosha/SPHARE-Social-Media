@@ -22,9 +22,10 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
 
     private const double SpamLimit = 1.0;
 
-    private async Task<bool> VerifyThePermissionToMakeAction(UserActionType actionType, string userId)
+    private async Task<bool> VerifyThePermissionToMakeAction(UserActionType actionType, string userId, 
+        CancellationToken ct = default)
     {
-        var rating = await context.SpamRatings.FirstOrDefaultAsync(a => a.UserId == userId);
+        var rating = await context.SpamRatings.FirstOrDefaultAsync(a => a.UserId == userId, ct);
         if (rating == null) throw new Exception("There is no such record of user and spamratings");
         if (rating.SpamValue >= SpamLimit)
         {
@@ -90,38 +91,38 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
             setters.SetProperty(s => s.SpamValue, 0.0));
     }
 
-    public async Task<bool> MakePublication(string userId)
+    public async Task<bool> MakePublication(string userId, CancellationToken ct = default)
     {
         await ResetSpamRating(userId);
 
-        var response = await VerifyThePermissionToMakeAction(UserActionType.MakeAPublication, userId);
+        var response = await VerifyThePermissionToMakeAction(UserActionType.MakeAPublication, userId, ct);
 
         return response;
     }
 
-    public async Task<bool> MakeComment(string userId)
+    public async Task<bool> MakeComment(string userId, CancellationToken ct = default)
     {
         await ResetSpamRating(userId);
 
-        var response = await VerifyThePermissionToMakeAction(UserActionType.MakeAComment, userId);
+        var response = await VerifyThePermissionToMakeAction(UserActionType.MakeAComment, userId, ct);
 
         return response;
     }
 
-    public async Task<bool> MakeLike(string userId)
+    public async Task<bool> MakeLike(string userId, CancellationToken ct = default)
     {
         await ResetSpamRating(userId);
 
-        var response = await VerifyThePermissionToMakeAction(UserActionType.LikeAPublication, userId);
+        var response = await VerifyThePermissionToMakeAction(UserActionType.LikeAPublication, userId, ct);
 
         return response;
     }
     
-    public async Task<bool> MakeComplaint(string userId)
+    public async Task<bool> MakeComplaint(string userId, CancellationToken ct = default)
     {
         await ResetSpamRating(userId);
 
-        var response = await VerifyThePermissionToMakeAction(UserActionType.MakeAComplaint, userId);
+        var response = await VerifyThePermissionToMakeAction(UserActionType.MakeAComplaint, userId, ct);
 
         return response;
     }

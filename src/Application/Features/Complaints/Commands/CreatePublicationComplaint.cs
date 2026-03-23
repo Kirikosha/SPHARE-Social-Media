@@ -23,25 +23,26 @@ public class CreatePublicationComplaint
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
             // Check for existing complaint -- Start
-            var existingComplaint = await context.PublicationComplaints.Where(a =>
-                a.PublicationId == request.Complaint.TargetId &&
-                a.ComplainerId == request.UserId).FirstOrDefaultAsync(cancellationToken);
+            var existingComplaint = await context.PublicationComplaints
+                .Where(a => a.PublicationId == request.Complaint.TargetId &&
+                            a.ComplainerId == request.UserId)
+                .Select(c => new { c.ComplainedAt })
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (existingComplaint != null)
             {
                 return Result<bool>.Failure(
                     "Complain on that publication was already sent at " + existingComplaint.ComplainedAt.Date, 400);
             }
-            // Check for existing complaint -- End
             
-            var res = await spamRepository.MakeComplaint(request.UserId);
+            var res = await spamRepository.MakeComplaint(request.UserId, cancellationToken);
             if (!res)
             {
                 return Result<bool>.Failure(
                     "You cannot complain for today due to our antispam rules", 400);
             }
 
-            bool isNewAuthor = await IsNewAuthor(request.Complaint.TargetId);
+            bool isNewAuthor = await IsNewAuthor(request.Complaint.TargetId, cancellationToken);
             PublicationComplaint complaint = new PublicationComplaint
             {
                 Reason = request.Complaint.Reason,
@@ -52,28 +53,23 @@ public class CreatePublicationComplaint
                 ComplaintValue = isNewAuthor ?  (BaseComplaintValue * NewAuthorMultiplier) : BaseComplaintValue
             };
 
-            await context.PublicationComplaints.AddAsync(complaint);
+            await context.PublicationComplaints.AddAsync(complaint, cancellationToken);
 
             return Result<bool>.Success(true);
         }
         
-        private async Task<bool> IsNewAuthor(string publicationId)
+        private async Task<bool> IsNewAuthor(string publicationId, CancellationToken ct)
         {
-            var authorCreationDate = await context.PublicationComplaints
-                .Include(a => a.Publication)
-                .ThenInclude(c => c.Author)
-                .Where(a => a.Publication.Id == publicationId)
-                .Select(a => a.Publication.Author.DateOfCreation)
-                .FirstAsync();
+            var authorCreationDate = await context.Publications
+                .Where(p => p.Id == publicationId)
+                .Select(p => p.Author.DateOfCreation)
+                .FirstOrDefaultAsync(ct);
+
+            if (authorCreationDate == default)
+                throw new Exception("Author cannot have default creation date");
 
             var cutOff = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-            if (authorCreationDate >= cutOff)
-            {
-                return true;
-            }
-
-            return false;
+            return authorCreationDate >= cutOff;
         }
     }
-
 }

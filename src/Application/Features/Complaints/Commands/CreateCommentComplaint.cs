@@ -17,7 +17,7 @@ public class CreateCommentComplaint
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var res = await spamRepository.MakeComplaint(request.UserId);
+            var res = await spamRepository.MakeComplaint(request.UserId, cancellationToken);
             if (!res)
             {
                 return Result<bool>.Failure(

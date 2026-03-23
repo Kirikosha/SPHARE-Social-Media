@@ -2,8 +2,8 @@
 
 public interface ISpamRepository
 {
-    Task<string> MakePublication(string userId);
-    Task<string> MakeComment(string userId);
-    Task<string> MakeLike(string userId);
-    Task<string> MakeComplaint(string userId);
+    Task<bool> MakePublication(string userId);
+    Task<bool> MakeComment(string userId);
+    Task<bool> MakeLike(string userId);
+    Task<bool> MakeComplaint(string userId);
 }

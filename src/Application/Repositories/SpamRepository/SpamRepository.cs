@@ -22,13 +22,13 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
 
     private const double SpamLimit = 1.0;
 
-    private async Task<string> VerifyThePermissionToMakeAction(UserActionType actionType, string userId)
+    private async Task<bool> VerifyThePermissionToMakeAction(UserActionType actionType, string userId)
     {
         var rating = await context.SpamRatings.FirstOrDefaultAsync(a => a.UserId == userId);
         if (rating == null) throw new Exception("There is no such record of user and spamratings");
         if (rating.SpamValue >= SpamLimit)
         {
-            return "Forbidden";
+            return false;
         }
 
         switch (actionType)
@@ -51,7 +51,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
                 break;
         }
 
-        return "Allowed";
+        return true;
     }
 
     private async Task ResetSpamRating(string userId)
@@ -90,7 +90,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
             setters.SetProperty(s => s.SpamValue, 0.0));
     }
 
-    public async Task<string> MakePublication(string userId)
+    public async Task<bool> MakePublication(string userId)
     {
         await ResetSpamRating(userId);
 
@@ -99,7 +99,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
         return response;
     }
 
-    public async Task<string> MakeComment(string userId)
+    public async Task<bool> MakeComment(string userId)
     {
         await ResetSpamRating(userId);
 
@@ -108,7 +108,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
         return response;
     }
 
-    public async Task<string> MakeLike(string userId)
+    public async Task<bool> MakeLike(string userId)
     {
         await ResetSpamRating(userId);
 
@@ -117,7 +117,7 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
         return response;
     }
     
-    public async Task<string> MakeComplaint(string userId)
+    public async Task<bool> MakeComplaint(string userId)
     {
         await ResetSpamRating(userId);
 

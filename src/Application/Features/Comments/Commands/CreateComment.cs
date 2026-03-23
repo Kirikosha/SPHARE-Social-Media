@@ -41,7 +41,7 @@ public class CreateComment
                 return Result<CommentDto>.Failure("You are sending comments too fast", 400);
 
             var spamResult = await spamRepository.MakeComment(request.UserId);
-            if (spamResult == "Forbidden")
+            if (!spamResult)
                 return Result<CommentDto>.Failure("You cannot make comments for today due to our antispam rules", 400);
 
             var parentValidation = await ValidateParentAsync(request, cancellationToken);

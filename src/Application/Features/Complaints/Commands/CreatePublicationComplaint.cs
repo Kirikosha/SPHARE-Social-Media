@@ -35,7 +35,7 @@ public class CreatePublicationComplaint
             // Check for existing complaint -- End
             
             var res = await spamRepository.MakeComplaint(request.UserId);
-            if (res == "Forbidden")
+            if (!res)
             {
                 return Result<bool>.Failure(
                     "You cannot complain for today due to our antispam rules", 400);

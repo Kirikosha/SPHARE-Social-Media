@@ -46,7 +46,7 @@ public class CreatePublication
                     .Failure("You cannot make that many publications in short period of time", 400);
 
             var res = await spamRepository.MakePublication(user.Id);
-            if (res == "Forbidden")
+            if (!res)
             {
                 return Result<bool>.Failure(
                     "You cannot make more publications for today due to our anti spam rules", 400);

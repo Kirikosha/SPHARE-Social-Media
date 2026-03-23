@@ -38,7 +38,7 @@ public class LikePublication
             bool liked = like != null;
 
             var res = await spamRepository.MakeLike(request.UserId);
-            if (res == "Forbidden")
+            if (!res)
             {
                 return Result<LikeDto>.Failure(
                     "You cannot like more for today due to our antispam rules", 400);

@@ -22,12 +22,17 @@ public class DeleteComment
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
-            Comment? comment = await context.Comments.Include(a => a.Replies).FirstOrDefaultAsync(c => c.Id == request.CommentId, cancellationToken);
-            if (comment == null) return Result<bool>.Failure("Comment was not found", 404);
+            var comment = await context.Comments
+                .Where(c => c.Id == request.CommentId)
+                .Select(c => new { c.Id, c.AuthorId })
+                .FirstOrDefaultAsync(cancellationToken);
 
-            comment.IsDeleted = true;
+            if (comment == null) 
+                return Result<bool>.Failure("Comment was not found", 404);
 
-            context.Update(comment);
+            await context.Comments
+                .Where(c => c.Id == request.CommentId)
+                .ExecuteUpdateAsync(s => s.SetProperty(c => c.IsDeleted, true), cancellationToken);
 
             await logger.LogAsync(comment.AuthorId, UserLogAction.DeleteComment, new
             {

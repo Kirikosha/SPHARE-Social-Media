@@ -7,6 +7,7 @@ public class Comment
     public string Content { get; set; } = string.Empty;
     public DateTime CreationDate { get; set; }
     public bool IsDeleted { get; set; } = false;
+    public int TotalRepliesCount { get; set; } = 0;
     
     // Navigation properties
     public User Author { get; set; } = null!;
@@ -20,6 +21,4 @@ public class Comment
     public Comment? ParentComment { get; set; }
     public List<Comment> Replies { get; set; } = [];
 
-    public List<CommentClosure> Ancestors { get; set; } = [];
-    public List<CommentClosure> Descendants { get; set; } = [];
 }

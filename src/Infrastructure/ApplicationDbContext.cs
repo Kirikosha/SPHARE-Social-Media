@@ -19,7 +19,6 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Complaint> Complaints { get; set; }
     public DbSet<PublicationComplaint> PublicationComplaints { get; set; }
     public DbSet<CommentComplaint> CommentComplaints { get; set; }
-    public DbSet<CommentClosure> CommentTrees { get; set; }
     public DbSet<Chat> Chats { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<ChatUser> ChatUsers { get; set; }
@@ -100,28 +99,6 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
             .WithMany(c => c.Replies)
             .HasForeignKey(c => c.ParentCommentId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<CommentClosure>()
-            .HasKey(x => new { x.AncestorId, x.DescendantId });
-
-        modelBuilder.Entity<CommentClosure>()
-            .HasOne(x => x.Ancestor)
-            .WithMany(c => c.Descendants)
-            .HasForeignKey(x => x.AncestorId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<CommentClosure>()
-            .HasOne(x => x.Descendant)
-            .WithMany(c => c.Ancestors)
-            .HasForeignKey(x => x.DescendantId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<CommentClosure>()
-            .HasIndex(x => new { x.AncestorId, x.Depth });
-
-
-        modelBuilder.Entity<CommentClosure>()
-            .HasIndex(x => new { x.DescendantId, x.Depth });
 
         modelBuilder.Entity<Comment>()
             .HasIndex(c => new { c.PublicationId, c.ParentCommentId, c.CreationDate });

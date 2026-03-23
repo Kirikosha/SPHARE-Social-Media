@@ -34,8 +34,7 @@ public class GetComment
                         Username = c.Author.Username
                     },
 
-                    RepliesAmount = context.CommentTrees
-                        .Count(cc => cc.AncestorId == c.Id && cc.Depth > 0)
+                    RepliesAmount = c.TotalRepliesCount
                 }).SingleOrDefaultAsync(cancellationToken);
 
             return comment == null ? Result<CommentDto>.Failure("Comment was not found", 404) 

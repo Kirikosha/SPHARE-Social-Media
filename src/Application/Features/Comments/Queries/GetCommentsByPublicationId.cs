@@ -44,8 +44,7 @@ public class GetCommentsByPublicationId
                         UniqueNameIdentifier = c.Author.UniqueNameIdentifier,
                         Username = c.Author.Username
                     },
-                    RepliesAmount = context.CommentTrees
-                        .Count(cc => cc.AncestorId == c.Id && cc.Depth > 0)
+                    RepliesAmount = c.TotalRepliesCount
                 });
 
             var pagedComments = await PagedList<CommentDto>.CreateAsync(

@@ -36,4 +36,5 @@ public class User
     public SpamRating SpamRating { get; set; } = null!;
     public List<PublicationView> ViewedPublications { get; set; } = [];
     public List<UserInterestTag> InterestTags { get; set; } = [];
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 }

@@ -20,6 +20,7 @@ public class Login
         public async Task<Result<AccountClaimsDto>> Handle(Command request, CancellationToken cancellationToken)
         {
             User? user = await context.Users
+                .Include(u => u.RefreshTokens)
                 .FirstOrDefaultAsync(a => string.Equals(a.Email, request.LoginModel.Email), cancellationToken);
 
             if (user == null)
@@ -35,12 +36,17 @@ public class Login
                     return Result<AccountClaimsDto>.Failure("Invalid credentials", 401);
             }
 
+            var refreshToken = tokenService.CreateRefreshToken();
+            user.RefreshTokens.Add(refreshToken);
+            await context.SaveChangesAsync(cancellationToken);
+            
             AccountClaimsDto account = new AccountClaimsDto
             {
                 UniqueNameIdentifier = user.UniqueNameIdentifier,
                 Username = user.Username,
                 UserId = user.Id,
                 Token = tokenService.CreateToken(user),
+                RefreshToken = refreshToken.Token,
                 Role = user.Role.ToString(),
                 Blocked = user.Blocked
             };

@@ -60,8 +60,8 @@ public class Register
                 };
 
                 user.ProfileImage = newImage;
-
             }
+            
             bool result = await CreateUser(user);
             if (!result)
                 return Result<AccountClaimsDto>.Failure("User was not created or something went wrong", 500);
@@ -83,6 +83,10 @@ public class Register
 
             await context.SpamRatings.AddAsync(rating, cancellationToken);
 
+            var refreshToken = tokenService.CreateRefreshToken();
+            user.RefreshTokens.Add(refreshToken);
+            await context.SaveChangesAsync(cancellationToken);
+
             AccountClaimsDto account = new AccountClaimsDto
             {
                 UniqueNameIdentifier = user.UniqueNameIdentifier,
@@ -90,6 +94,7 @@ public class Register
                 UserId = user.Id,
                 Role = user.Role.ToString(),
                 Token = tokenService.CreateToken(user),
+                RefreshToken = refreshToken.Token,
                 Blocked = false
             };
 

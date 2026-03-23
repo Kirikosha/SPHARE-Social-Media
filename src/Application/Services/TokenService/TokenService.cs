@@ -1,4 +1,6 @@
-﻿namespace Application.Services.TokenService;
+﻿using System.Security.Cryptography;
+
+namespace Application.Services.TokenService;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 
@@ -31,7 +33,7 @@ public class TokenService(IConfiguration config) : ITokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = DateTime.UtcNow.AddMinutes(15),
             SigningCredentials = creds
         };
 
@@ -39,5 +41,15 @@ public class TokenService(IConfiguration config) : ITokenService
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
         return tokenHandler.WriteToken(token);
+    }
+
+    public RefreshToken CreateRefreshToken()
+    {
+        return new RefreshToken()
+        {
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+            Created = DateTime.UtcNow,
+            Expires = DateTime.UtcNow.AddDays(7)
+        };
     }
 }

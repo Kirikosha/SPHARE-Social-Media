@@ -75,7 +75,8 @@ builder.Services.AddAuthentication("Bearer")
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(tokenKey))
+                Encoding.UTF8.GetBytes(tokenKey)),
+            ClockSkew = TimeSpan.Zero
         };
 
         options.Events = new JwtBearerEvents

@@ -1,5 +1,4 @@
 ﻿using Application.Core;
-using Domain.DTOs;
 using Domain.DTOs.CommentDTOs;
 using Domain.DTOs.UserDTOs;
 using Infrastructure;
@@ -26,19 +25,11 @@ public class GetComment
                     CreationDate = c.CreationDate,
                     PublicationId = c.PublicationId,
                     IsDeleted = c.IsDeleted,
-
-                    Author = new PublicUserDto
+                    Author = new PublicUserBriefDto
                     {
                         Id = c.Author.Id,
                         Blocked = c.Author.Blocked,
-                        ProfileImage = c.Author.ProfileImage == null
-                            ? null
-                            : new ImageDto
-                            {
-                                Id = c.Author.ProfileImage.Id,
-                                PublicId = c.Author.ProfileImage.PublicId!,
-                                ImageUrl = c.Author.ProfileImage.ImageUrl
-                            },
+                        ImageUrl = c.Author.ProfileImage == null ? null : c.Author.ProfileImage.ImageUrl,
                         UniqueNameIdentifier = c.Author.UniqueNameIdentifier,
                         Username = c.Author.Username
                     },

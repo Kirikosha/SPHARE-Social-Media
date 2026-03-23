@@ -70,6 +70,11 @@ public class MappingProfiles : Profile
             .ForMember(dest => dest.IsRead, opt => opt.Ignore());
 
         CreateMap<Publication, PublicationCalendarDto>();
+        CreateMap<User, PublicUserBriefDto>()
+            .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ProfileImage != null
+                ? src.ProfileImage
+                    .ImageUrl
+                : null));
 
     }
 }

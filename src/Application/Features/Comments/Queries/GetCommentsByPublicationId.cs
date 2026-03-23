@@ -1,8 +1,8 @@
-﻿namespace Application.Features.Comments.Queries;
+﻿using Application.Core.Pagination;
+
+namespace Application.Features.Comments.Queries;
 
 using Core;
-using AutoMapper;
-using Domain.DTOs;
 using Domain.DTOs.CommentDTOs;
 using Domain.DTOs.UserDTOs;
 using Infrastructure;
@@ -12,18 +12,22 @@ using System.Threading.Tasks;
 
 public class GetCommentsByPublicationId
 {
-    public class Query : IRequest<Result<List<CommentDto>>>
+    public class Query : IRequest<Result<PagedList<CommentDto>>>
     {
         public required string PublicationId { get; init; }
+        public PaginationParams Params { get; init; } = new();
     }
-    public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Query, Result<List<CommentDto>>>
+    public class Handler(ApplicationDbContext context) : IRequestHandler<Query, Result<PagedList<CommentDto>>>
     {
-        public async Task<Result<List<CommentDto>>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<PagedList<CommentDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            bool publicationExists = await context.Publications.AnyAsync(a => a.Id == request.PublicationId, cancellationToken);
-            if (!publicationExists) return Result<List<CommentDto>>.Failure("Publication does not exist", 404);
+            bool publicationExists = await context.Publications
+                .AnyAsync(a => a.Id == request.PublicationId, cancellationToken);
+            
+            if (!publicationExists) 
+                return Result<PagedList<CommentDto>>.Failure("Publication does not exist", 404);
 
-            var comments = await context.Comments
+            var query = context.Comments
                 .Where(c => c.PublicationId == request.PublicationId && c.ParentCommentId == null)
                 .Select(c => new CommentDto
                 {
@@ -32,25 +36,22 @@ public class GetCommentsByPublicationId
                     CreationDate = c.CreationDate,
                     PublicationId = c.PublicationId,
                     IsDeleted = c.IsDeleted,
-                    Author = new PublicUserDto
+                    Author = new PublicUserBriefDto
                     {
                         Id = c.Author.Id,
                         Blocked = c.Author.Blocked,
-                        ProfileImage = new ImageDto
-                        {
-                            Id = c.Author.ProfileImage == null ? string.Empty : c.Author.ProfileImage.Id,
-                            PublicId = c.Author.ProfileImage!.PublicId!,
-                            ImageUrl = c.Author.ProfileImage.ImageUrl
-                        },
+                        ImageUrl = c.Author.ProfileImage == null ? null : c.Author.ProfileImage.ImageUrl,
                         UniqueNameIdentifier = c.Author.UniqueNameIdentifier,
                         Username = c.Author.Username
                     },
                     RepliesAmount = context.CommentTrees
                         .Count(cc => cc.AncestorId == c.Id && cc.Depth > 0)
-                })
-                .ToListAsync(cancellationToken);
+                });
 
-            return Result<List<CommentDto>>.Success(mapper.Map<List<CommentDto>>(comments));
+            var pagedComments = await PagedList<CommentDto>.CreateAsync(
+                query, request.Params.PageNumber, request.Params.PageSize, cancellationToken);
+
+            return Result<PagedList<CommentDto>>.Success(pagedComments);
         }
     }
 }

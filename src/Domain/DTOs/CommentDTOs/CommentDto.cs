@@ -6,7 +6,7 @@ public class CommentDto
 {
     public string Id { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
-    public PublicUserDto Author { get; set; } = null!;
+    public PublicUserBriefDto Author { get; set; } = null!;
     public string PublicationId { get; set; } = string.Empty;
     public DateTime CreationDate { get; set; }
     public bool IsDeleted { get; set; } = false;

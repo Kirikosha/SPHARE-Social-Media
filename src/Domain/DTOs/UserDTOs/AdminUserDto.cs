@@ -5,7 +5,7 @@ public class AdminUserDto
     public string Username { get; set; } = string.Empty;
     public string UniqueNameIdentifier { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public ImageDto? ProfileImage { get; set; }
+    public string? ProfileImageUrl { get; set; }
     public int ViolationScore { get; set; }
     public int AmountOfViolations { get; set; }
     public bool Blocked { get; set; }

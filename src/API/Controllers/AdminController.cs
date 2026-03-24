@@ -1,4 +1,5 @@
-﻿using Application.Helpers;
+﻿using Application.Core.Pagination;
+using Application.Helpers;
 
 namespace API.Controllers;
 
@@ -12,9 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 public class AdminController : BaseApiController
 {
     [HttpGet("get-users")]
-    public async Task<ActionResult<List<AdminUserDto>>> GetUsers()
+    public async Task<ActionResult<PagedList<AdminUserDto>>> GetUsers([FromQuery]PaginationParams paginationParams)
     {
-        var users = await Mediator.Send(new GetUsersList.Query());
+        var users = await Mediator.Send(new GetUsersList.Query { PaginationParams = paginationParams});
         return Ok(users); 
     }
 

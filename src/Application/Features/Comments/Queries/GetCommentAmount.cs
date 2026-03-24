@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Comments.Queries;
 public class GetCommentAmount
@@ -13,7 +14,7 @@ public class GetCommentAmount
     {
         public async Task<Result<int>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var amount = context.Comments.Count(a => a.PublicationId == request.Id);
+            var amount = await context.Comments.CountAsync(a => a.PublicationId == request.Id, cancellationToken);
             return Result<int>.Success(amount);
         }
     }

@@ -11,7 +11,7 @@ public class UnblockUser
 {
     public class Command : IRequest<Result<bool>>
     {
-        public required int UserId { get; set; }
+        public required string UserId { get; set; }
     }
 
     public class Handler(ApplicationDbContext context) : IRequestHandler<Command, Result<bool>>

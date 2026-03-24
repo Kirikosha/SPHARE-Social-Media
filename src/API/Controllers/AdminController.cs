@@ -39,7 +39,7 @@ public class AdminController : BaseApiController
     }
 
     [HttpPost("unblock-user")]
-    public async Task<ActionResult> UnblockUser([FromBody] int userId)
+    public async Task<ActionResult> UnblockUser([FromBody] string userId)
     {
         return HandleResult(await Mediator.Send(new UnblockUser.Command { UserId = userId }));
     }

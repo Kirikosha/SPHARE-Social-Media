@@ -91,4 +91,40 @@ public class SubscriptionService(INeo4jDataAccess neo4j) : ISubscriptionService
 
         return result.Count > 0 && int.Parse(result[0]) > 0;
     }
+    
+    public async Task<int> GetFollowerCountAsync(string userId)
+    {
+        var query = @"
+        MATCH (f:User)-[:FOLLOWS]->(u:User {id: $userId})
+        RETURN count(f) AS count";
+
+        var result = await neo4j.ExecuteReadListAsync(query, "count", new Dictionary<string, object>
+        {
+            { "userId", userId }
+        });
+
+        var countString = result.SingleOrDefault(); // Throws if 0 or >1 rows
+        if (!int.TryParse(countString, out var followerCount))
+            throw new InvalidOperationException("Unexpected count format from Neo4j");
+
+        return followerCount;
+    }
+    
+    public async Task<int> GetFollowingCountAsync(string userId)
+    {
+        var query = @"
+        MATCH (u:User {id: $userId})-[:FOLLOWS]->(f:User)
+        RETURN count(f) AS count";
+
+        var result = await neo4j.ExecuteReadListAsync(query, "count", new Dictionary<string, object>
+        {
+            { "userId", userId }
+        });
+
+        var countString = result.SingleOrDefault(); // Throws if 0 or >1 rows
+        if (!int.TryParse(countString, out var followerCount))
+            throw new InvalidOperationException("Unexpected count format from Neo4j");
+
+        return followerCount;
+    }
 }

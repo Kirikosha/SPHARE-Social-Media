@@ -22,8 +22,8 @@ public class GetFollowersCount
 
             try
             {
-                var result = await subscriptionService.GetFollowersAsync(userId);
-                return Result<int>.Success(result.Count);
+                var result = await subscriptionService.GetFollowerCountAsync(userId);
+                return Result<int>.Success(result);
             }
             catch (Exception ex)
             {

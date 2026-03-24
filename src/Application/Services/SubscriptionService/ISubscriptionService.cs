@@ -13,4 +13,6 @@ public interface ISubscriptionService
     Task<List<string>> GetFollowingAsync(string userId);
     Task CreateUserNodeAsync(string userId);
     Task<bool> IsFollowing(string userId, string followedId);
+    Task<int> GetFollowerCountAsync(string userId);
+    Task<int> GetFollowingCountAsync(string userId);
 }

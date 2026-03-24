@@ -31,7 +31,7 @@ public class GetSubscriptions
                 var users = await context.Users.Include(a => a.ProfileImage)
                     .Where(a => subscribedUserIds.Contains(a.Id))
                     .ProjectTo<PublicUserDto>(mapper.ConfigurationProvider)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
                 return Result<List<PublicUserDto>>.Success(users);
             }
             catch (Exception ex)

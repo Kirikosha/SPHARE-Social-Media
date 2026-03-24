@@ -17,19 +17,33 @@ public class Unsubscribe
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
-            bool userExists = await context.Users.AnyAsync(a => a.Id == request.UserId, cancellationToken);
-            if (!userExists) return Result<bool>.Failure("User does not exist", 404);
-
-            var userToUnfollow = await context.Users.Where(x => x.UniqueNameIdentifier == request.UnfollowUserUniqueNameIdentifier).FirstOrDefaultAsync(cancellationToken);
-            if (userToUnfollow == null) return Result<bool>.Failure("User you want to follow does not exist", 400);
-
             try
             {
-                await subscriptionService.UnfollowAsync(request.UserId, userToUnfollow.Id);
-                var subscriberAmount = await subscriptionService.GetFollowersAsync(userToUnfollow.Id);
-                userToUnfollow.SubscriberNumber = subscriberAmount.Count;
+                bool followerExists = await context.Users.AnyAsync(u => u.Id == request.UserId, cancellationToken);
+                if (!followerExists)
+                    return Result<bool>.Failure("User does not exist", 404);
+                
+                var targetUserId = await context.Users
+                    .Where(u => u.UniqueNameIdentifier == request.UnfollowUserUniqueNameIdentifier)
+                    .Select(u => u.Id)
+                    .FirstOrDefaultAsync(cancellationToken);
+                if (targetUserId == null)
+                    return Result<bool>.Failure("User you want to unfollow does not exist", 400);
+            
+                await subscriptionService.UnfollowAsync(request.UserId, targetUserId);
 
-                context.Users.Update(userToUnfollow);
+                int rowsUpdated = await context.Users
+                    .Where(u => u.Id == targetUserId)
+                    .ExecuteUpdateAsync(
+                        setters => setters.SetProperty(u => u.SubscriberNumber, u => u.SubscriberNumber + 1),
+                        cancellationToken);
+
+                if (rowsUpdated == 0)
+                {
+                    await subscriptionService.FollowAsync(request.UserId, targetUserId);
+                    return Result<bool>.Failure("User not found while updating count", 404);
+                }
+
                 return Result<bool>.Success(true);
             }
             catch (Exception ex)

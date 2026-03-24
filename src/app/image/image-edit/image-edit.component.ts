@@ -43,6 +43,8 @@ export class ImageEditComponent implements OnChanges{
     };
     this.imageChangedEvent = syntheticEvent;
     this.croppedImage = '';
+    this.finalDrawingBlob = null;
+    this.drawingImageSrc = null;
     this.cdr.detectChanges();
   }
 
@@ -64,12 +66,10 @@ export class ImageEditComponent implements OnChanges{
   proceedToDraw(): void {
     if (!this.croppedImage) return;
     this.drawingImageSrc = this.croppedImage;
+    this.finalDrawingBlob = null;
     this.mode = 'draw';
   }
 
-  handleSavedImage(event: any): void {
-    this.finalDrawingBlob = this.dataURLtoBlob(event);
-  }
 
   private dataURLtoBlob(dataURL: string): Blob {
     const byteString = atob(dataURL.split(',')[1]);
@@ -121,6 +121,31 @@ export class ImageEditComponent implements OnChanges{
       this.cancelCrop();
     }
   }
+  handleSavedImage(event: any): void {
+  // If event is already a Blob
+  if (event instanceof Blob) {
+    this.finalDrawingBlob = event;
+    return;
+  }
+
+  // If event is a string (dataURL)
+  if (typeof event === 'string') {
+    this.finalDrawingBlob = this.dataURLtoBlob(event);
+    return;
+  }
+
+  // If event is an object with a 'dataURL' property (common pattern)
+  if (event && typeof event === 'object' && 'dataURL' in event) {
+    this.finalDrawingBlob = this.dataURLtoBlob(event.dataURL);
+    return;
+  }
+
+  // If event is an object with a 'base64' property
+  if (event && typeof event === 'object' && 'base64' in event) {
+    this.finalDrawingBlob = this.dataURLtoBlob(event.base64);
+    return;
+  }
+}
 
   cancelCrop(): void {
     this.resetCropper();

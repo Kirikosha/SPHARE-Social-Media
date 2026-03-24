@@ -15,4 +15,5 @@ export interface PublicationModel{
     conditionType?: 'SubscriberCount';
     conditionTarget?: number;
     comparisonOperator?: 'GreaterThanOrEqual'
+    viewCount: number;
 }

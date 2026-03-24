@@ -90,6 +90,10 @@
       <button class="action-button" (click)="openComplaintModal()">
         <i class="bi bi-flag"></i>
       </button>
+      <button class="action-button" disabled>
+        <i class="bi bi-eye"></i>
+        <span class="action-count">{{publication.viewCount}}</span>
+      </button>
     </div>
 
     <div class="admin-actions-wrapper">

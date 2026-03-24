@@ -3,6 +3,7 @@ export interface AccountModel {
     uniqueNameIdentifier: string,
     userId: number,
     token: string,
+    refreshToken: string,
     role: string,
     blocked: boolean,
 }

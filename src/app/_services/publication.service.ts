@@ -6,6 +6,7 @@ import { UpdatePublicationModel } from '../_models/publications/updatePublicatio
 import { LikeModel } from '../_models/likeModel';
 import { CreatePublicationModel } from '../_models/publications/createPublicationModel';
 import { PublicationCalendarModel } from '../_models/publications/publicationCalendarModel';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -73,5 +74,10 @@ getRecommendations(){
 getPublicationCalendar() {
   return this.http.get<PublicationCalendarModel[]>(this.baseUrl + '/publication/publication-calendar');
 }
+
+updatePublicationView(publicationId: number): Observable<number> {
+  return this.http.get<number>(`${this.baseUrl}/publication/publication/view-update/${publicationId}`);
+}
+
   constructor() { }
 }

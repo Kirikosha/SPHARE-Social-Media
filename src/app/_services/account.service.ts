@@ -4,9 +4,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { AccountModel } from '../_models/accountModel';
 import { LoginModel } from '../_models/loginModel';
-import { map, Observable } from 'rxjs';
-import { RegisterModel } from '../_models/registerModel';
-import { JsonPipe } from '@angular/common';
+import { catchError, map, Observable, tap, throwError} from 'rxjs';
 import { isTokenExpired } from '../_utilities/jwtDecode';
 
 @Injectable({
@@ -18,27 +16,60 @@ export class AccountService {
   baseUrl = environment.apiUrl;
   currentUser = signal<AccountModel | null>(null);
 
-  login (model: LoginModel){
+  constructor() {
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      const user: AccountModel = JSON.parse(userJson);
+
+      if (!isTokenExpired(user.token)) {
+        // Access token still valid — load normally
+        this.currentUser.set(user);
+      } else if (user.refreshToken) {
+        // Access token expired but refresh token exists — try silent refresh
+        this.refresh(user.refreshToken).subscribe({
+          next: () => {},
+          error: () => this.logout()
+        });
+      } else {
+        this.logout();
+      }
+    }
+  }
+
+  login(model: LoginModel): Observable<void> {
     return this.http.post<AccountModel>(this.baseUrl + '/account/login', model).pipe(
       map(user => {
         if (user) {
-          localStorage.setItem('user', JSON.stringify(user));
-          this.currentUser.set(user);
+          this.setUser(user);
         }
       })
-    )
+    );
   }
-register(model: FormData) {
-  return this.http.post<AccountModel>(this.baseUrl + '/account/register', model).pipe(
-    map(user => {
-      if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
-        this.currentUser.set(user);
-      }
-      return user;
-    })
-  );
-}
+
+  register(model: FormData): Observable<AccountModel> {
+    return this.http.post<AccountModel>(this.baseUrl + '/account/register', model).pipe(
+      map(user => {
+        if (user) {
+          this.setUser(user);
+        }
+        return user;
+      })
+    );
+  }
+
+  refresh(refreshToken: string): Observable<AccountModel> {
+    return this.http.post<AccountModel>(
+      this.baseUrl + '/account/refresh',
+      JSON.stringify(refreshToken), 
+      { headers: { 'Content-Type': 'application/json' } }
+    ).pipe(
+      tap(user => this.setUser(user)),
+      catchError(err => {
+        this.logout();
+        return throwError(() => err);
+      })
+    );
+  }
 
   updateProfile(model: AccountModel) {
     const user = this.currentUser();
@@ -50,32 +81,27 @@ register(model: FormData) {
     }
   }
 
-  logout(){
+  logout() {
     localStorage.removeItem('user');
     this.currentUser.set(null);
+    this.router.navigateByUrl('/login');
   }
 
-  forgotPassword(email: string){
+  // keeps localStorage and signal in sync
+  private setUser(user: AccountModel) {
+    localStorage.setItem('user', JSON.stringify(user));
+    this.currentUser.set(user);
+  }
+
+  forgotPassword(email: string) {
     return this.http.post(this.baseUrl + '/account/forgot-password', { email });
   }
 
-  verifyResetCode(email: string, code: string){
+  verifyResetCode(email: string, code: string) {
     return this.http.post(`${this.baseUrl}/account/verify-reset-code`, { email, code });
   }
 
-  resetPassword(email: string, newPassword: string){
+  resetPassword(email: string, newPassword: string) {
     return this.http.post(this.baseUrl + '/account/reset-password', { email, newPassword });
-  }
-
-  constructor(){
-    const userJson = localStorage.getItem('user');
-    if (userJson) {
-      const user = JSON.parse(userJson);
-      if (isTokenExpired(user.token)){
-        this.logout();
-      } else {
-        this.currentUser.set(user);
-      }
-    }
   }
 }

@@ -41,6 +41,17 @@ export class PublicationPageComponent {
         this.publication = publication;
         console.log('Loaded publication:', this.publication);
         this.isLoading = false;
+
+        if (this.accountService.currentUser()) {
+          this.publicationService.updatePublicationView(publication.id).subscribe({
+            next: updatedCount => {
+              if (this.publication) {
+                this.publication.viewCount = updatedCount;
+              }
+            },
+            error: err => console.error('Failed to update view count', err)
+          })
+        }
       },
       error: err => {
         this.toastr.error('Failed to load publication');
@@ -83,4 +94,13 @@ export class PublicationPageComponent {
     }
   }
 
+
+  sharePublication() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastr.success('Link copied to clipboard');
+    }).catch(() => {
+      this.toastr.error('Failed to copy link');
+    });
+  }
 }

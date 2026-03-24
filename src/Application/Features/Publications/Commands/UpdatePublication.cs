@@ -1,4 +1,5 @@
 ﻿using Application.Services.UserActionLogger;
+using Domain.DTOs.UserDTOs;
 
 namespace Application.Features.Publications.Commands;
 
@@ -26,25 +27,72 @@ public class UpdatePublication
     {
         public async Task<Result<PublicationDto>> Handle(Command request, CancellationToken cancellationToken)
         {
-            Publication? publication = await context.Publications
-                .Include(a => a.Images)
-                .Include(a => a.Author).ThenInclude(a => a.ProfileImage)
-                .FirstOrDefaultAsync(a => a.Id == request.Publication.Id, cancellationToken);
+            var publication = await context.Publications
+                .Where(p => p.Id == request.Publication.Id)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.AuthorId,
+                    p.PublicationType,
+                    p.RemindAt
+                })
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (publication == null)
                 return Result<PublicationDto>.Failure("Publication was not found", 404);
 
-            publication.Content = request.Publication.Content;
-            if (publication.PublicationType == PublicationTypes.planned
-                && (publication.RemindAt == null || publication.RemindAt != request.Publication.RemindAt)
-                && request.Publication.RemindAt > DateTime.UtcNow)
-            {
-                publication.RemindAt = request.Publication.RemindAt;
-            }
+            await context.Publications
+                .Where(p => p.Id == request.Publication.Id)
+                .ExecuteUpdateAsync(s => s
+                        .SetProperty(p => p.Content, request.Publication.Content)
+                        .SetProperty(p => p.UpdatedAt, DateTime.UtcNow),
+                    cancellationToken);
 
-            publication.UpdatedAt = DateTime.UtcNow;
+            if (publication.PublicationType == PublicationTypes.planned
+                && request.Publication.RemindAt > DateTime.UtcNow
+                && publication.RemindAt != request.Publication.RemindAt)
+            {
+                await context.Publications
+                    .Where(p => p.Id == request.Publication.Id)
+                    .ExecuteUpdateAsync(s => s
+                            .SetProperty(p => p.RemindAt, request.Publication.RemindAt),
+                        cancellationToken);
+            }
+            
             var success = await context.SaveChangesAsync(cancellationToken) > 0;
-            var readyPublication = mapper.Map<PublicationDto>(publication);
+            if (!success) return Result<PublicationDto>.Failure("Publication was not updated", 500);
+            
+            var readyPublication = await context.Publications
+                .Where(p => p.Id == request.Publication.Id)
+                .Select(p => new PublicationDto
+                {
+                    Id = p.Id,
+                    Content = p.Content,
+                    PostedAt = p.PostedAt,
+                    UpdatedAt = p.UpdatedAt,
+                    RemindAt = p.RemindAt,
+                    LikesAmount = p.Likes.Count,
+                    CommentAmount = p.Comments == null ? 0 : p.Comments.Count,
+                    PublicationType = p.PublicationType,
+                    ConditionType = p.ConditionType,
+                    ConditionTarget = p.ConditionTarget,
+                    Author = new PublicUserBriefDto
+                    {
+                        Id = p.Author.Id,
+                        Username = p.Author.Username,
+                        UniqueNameIdentifier = p.Author.UniqueNameIdentifier,
+                        Blocked = p.Author.Blocked,
+                        ImageUrl = p.Author.ProfileImage == null ? null : p.Author.ProfileImage.ImageUrl
+                    },
+                    ComparisonOperator = p.ComparisonOperator,
+                    ViewCount = p.ViewCount,
+                    IsDeleted = p.IsDeleted,
+                    Images = p.Images!
+                        .Select(x => x.ImageUrl)
+                        .ToList()
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
             var isLikedResult = await mediator
                 .Send(new IsLikedBy.Query { PublicationId = readyPublication.Id, UserId = request.UserId }, cancellationToken);
             if (isLikedResult.IsSuccess)
@@ -56,7 +104,7 @@ public class UpdatePublication
                 return Result<PublicationDto>.Failure(isLikedResult.Error!, isLikedResult.Code);
             }
 
-            if (!success) return Result<PublicationDto>.Failure("Publication was not updated", 500);
+
             await logger.LogAsync(request.UserId, UserLogAction.EditPublication, new
             {
                 info = $"User {request

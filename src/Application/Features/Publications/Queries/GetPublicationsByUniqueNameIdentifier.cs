@@ -46,7 +46,7 @@ public class GetPublicationsByUniqueNameIdentifier
                     CommentAmount = context.Comments.Count(c => c.PublicationId == p.Id),
                     ConditionTarget = p.ConditionTarget,
                     ConditionType = p.ConditionType,
-                    ComparisonOperator = p.ConditionOperator,
+                    ComparisonOperator = p.ComparisonOperator,
                     ViewCount = p.ViewCount
                 }).ToListAsync(cancellationToken);
             return Result<List<PublicationDto>>.Success(publications);

@@ -25,7 +25,7 @@ public class GetPublicationsToRemind
             //.Include(a => a.Images)
             .Where(p => ((p.RemindAt != null && p.RemindAt <= now) 
                          || (p.ConditionType != null 
-                         && p.ConditionOperator == ComparisonOperator.GreaterThanOrEqual 
+                         && p.ComparisonOperator == ComparisonOperator.GreaterThanOrEqual 
                          && p.Author.SubscriberNumber >= p.ConditionTarget)) 
                          && !p.WasSent && p.PostedAt > request.PostedAt)
             .OrderBy(p => p.Id)

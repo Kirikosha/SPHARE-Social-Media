@@ -23,7 +23,7 @@ public class DeletePublication
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
             var publication = await context.Publications
-                .Include(a => a.Images).Select(p => new
+                .Select(p => new
                 {
                     p.Id,
                     p.AuthorId,
@@ -33,19 +33,16 @@ public class DeletePublication
             if (publication == null)
                 return Result<Unit>.Failure("Publication was not deleted because it does not exist", 404);
 
-            if (publication.ImagePublicIds != null)
+
+            await context.Publications
+                .Where(p => p.Id == request.Id)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsDeleted, true), cancellationToken);
+            if (publication.ImagePublicIds is { Count: > 0 })
             {
-                foreach (var publicId in publication.ImagePublicIds.Where(id => !string.IsNullOrEmpty(id)))
-                {
-                    await photoService.DeletePhotoAsync(publicId!);
-                }
+                await Task.WhenAll(publication.ImagePublicIds
+                    .Select(id => photoService.DeletePhotoAsync(id)));
             }
-
-            // TODO: look up at this thing
-            var entity = new Publication { Id = publication.Id };
-            context.Publications.Attach(entity);
-            entity.IsDeleted = true;
-
+            
             await logger.LogAsync(publication.AuthorId, UserLogAction.DeletePublication, new
             {
                 info = $"Publication " +

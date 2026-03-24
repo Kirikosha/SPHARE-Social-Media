@@ -84,7 +84,7 @@
               <h6>Publication Details:</h6>
               <div class="publication-preview">
                 <div class="d-flex align-items-center mb-2">
-                  <img [src]="complaint.publication.author?.profileImage?.imageUrl || 'assets/user.png'" 
+                  <img [src]="complaint.publication.author.imageUrl || 'assets/user.png'" 
                        alt="Author" 
                        class="rounded-circle me-2" 
                        style="width: 30px; height: 30px;">
@@ -159,7 +159,7 @@
               <h6>Comment Details:</h6>
               <div class="comment-preview">
                 <div class="d-flex align-items-center mb-2">
-                  <img [src]="complaint.comment.author.profileImage?.imageUrl || 'assets/user.png'" 
+                  <img [src]="complaint.comment.author.profileImage || 'assets/user.png'" 
                        alt="Author" 
                        class="rounded-circle me-2" 
                        style="width: 30px; height: 30px;">

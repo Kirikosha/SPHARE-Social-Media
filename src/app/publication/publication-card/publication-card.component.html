@@ -17,14 +17,6 @@
           Scheduled for {{ formatDateTime(publication.remindAt) }}
         </div>
 
-<div class="conditional-info" *ngIf="publication.conditionType !== undefined && publication.conditionTarget !== null">
-          <i class="bi bi-bullseye"></i>
-          Will post when {{ publication.conditionType | lowercase }} {{ formatConditionOperator(publication.comparisonOperator) }} {{ publication.conditionTarget }}
-        </div>
-      </div>
-    </div>
-
-
     <div class="click-to-open" (click)="goToPublicationPage(publication.id)">
       <div *ngIf="!isEditing">
         <div class="publication-text">

@@ -1,8 +1,8 @@
 <div class="author-info">
   <div class="profile-pic-wrapper">
-    @if (user.profileImage && user.profileImage.imageUrl) {
+    @if (user.imageUrl) {
       <img
-        [src]="user.profileImage.imageUrl"
+        [src]="user.imageUrl"
         alt="Profile Picture"
         class="profile-pic rounded-circle"
       />

@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { MemberModel } from '../../app/_models/user/memberModel';
+import { PublicUserBriefModel } from '../../app/_models/user/publicUserBriefModel';
 
 @Component({
   selector: 'app-icon',
@@ -9,5 +10,5 @@ import { MemberModel } from '../../app/_models/user/memberModel';
   styleUrl: './icon.component.css'
 })
 export class IconComponent {
-  @Input() user!: MemberModel
+  @Input() user!: PublicUserBriefModel
 }

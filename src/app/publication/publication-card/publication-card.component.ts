@@ -1,5 +1,4 @@
 import { Component, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
-import { PublicationModel } from '../../_models/publications/publicationModel';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { UpdatePublicationModel } from '../../_models/publications/updatePublicationModel';
 import { AccountService } from '../../_services/account.service';
@@ -7,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MakeComplaintComponent } from "../../complaint/make-complaint-component/make-complaint-component.component";
 import { IconComponent } from "../../../shared-components/icon/icon.component";
+import { PublicationCardModel } from '../../_models/publications/publicationCardModel';
 
 @Component({
   selector: 'app-publication-card',
@@ -19,7 +19,7 @@ import { IconComponent } from "../../../shared-components/icon/icon.component";
 export class PublicationCardComponent {
   accountService = inject(AccountService);
   private router = inject(Router);
-  @Input() publication!: PublicationModel;
+  @Input() publication!: PublicationCardModel;
   @Output() editPublication = new EventEmitter<UpdatePublicationModel>();
   @Output() deletePublication = new EventEmitter<string>();
   @Output() likePublication = new EventEmitter<string>();

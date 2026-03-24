@@ -16,24 +16,16 @@ export class AdminService {
   private baseUrl = environment.apiUrl;
   constructor() { }
 
-  getUsers(params?: PaginationParams): Observable<PagedList<AdminUserModel>> {
-    let httpParams = new HttpParams()
-      .set('page', params?.page?.toString() ?? '1')
-      .set('pageSize', params?.pageSize?.toString() ?? '10');
+getUsers(params?: PaginationParams): Observable<PagedList<AdminUserModel>> {
+  const httpParams = new HttpParams()
+    .set('page', params?.page?.toString() ?? '1')
+    .set('pageSize', params?.pageSize?.toString() ?? '10');
 
-    // Request returns ApiResponse<PagedList<T>>, extract .value
-    return this.http.get<ApiResponse<PagedList<AdminUserModel>>>(
-      `${this.baseUrl}/admin/get-users`,
-      { params: httpParams }
-    ).pipe(
-      map(response => {
-        if (!response.isSuccess || !response.value) {
-          throw new Error(response.error ?? 'Unknown API error');
-        }
-        return response.value;
-      })
-    );
-  }
+  return this.http.get<PagedList<AdminUserModel>>(
+    `${this.baseUrl}/admin/get-users`,
+    { params: httpParams }
+  );
+}
 
   getViolations(userId: string){
     return this.http.get<ViolationModel[]>(`${this.baseUrl}/admin/violations/${userId}`);

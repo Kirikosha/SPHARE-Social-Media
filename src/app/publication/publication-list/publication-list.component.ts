@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { PublicationService } from '../../_services/publication.service';
-import { PublicationModel } from '../../_models/publications/publicationModel';
+import { mapPublicationToCard, PublicationModel } from '../../_models/publications/publicationModel';
 import { AccountService } from '../../_services/account.service';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
@@ -8,6 +8,7 @@ import { PublicationCardComponent } from "../publication-card/publication-card.c
 import { UpdatePublicationModel } from '../../_models/publications/updatePublicationModel';
 import { ActivatedRoute } from '@angular/router';
 import { CreateViolationComponent } from "../../admin/create-violation/create-violation.component";
+import { PublicationCardModel } from '../../_models/publications/publicationCardModel';
 
 @Component({
   selector: 'app-publication-my-list',
@@ -22,7 +23,7 @@ export class PublicationListComponent implements OnInit{
   accountService = inject(AccountService);
   private toastr = inject(ToastrService);
   
-  publications: PublicationModel[] = [];
+  publications: PublicationCardModel[] = [];
   isLoading = true;
   isCurrentUserProfile = false;
 
@@ -47,12 +48,6 @@ loadPublications(uniqueNameIdentifier: string): void {
       const isOwnProfile = currentUser?.uniqueNameIdentifier === uniqueNameIdentifier;
       const now = new Date();
       
-      this.publications = publications.filter(p => 
-        !p.remindAt || 
-        new Date(p.remindAt) <= now || 
-        isOwnProfile
-      );
-      
       this.isLoading = false;
     },
     error: (error) => {
@@ -62,20 +57,20 @@ loadPublications(uniqueNameIdentifier: string): void {
   });
 }
 
-  onUpdatePublication(publication: UpdatePublicationModel): void {
-    this.publicationService.updatePublication(publication).subscribe({
-      next: (updatedPublication) => {
-        const index = this.publications.findIndex(p => p.id === updatedPublication.id);
-        if (index !== -1) {
-          this.publications[index] = updatedPublication;
-          this.toastr.success('Publication updated successfully');
-        }
-      },
-      error: (error) => {
-        this.toastr.error('Failed to update publication', error.message);
+onUpdatePublication(publication: UpdatePublicationModel): void {
+  this.publicationService.updatePublication(publication).subscribe({
+    next: (updatedCard: PublicationCardModel) => {
+      const index = this.publications.findIndex(p => p.id === updatedCard.id);
+      if (index !== -1) {
+        this.publications[index] = updatedCard;
+        this.toastr.success('Publication updated successfully');
       }
-    });
-  }
+    },
+    error: (error) => {
+      this.toastr.error('Failed to update publication', error.message);
+    }
+  });
+}
 
   onDeletePublication(publicationId: string): void {
     if (!confirm('Are you sure you want to delete this publication?')) return;

@@ -6,6 +6,7 @@ import { AdminService } from '../../_services/admin.service';
 import { CommonModule, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AccountService } from '../../_services/account.service';
+import { PublicationCardModel } from '../../_models/publications/publicationCardModel';
 
 @Component({
   selector: 'app-create-violation',
@@ -16,7 +17,7 @@ import { AccountService } from '../../_services/account.service';
 })
 export class CreateViolationComponent implements OnInit {
   accountService = inject(AccountService);
-  @Input() item!: PublicationModel | CommentModel;
+  @Input() item!: PublicationCardModel | CommentModel;
   @Output() itemDeleted = new EventEmitter<string>();
   private adminService = inject(AdminService);
   private toastr = inject(ToastrService);

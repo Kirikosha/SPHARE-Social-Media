@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using Domain.DTOs.UserDTOs;
 
 namespace Application.Features.Recommendations.Queries;
 
@@ -11,41 +11,50 @@ using System.Threading.Tasks;
 
 public class GetRecommendations
 {
-    public class Query : IRequest<Result<List<PublicationDto>>>
+    public class Query : IRequest<Result<List<PublicationCardDto>>>
     {
         public required string UserId { get; set; }
         public required int Page { get; set; }
         public required int PageSize { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper)
-        : IRequestHandler<Query, Result<List<PublicationDto>>>
+    public class Handler(ApplicationDbContext context)
+        : IRequestHandler<Query, Result<List<PublicationCardDto>>>
     {
-        public async Task<Result<List<PublicationDto>>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<List<PublicationCardDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
+            var now = DateTime.UtcNow;
+            
             var interests = await context.UserInterestTags
+                .AsNoTracking()
                 .Where(i => i.UserId == request.UserId && i.Weight > 0.1f)
                 .ToListAsync(cancellationToken);
 
             if (!interests.Any())
             {
-                var publications = await GetFallbackRecommendationsAsync(request.Page, request.PageSize,
-                    cancellationToken);
+                var fallbackDtos = await GetFallbackRecommendationsAsync(
+                    request, cancellationToken);
 
-                return Result<List<PublicationDto>>.Success(mapper.Map<List<PublicationDto>>(publications));
+                return Result<List<PublicationCardDto>>.Success(fallbackDtos);
             }
+
             var interestTagIds = interests.Select(i => i.TagId).ToHashSet();
+            var weightLookup = interests.ToDictionary(i => i.TagId, i => i.Weight);
 
             var seenIds = await context.PublicationViews
-                .Where(v => v.UserId == request.UserId 
-                            && v.ViewedAt > DateTime.UtcNow.AddDays(-30))
+                .AsNoTracking()
+                .Where(v => v.UserId == request.UserId &&
+                            v.ViewedAt > now.AddDays(-30))
                 .Select(v => v.PublicationId)
                 .ToListAsync(cancellationToken);
 
             var candidates = await context.Publications
+                .AsNoTracking()
                 .Where(p => !p.IsDeleted
                             && !seenIds.Contains(p.Id)
                             && p.PublicationTags.Any(pt => interestTagIds.Contains(pt.TagId)))
+                .OrderByDescending(p => p.PostedAt)
+                .Take(200)
                 .Select(p => new
                 {
                     Publication = p,
@@ -55,11 +64,7 @@ public class GetRecommendations
                         .ToList()
                 })
                 .ToListAsync(cancellationToken);
-
-            var weightLookup = interests.ToDictionary(i => i.TagId, i => i.Weight);
-
-            var skip = request.Page * request.PageSize;
-
+ 
             var scored = candidates
                 .Select(c => new
                 {
@@ -67,23 +72,109 @@ public class GetRecommendations
                     Score = CalculateScore(c.MatchingTagIds, weightLookup, c.Publication)
                 })
                 .OrderByDescending(x => x.Score)
+                .ToList();
+
+            var skip = request.Page * request.PageSize;
+
+            var recommended = scored
                 .Skip(skip)
                 .Take(request.PageSize)
                 .Select(x => x.Publication)
                 .ToList();
-
-            return Result<List<PublicationDto>>.Success(mapper.Map<List<PublicationDto>>(scored));
- 
             
+            if (recommended.Count < request.PageSize)
+            {
+                var fallback = await context.Publications
+                    .AsNoTracking()
+                    .Where(p => !p.IsDeleted && p.PostedAt > now.AddDays(-7))
+                    .OrderByDescending(p => p.Likes.Count * 0.6f + p.ViewCount * 0.1f)
+                    .Skip(skip)
+                    .Take(request.PageSize)
+                    .ToListAsync(cancellationToken);
+
+                var needed = request.PageSize - recommended.Count;
+
+                var additional = fallback
+                    .Where(f => recommended.All(r => r.Id != f.Id))
+                    .Take(needed)
+                    .ToList();
+
+                recommended.AddRange(additional);
+            }
+            
+            var result = recommended
+                .Select(p => new PublicationCardDto
+                {
+                    Id = p.Id,
+                    Content = p.Content,
+                    PostedAt = p.PostedAt,
+                    UpdatedAt = p.UpdatedAt,
+                    ImageUrls = p.Images!
+                        .Select(i => i.ImageUrl)
+                        .ToList(),
+                    Author = new PublicUserBriefDto
+                    {
+                        Id = p.Author.Id,
+                        Username = p.Author.Username,
+                        UniqueNameIdentifier = p.Author.UniqueNameIdentifier,
+                        Blocked = p.Author.Blocked,
+                        ImageUrl = p.Author.ProfileImage != null
+                            ? p.Author.ProfileImage.ImageUrl
+                            : null
+                    },
+                    LikesAmount = p.Likes.Count(),
+                    IsLikedByCurrentUser = p.Likes.Any(l => l.LikedById == request.UserId),
+                    CommentAmount = p.Comments!.Count(),
+                    PublicationType = p.PublicationType,
+                    ViewCount = p.ViewCount,
+                    IsDeleted = p.IsDeleted
+                })
+                .ToList();
+
+            return Result<List<PublicationCardDto>>.Success(result);
         }
-        private async Task<List<Publication>> GetFallbackRecommendationsAsync(
-            int page, int pageSize, CancellationToken ct)
+        private async Task<List<PublicationCardDto>> GetFallbackRecommendationsAsync(
+            Query request,
+            CancellationToken ct)
         {
+            var now = DateTime.UtcNow;
+
             return await context.Publications
-                .Where(p => !p.IsDeleted && p.PostedAt > DateTime.UtcNow.AddDays(-7))
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted && p.PostedAt > now.AddDays(-7))
                 .OrderByDescending(p => p.Likes.Count * 0.6f + p.ViewCount * 0.1f)
-                .Skip(page * pageSize)
-                .Take(pageSize)
+                .Skip(request.Page * request.PageSize)
+                .Take(request.PageSize)
+                .Select(p => new PublicationCardDto
+                {
+                    Id = p.Id,
+                    Content = p.Content,
+                    PostedAt = p.PostedAt,
+                    UpdatedAt = p.UpdatedAt,
+
+                    ImageUrls = p.Images!
+                        .Select(i => i.ImageUrl)
+                        .ToList(),
+
+                    Author = new PublicUserBriefDto
+                    {
+                        Id = p.Author.Id,
+                        Username = p.Author.Username,
+                        UniqueNameIdentifier = p.Author.UniqueNameIdentifier,
+                        Blocked = p.Author.Blocked,
+                        ImageUrl = p.Author.ProfileImage != null
+                            ? p.Author.ProfileImage.ImageUrl
+                            : null
+                    },
+
+                    LikesAmount = p.Likes.Count(),
+                    IsLikedByCurrentUser = p.Likes.Any(l => l.LikedById == request.UserId),
+                    CommentAmount = p.Comments!.Count(),
+
+                    PublicationType = p.PublicationType,
+                    ViewCount = p.ViewCount,
+                    IsDeleted = p.IsDeleted
+                })
                 .ToListAsync(ct);
         }
         

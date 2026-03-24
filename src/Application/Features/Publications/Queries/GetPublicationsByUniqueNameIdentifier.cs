@@ -3,8 +3,6 @@
 namespace Application.Features.Publications.Queries;
 
 using Core;
-using AutoMapper;
-using Domain.DTOs;
 using Domain.DTOs.PublicationDTOs;
 using Domain.DTOs.UserDTOs;
 using Infrastructure;
@@ -21,7 +19,7 @@ public class GetPublicationsByUniqueNameIdentifier
         public PaginationParams PaginationParams { get; set; } = new();
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper) 
+    public class Handler(ApplicationDbContext context) 
         : IRequestHandler<Query, Result<PagedList<PublicationCardDto>>>
     {
         public async Task<Result<PagedList<PublicationCardDto>>> Handle(Query request, CancellationToken cancellationToken)
@@ -44,7 +42,7 @@ public class GetPublicationsByUniqueNameIdentifier
                     PostedAt = p.PostedAt,
                     UpdatedAt = p.UpdatedAt,
 
-                    ImageUrls = p.Images
+                    ImageUrls = p.Images!
                         .Select(i => i.ImageUrl)
                         .ToList(),
 
@@ -64,7 +62,7 @@ public class GetPublicationsByUniqueNameIdentifier
                     IsLikedByCurrentUser = p.Likes
                         .Any(l => l.LikedById == request.UserId),
 
-                    CommentAmount = p.Comments.Count(),
+                    CommentAmount = p.Comments!.Count(),
 
                     PublicationType = p.PublicationType,
                     ViewCount = p.ViewCount,

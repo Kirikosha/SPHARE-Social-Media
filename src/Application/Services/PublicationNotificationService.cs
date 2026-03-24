@@ -3,6 +3,7 @@ using Application.Features.Publications.Queries;
 using Application.Features.Users.Queries;
 using Application.Services.EmailService;
 using Application.Services.SubscriptionService;
+using Domain.DTOs.PublicationDTOs;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -48,7 +49,7 @@ public class PublicationNotificationService : BackgroundService
     private async Task ProcessPublicationsAsync(CancellationToken stoppingToken)
     {
         var followersCache = new Dictionary<string, List<string>>(); // Key - author id, value - list of follower ids
-        List<Publication> publicationsBatch;
+        List<PublicationNotificationDto> publicationsBatch;
 
         var lastDate = DateTime.UtcNow;
         do
@@ -77,7 +78,7 @@ public class PublicationNotificationService : BackgroundService
         } while (publicationsBatch.Count == BatchSize && !stoppingToken.IsCancellationRequested);
     }
 
-    private async Task ProcessSinglePublicationAsync(Publication? publication, List<string> followers, 
+    private async Task ProcessSinglePublicationAsync(PublicationNotificationDto? publication, List<string> followers, 
         CancellationToken 
             stoppingToken)
     {
@@ -122,10 +123,9 @@ public class PublicationNotificationService : BackgroundService
     }
 
 
-    private static string CreateBody(Publication publication, string appBaseUrl)
+    private static string CreateBody(PublicationNotificationDto publication, string appBaseUrl)
     {
-        var author = publication.Author;
-        var hasImages = publication.Images != null && publication.Images.Any();
+        var hasImages = string.IsNullOrEmpty(publication.FirstImageUrl);
 
         var body = $@"
 <!DOCTYPE html>
@@ -136,19 +136,19 @@ public class PublicationNotificationService : BackgroundService
 <body>
     <div class='container'>
         <div class='header'>
-            <h2>New Publication from {author.Username}</h2>
+            <h2>New Publication from {publication.AuthorUsername}</h2>
         </div>
         
         <div class='content'>
             <p>Hello,</p>
-            <p>{author.Username} has just published something new that you might find interesting:</p>
+            <p>{publication.AuthorUsername} has just published something new that you might find interesting:</p>
             
             <div class='publication-card'>
                 <div class='author-info'>
-                    <img src='{author.ProfileImage?.ImageUrl ?? "https://example.com/default-profile.png"}' 
-                         alt='{author.Username}' class='profile-image'>
+                    <img src='{publication.AuthorImageUrl ?? "https://example.com/default-profile.png"}' 
+                         alt='{publication.AuthorUsername}' class='profile-image'>
                     <div>
-                        <div class='author-name'>{author.Username}</div>
+                        <div class='author-name'>{publication.AuthorUsername}</div>
                         <div class='timestamp'>Posted at: {publication.PostedAt.ToString("MMMM dd, yyyy h:mm tt")}</div>
                     </div>
                 </div>
@@ -158,7 +158,7 @@ public class PublicationNotificationService : BackgroundService
                 </div>
                 
                 {(hasImages ? $@"
-                <img src='{publication.Images!.First().ImageUrl}' 
+                <img src='{publication.FirstImageUrl}' 
                      alt='Publication image' class='publication-image'>
                 " : "")}
                 
@@ -168,7 +168,7 @@ public class PublicationNotificationService : BackgroundService
             </div>
             
             <p style='margin-top: 25px;'>
-                You're receiving this notification because you're following {author.Username}. 
+                You're receiving this notification because you're following {publication.AuthorUsername}. 
             </p>
         </div>
         

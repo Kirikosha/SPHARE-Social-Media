@@ -72,15 +72,15 @@ public class PublicationController : BaseApiController
         }));
     }
 
-    // TODO: Think about setting sort of a query for date like a month or something like that instead of getting all
-    // planned publications
+    // TODO: replace with filtration + pagination
+    /*
     [HttpGet("planned-publications")]
     public async Task<ActionResult> GetPlannedPublications()
     {
         var userId = User.GetUserId();
         return HandleResult(await Mediator.Send(new GetPlannedPublications.Query { UserId = userId }));
     }
-
+    */
     [HttpGet("publication-calendar")]
     public async Task<ActionResult> GetPublicationModelForCalendar()
     {

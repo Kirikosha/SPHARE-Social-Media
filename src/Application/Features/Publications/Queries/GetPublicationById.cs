@@ -1,8 +1,8 @@
-﻿namespace Application.Features.Publications.Queries;
+﻿using Domain.DTOs.UserDTOs;
+
+namespace Application.Features.Publications.Queries;
 
 using Core;
-using Application.Features.Likes.Queries;
-using AutoMapper;
 using Domain.DTOs.PublicationDTOs;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -17,31 +17,45 @@ public class GetPublicationById
         public required string UserId { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context, IMapper mapper, IMediator mediator) 
+    public class Handler(ApplicationDbContext context) 
         : IRequestHandler<Query, Result<PublicationDto>>
     {
         public async Task<Result<PublicationDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            Publication? publication = await context.Publications
-                .Include(a => a.Author).ThenInclude(a => a.ProfileImage)
-                .Include(a => a.Comments)
-                .Include(a => a.Images)
-                .Include(a => a.Likes)
-                .FirstOrDefaultAsync(a => a.Id == request.PublicationId, cancellationToken);
+            var publication = await context.Publications
+                .Where(p => p.Id == request.PublicationId)
+                .Select(p => new PublicationDto
+                {
+                    Id = p.Id,
+                    Content = p.Content,
+                    PostedAt = p.PostedAt,
+                    UpdatedAt = p.UpdatedAt,
+                    RemindAt = p.RemindAt,
+                    PublicationType = p.PublicationType,
+                    ConditionType = p.ConditionType,
+                    ConditionTarget = p.ConditionTarget,
+                    ComparisonOperator = p.ComparisonOperator,
+                    ViewCount = p.ViewCount,
+                    IsDeleted = p.IsDeleted,
+                    LikesAmount = p.Likes.Count,
+                    CommentAmount = p.Comments!.Count(c => c.ParentCommentId == null),
+                    IsLikedByCurrentUser = p.Likes.Any(l => l.LikedById == request.UserId),
+                    Images = p.Images!.Select(i => i.ImageUrl).ToList(),
+                    Author = new PublicUserBriefDto
+                    {
+                        Id = p.Author.Id,
+                        Username = p.Author.Username,
+                        UniqueNameIdentifier = p.Author.UniqueNameIdentifier,
+                        Blocked = p.Author.Blocked,
+                        ImageUrl = p.Author.ProfileImage == null ? null : p.Author.ProfileImage.ImageUrl
+                    }
+                })
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (publication == null)
                 return Result<PublicationDto>.Failure("Publication was not found", 404);
 
-            var mappedPublication = mapper.Map<PublicationDto>(publication);
-            var isLikedResult = await mediator
-                .Send(new IsLikedBy.Query { PublicationId = publication.Id, UserId = request.UserId });
-            if (!isLikedResult.IsSuccess)
-            {
-                return Result<PublicationDto>.Failure(isLikedResult.Error!, isLikedResult.Code);
-            }
-
-            mappedPublication.IsLikedByCurrentUser = isLikedResult.Value;
-            return Result<PublicationDto>.Success(mappedPublication);
+            return Result<PublicationDto>.Success(publication);
         }
     }
 }

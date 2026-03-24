@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Users.Queries;
+﻿using Domain.DTOs.DetailedUserInfoDTOs;
+
+namespace Application.Features.Users.Queries;
 
 using Application.Core;
 using AutoMapper;
@@ -20,16 +22,41 @@ public class GetPublicUserById
     {
         public async Task<Result<PublicUserDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            User? user = await context.Users
-                .Include(a => a.ProfileImage)
-                .Include(a => a.Address)
-                .Include(a => a.ProfileDetails)
-                .FirstOrDefaultAsync(a => a.Id == request.Id, cancellationToken);
+            var userDto = await context.Users
+                .Where(u => u.Id == request.Id)
+                .Select(u => new PublicUserDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    UniqueNameIdentifier = u.UniqueNameIdentifier,
+                    JoinedAt = u.DateOfCreation.ToString("yyyy-MM-dd"),
+                    ProfileImage = u.ProfileImage != null ? u.ProfileImage.ImageUrl : null,
+                    Blocked = u.Blocked,
+                    UserProfileDetails = u.ProfileDetails != null
+                        ? new UserProfileDetailsDto
+                        {
+                            Id = u.ProfileDetails.Id,
+                            Pronouns = u.ProfileDetails.Pronouns,
+                            MainProfileDescription = u.ProfileDetails.MainProfileDescription,
+                            Interests = u.ProfileDetails.Interests,
+                            DateOfBirth = u.ProfileDetails.DateOfBirth
+                        }
+                        : null,
+                    Address = u.Address != null
+                        ? new AddressDto
+                        {
+                            Id = u.Address.Id,
+                            City = u.Address.City,
+                            Country = u.Address.Country
+                        }
+                        : null
+                })
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (user == null)
+            if (userDto == null)
                 return Result<PublicUserDto>.Failure("User was not found", 404);
-            var userDto = mapper.Map<PublicUserDto>(user);
-            return Result<PublicUserDto>.Success(mapper.Map<PublicUserDto>(userDto));
+
+            return Result<PublicUserDto>.Success(userDto);
         }
     }
 }

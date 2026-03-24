@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Publications.Commands;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Application.Features.Publications.Commands;
 
 using Core;
 using Infrastructure;
@@ -16,12 +18,12 @@ public class SetPublicationSentState
     {
         public async Task<Result<Unit>> Handle(Query request, CancellationToken cancellationToken)
         {
-            Publication? publication = await context.Publications.FindAsync(request.Id, cancellationToken);
-            if (publication == null)
+            bool exists = await context.Publications.AnyAsync(c => c.Id == request.Id, cancellationToken);
+            if (!exists)
                 return Result<Unit>.Failure("Publication was not found", 404);
 
-            publication.WasSent = request.State;
-            context.Publications.Update(publication);
+            await context.Publications.Where(a => a.Id == request.Id).ExecuteUpdateAsync(c => c.SetProperty(x => x
+                .WasSent, request.State), cancellationToken);
             return Result<Unit>.Success(Unit.Value);
         }
     }

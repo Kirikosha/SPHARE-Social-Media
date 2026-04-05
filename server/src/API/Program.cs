@@ -1,30 +1,10 @@
-using Application.Core;
-using Application.Features.Users.Queries;
-using Application.Helpers;
-using Application.Services.EmailService;
-using Application.Services.PasswordResetService;
-using Application.Services.PhotoService;
-using Application.Services.SubscriptionService;
-using Application.Services.TokenService;
-using Application.Services.ViolationService;
-using Application.Transaction;
-using Infrastructure;
-using Infrastructure.Neo4j;
-using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Neo4j.Driver;
-using Serilog;
-using System.Text;
-using Application.MessagingWebSockets;
-using Application.Repositories.SpamRepository;
-using Application.Repositories.UserActivityLogRepository;
-using Application.Services.UserActionLogger;
-using Application.Services.UserInterestsUpdateService;
-using Serilog.Events;
+using API.Extensions;
 using API.Middleware;
+using Application.MessagingWebSockets;
+using Serilog;
+using Serilog.Events;
 
+// Logger setup
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -38,104 +18,16 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultPGConnection"));
-});
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", builderI =>
-    {
-        builderI.WithOrigins("http://localhost:4200")
-               .AllowAnyHeader()
-               .AllowAnyMethod()
-               .AllowCredentials();
-    });
-});
-
-builder.Services.AddMediatR(x =>
-{
-    x.RegisterServicesFromAssemblyContaining<GetUsersList.Handler>();
-});
-
-var tokenKey = builder.Configuration["TokenKey"]
-               ?? throw new InvalidOperationException("TokenKey is not configured");
-builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(tokenKey)),
-            ClockSkew = TimeSpan.Zero
-        };
-
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                var accessToken = context.Request.Query["access_token"];
-                var path = context.HttpContext.Request.Path;
-
-                if (!string.IsNullOrEmpty(accessToken) &&
-                path.StartsWithSegments("/chat"))
-                {
-                    context.Token = accessToken;
-                }
-                return Task.CompletedTask;
-            }
-        };
-    });
-
-
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
-builder.Services.AddScoped<IEmailService, EmailService>(); // SMTP Settings
-builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
-builder.Services.AddScoped<IPhotoService, PhotoService>(); // Cloudinary settings
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IViolationService, ViolationService>();
-builder.Services.AddScoped<ISpamRepository, SpamRepository>();
-builder.Services.AddScoped<IUserActivityLogRepository, UserActivityLogRepository>();
-builder.Services.AddScoped(typeof(IUserActionLogger<>), typeof(UserActionLogger<>));
-
-builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
-builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
-
-var settings = new Neo4jSettings();
-builder.Configuration.GetSection("Neo4jSettings").Bind(settings);
-try
-{
-    var neo4JDriver = GraphDatabase.Driver(
-        settings.Neo4jConnection,
-        AuthTokens.Basic(settings.Neo4juser, settings.Neo4jPassword)
-    );
-    builder.Services.AddSingleton(neo4JDriver);
-    builder.Services.AddTransient<INeo4jDataAccess, Neo4jDataAccess>();
-    builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
-}
-catch (Exception ex)
-{
-    Log.Fatal(ex, "Failed to initialize Neo4j Driver");
-}
-builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
-
-builder.Services.AddMemoryCache();
-
-builder.Services.AddSignalR();
-
-builder.Services.AddHostedService<UserInterestUpdateJob>();
+// chained service registration
+builder.Services
+    .AddWebServices(builder.Configuration)
+    .AddApplicationServices(builder.Configuration)
+    .AddInfrastructureServices(builder.Configuration)
+    .AddAuthServices(builder.Configuration);
 
 var app = builder.Build();
 
+// Middleware pipeline
 app.UseSerilogRequestLogging();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
@@ -146,35 +38,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.MapHub<ChatHub>("/chat");
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    
-    var retryCount = 5;
-    var delay = TimeSpan.FromSeconds(2);
-    
-    for (int i = 0; i < retryCount; i++)
-    {
-        try
-        {
-            await dbContext.Database.MigrateAsync();
-            break;
-        }
-        catch (Exception ex) when (i < retryCount - 1)
-        {
-            Console.WriteLine($"Migration attempt {i + 1} failed: {ex.Message}. Retrying in {delay.TotalSeconds} seconds...");
-            await Task.Delay(delay);
-        }
-    }
-}
+// Database migration
+await app.MigrateDatabaseAsync();
+
 
 app.Run();

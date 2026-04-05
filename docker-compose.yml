@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: socialmedia_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Password12
+      POSTGRES_DB: socialnetwork_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - socialmedia_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: socialmedia_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com   # change as needed
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"   # pgAdmin web UI will be on http://localhost:5050
+    networks:
+      - socialmedia_network
+    depends_on:
+      - postgres
+
+  neo4j:
+    image: neo4j:5
+    container_name: socialmedia_neo4j
+    environment:
+      NEO4J_AUTH: neo4j/password
+    ports:
+      - "7474:7474"   # HTTP
+      - "7687:7687"   # Bolt
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - socialmedia_network
+
+  api:
+    build:
+      context: ./server
+      dockerfile: SocialMediaApp/src/API/Dockerfile
+    container_name: socialmedia_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultPGConnection=Host=postgres;Port=5432;Database=socialnetwork_db;Username=postgres;Password=Password12
+      - Neo4jSettings__Neo4jConnection=bolt://neo4j:7687
+      - Neo4jSettings__Neo4jUser=neo4j
+      - Neo4jSettings__Neo4jPassword=password
+      - Neo4jSettings__Neo4jDatabase=neo4j
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    depends_on:
+      postgres:
+        condition: service_started
+      neo4j:
+        condition: service_started
+      seq:
+        condition: service_started
+    networks:
+      - socialmedia_network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: socialmedia_client
+    ports:
+      - "4200:80"
+    networks:
+      - socialmedia_network
+  
+  seq:
+    image: datalust/seq:latest
+    container_name: socialmedia_seq
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=StrongPassword123
+    ports:
+      - "5341:5341"
+      - "8082:80"
+    volumes:
+      - seq_data:/data
+    networks:
+      - socialmedia_network
+
+volumes:
+  postgres_data:
+  neo4j_data:
+  seq_data:
+
+networks:
+  socialmedia_network:
+    driver: bridge

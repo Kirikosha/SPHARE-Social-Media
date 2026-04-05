@@ -44,7 +44,7 @@ services:
   api:
     build:
       context: ./server
-      dockerfile: SocialMediaApp/src/API/Dockerfile
+      dockerfile: src/API/Dockerfile
     container_name: socialmedia_api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development

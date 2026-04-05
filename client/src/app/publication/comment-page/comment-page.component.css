@@ -1,0 +1,94 @@
+.comment-section {
+  margin-top: 1rem;
+}
+
+.comment-section-title {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f8f9fa;
+  margin-bottom: 1rem;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.comment-card {
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.parent-card {
+  border-width: 2px;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.comment-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.comment-author-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-author-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.comment-author-name {
+  font-weight: 600;
+}
+
+.comment-author-handle {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comment-time {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.comment-content {
+  margin-top: 0.5rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.delete-button {
+  color: #dc3545;
+}
+
+.clickable {
+  cursor: pointer;
+}

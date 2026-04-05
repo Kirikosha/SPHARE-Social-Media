@@ -1,0 +1,157 @@
+<div class="profile-container">
+  @if (memberModel && !isLoading) {
+    <div class="profile-header">
+      <div class="cover-photo"></div>
+      
+      <!-- Profile Info Section -->
+      <div class="profile-info-section">
+        <div class="profile-pic-wrapper">
+          @if (memberModel.profileImage && memberModel.profileImage.imageUrl) {
+            <img [src]="memberModel.profileImage.imageUrl" 
+                alt="Profile Picture" 
+                class="profile-pic rounded-circle"
+                [class.blocked-avatar]="memberModel.blocked">
+          } @else {
+            <img src="assets/user.png" 
+                alt="Profile Picture" 
+                class="profile-pic rounded-circle"
+                [class.blocked-avatar]="memberModel.blocked">
+          }
+          @if (memberModel.blocked) {
+            <div class="blocked-avatar-overlay">
+              <i class="bi bi-lock-fill"></i>
+            </div>
+          }
+        </div>
+        
+        <div class="profile-actions">
+          @if (isCurrentUserProfile) {
+            <button class="btn btn-outline-success rounded-pill" (click)="goToUpdate()">
+              Edit profile
+            </button>
+          } @else {
+            <button class="btn rounded-pill follow-button" 
+                    [class.btn-primary]="!isFollowing"
+                    [class.btn-outline-primary]="isFollowing"
+                    [disabled]="memberModel.blocked || accountService.currentUser()?.blocked"
+                    (click)="toggleFollow()">
+              @if (isFollowing) {
+                Following
+              } @else {
+                Follow
+              }
+            </button>
+            <button class="btn rounded-pill"
+            (click)="openChat()">Start chatting</button>
+          }
+        </div>
+        
+        <div class="profile-details mt-2">
+          <div class="d-flex align-items-center">
+            <h2 class="profile-name">{{memberModel.username}}</h2>
+            @if (memberModel.blocked) {
+              <span class="badge bg-danger ms-2">
+                <i class="bi bi-lock-fill"></i> Blocked
+              </span>
+            }
+          </div>
+          <h2 class="profile-unique-name">&#64;{{memberModel.uniqueNameIdentifier}}</h2>
+          <p class="text-muted">Joined {{memberModel.joinedAt}}</p>
+          
+          <div class="profile-stats d-flex mt-3">
+            <div class="me-4">
+              <span class="fw-bold pright">{{followingCount}}</span> 
+              <span class="text-muted">Following</span>
+            </div>
+            <div>
+              <span class="fw-bold pright">{{followersCount}}</span> 
+              <span class="text-muted">Followers</span>
+            </div>
+          </div>
+
+          <!-- User Profile Details Section (Conditional) -->
+          @if (memberModel.userProfileDetails && 
+               (memberModel.userProfileDetails.pronouns || 
+                memberModel.userProfileDetails.mainProfileDescription || 
+                memberModel.userProfileDetails.interests.length > 0 || 
+                memberModel.userProfileDetails.dateOfBirth)) {
+            <div class="profile-info-section mt-4">
+              <div class="section-divider mb-3">
+                <h5 class="section-title">About</h5>
+                <div class="divider-line"></div>
+              </div>
+              
+              <!-- Pronouns -->
+              @if (memberModel.userProfileDetails.pronouns) {
+                <div class="profile-info-item mb-2">
+                  <i class="bi bi-person-circle me-2 text-muted"></i>
+                  <span>{{memberModel.userProfileDetails.pronouns}}</span>
+                </div>
+              }
+              
+              <!-- Profile Description -->
+              @if (memberModel.userProfileDetails.mainProfileDescription) {
+                <div class="profile-info-item mb-3">
+                  <p class="mb-0">{{memberModel.userProfileDetails.mainProfileDescription}}</p>
+                </div>
+              }
+              
+              <!-- Interests -->
+              @if (memberModel.userProfileDetails.interests && memberModel.userProfileDetails.interests.length > 0) {
+                <div class="profile-info-item mb-3">
+                  <i class="bi bi-tags me-2 text-muted"></i>
+                  <div class="d-flex flex-wrap gap-2 mt-1">
+                    @for (interest of memberModel.userProfileDetails.interests; track $index) {
+                      <span class="interest-badge">{{interest}}</span>
+                    }
+                  </div>
+                </div>
+              }
+              
+              <!-- Date of Birth -->
+              @if (memberModel.userProfileDetails.dateOfBirth) {
+                <div class="profile-info-item mb-2">
+                  <i class="bi bi-calendar3 me-2 text-muted"></i>
+                  <span>Born {{formatDate(memberModel.userProfileDetails.dateOfBirth)}}</span>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Address Section (Conditional) -->
+          @if (memberModel.address && 
+               (memberModel.address.city || memberModel.address.country)) {
+            <div class="profile-info-section mt-4">
+              <div class="section-divider mb-3">
+                <h5 class="section-title">Location</h5>
+                <div class="divider-line"></div>
+              </div>
+              
+              <div class="profile-info-item">
+                <i class="bi bi-geo-alt me-2 text-muted"></i>
+                @if (memberModel.address.city && memberModel.address.country) {
+                  <span>{{memberModel.address.city}}, {{memberModel.address.country}}</span>
+                } @else if (memberModel.address.city) {
+                  <span>{{memberModel.address.city}}</span>
+                } @else if (memberModel.address.country) {
+                  <span>{{memberModel.address.country}}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tabs Section -->
+    <div class="profile-tabs mt-4">
+      <app-profile-tabs></app-profile-tabs>
+    </div>
+  } @else {
+    <div class="loading-spinner d-flex justify-content-center align-items-center" style="height: 300px;">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  }
+</div>

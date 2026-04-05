@@ -1,0 +1,76 @@
+<div class="comment-section">
+  <h3 class="comment-section-title">Comments ({{comments.length}})</h3>
+  
+  <!-- Comment creation -->
+  @if (!accountService.currentUser()?.blocked) {
+    <app-comment-create 
+      [publicationId]="publicationId" 
+      (commentCreated)="onCommentCreated($event)">
+    </app-comment-create>
+  }
+
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="errorLoading && !isLoading" class="error-state">
+    Failed to load comments. <button (click)="loadComments()">Try again</button>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="comments.length === 0 && !isLoading && !errorLoading" class="empty-state">
+    No comments yet. Be the first to comment!
+  </div>
+
+  <!-- Comments list -->
+  <div class="comments-list">
+    <div *ngFor="let comment of comments" class="comment-card">
+      <div class="comment-header">
+        <app-icon [user] = "comment.author"></app-icon>
+        <div class="comment-actions">
+          <span class="comment-time">{{comment.creationDate | date: 'MMM d, y, h:mm a'}}</span>
+
+          <button class="btn btn-link btn-sm"
+                  (click)="openComplaintModal(comment.id)">
+            <i class="bi bi-flag"></i>
+          </button>
+
+          <button *ngIf="comment.author && isCommentOwner(comment.author.uniqueNameIdentifier)" 
+                  class="btn btn-link btn-sm delete-button"
+                  (click)="deleteComment(comment.id)">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="comment-content">
+        <ng-container *ngIf="!comment.isDeleted; else removedTemplate">
+          {{comment.content}}
+        </ng-container>
+        <ng-template #removedTemplate>
+          This comment was removed
+        </ng-template>
+
+        <button type="button"
+                class="btn btn-link btn-sm p-0 mt-2"
+                (click)="openThread(comment.id)">
+          {{comment.repliesAmount || 0}} replies
+        </button>
+      </div>
+    </div>
+  </div>
+<app-make-complaint
+  #complaintModal
+  [targetId]="complaintTargetId"
+  targetType="comment"
+  title="Report comment"
+  [modalId]="complaintModalId"
+  (complaintSubmitted)="onComplaintSubmitted()"
+  (modalClosed)="onComplaintModalClosed()">
+</app-make-complaint>
+
+</div>

@@ -1,0 +1,25 @@
+<form [formGroup]="commentForm" (ngSubmit)="onSubmit()" class="comment-create-form">
+  <div class="form-group">
+    <textarea
+      formControlName="content"
+      class="form-control comment-textarea"
+      placeholder="Write a comment..."
+      [ngClass]="{ 'is-invalid': content?.touched && content?.invalid }"
+    ></textarea>
+    <div *ngIf="content?.touched && content?.invalid" class="invalid-feedback">
+      <div *ngIf="content?.errors?.['required']">Comment is required</div>
+      <div *ngIf="content?.errors?.['maxlength']">
+        Comment cannot exceed 500 characters
+      </div>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button
+      type="submit"
+      class="btn btn-primary comment-submit-button"
+      [disabled]="commentForm.invalid"
+    >
+      Post Comment
+    </button>
+  </div>
+</form>

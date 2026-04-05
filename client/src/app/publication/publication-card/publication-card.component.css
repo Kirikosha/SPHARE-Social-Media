@@ -1,0 +1,316 @@
+.publication-card {
+  padding: 16px;
+  border: 1px solid #e6ecf0; 
+  border-radius: 12px;        
+  transition: background-color 0.2s;
+  margin-bottom: 16px;        
+  background-color: white; 
+}
+
+.publication-card:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); 
+}
+
+
+
+.publication-text {
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  text-align: left;
+  padding-left: 52px;
+  margin-left: -52px;
+}
+
+.publication-images {
+  margin-bottom: 12px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.image-grid {
+  display: grid;
+  gap: 2px;
+}
+
+.image-grid.single-image {
+  display: block; /* Change from grid to block for single image */
+  max-width: 100%;
+}
+
+.image-grid.single-image .image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* This creates a square aspect ratio */
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.image-grid.single-image .publication-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-grid.two-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.image-grid.two-images .image-container {
+  position: relative;
+  padding-top: 100%; /* Make them square */
+}
+
+.image-grid.two-images .publication-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+.image-grid.three-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two columns */
+  grid-template-rows: auto auto; /* Two rows */
+  gap: 2px;
+}
+
+/* Big square on top (first row) */
+.image-grid.three-images .image-container:first-child {
+  grid-column: span 2; /* Takes both columns */
+  padding-top: 100%; /* Makes it square */
+}
+
+/* Two smaller squares on bottom (second row) */
+.image-grid.three-images .image-container:nth-child(2),
+.image-grid.three-images .image-container:nth-child(3) {
+  padding-top: 100%; /* Makes them square */
+}
+
+/* Remove any existing absolute positioning that might interfere */
+.image-grid.three-images .image-container {
+  position: relative;
+}
+
+.image-grid.three-images .publication-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+
+.image-grid.four-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.image-grid.four-images .image-container {
+  position: relative;
+  padding-top: 100%; /* Square containers */
+}
+
+.image-grid.four-images .publication-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+.image-container {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.publication-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.publication-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e6ecf0;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  color: #657786;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.action-button:hover {
+  color: #1da1f2;
+  background-color: rgba(29, 161, 242, 0.1);
+}
+
+.action-button i {
+  font-size: 1.1rem;
+}
+
+.action-count {
+  font-size: 0.8rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .profile-pic-wrapper {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .publication-text {
+    font-size: 1rem;
+  }
+}
+
+.publication-content {
+  width: 100%;
+}
+
+.edit-controls {
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.edit-textarea {
+  width: 100%;
+  min-height: 100px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.schedule-edit {
+  margin-bottom: 12px;
+}
+
+.schedule-edit label {
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.edit-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.edit-buttons .btn {
+  padding: 4px 12px;
+  font-size: 0.9rem;
+}
+
+.updated-time {
+  color: #657786;
+  font-size: 0.9rem;
+}
+
+.updated-time i {
+  font-size: 0.8rem;
+  margin-right: 2px;
+}
+
+.scheduled-time {
+  color: #1da1f2;
+  font-size: 0.9rem;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.scheduled-time i {
+  font-size: 0.9rem;
+}
+
+
+.publication-card {
+  position: relative; /* Needed for absolute positioning of admin button */
+  
+  .admin-actions-wrapper {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+  }
+}
+
+.publication-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.publication-meta {
+  margin-left: auto;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: #657786;
+  font-size: 0.9rem;
+}
+
+.publication-meta > span {
+  white-space: nowrap;
+}
+
+.scheduled-time {
+  margin-top: 4px;
+  color: #1da1f2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.conditional-info {
+  color: #6f42c1; /* purple */
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+}
+.conditional-info i {
+  margin-right: 0.25rem;
+}

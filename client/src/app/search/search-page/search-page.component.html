@@ -1,0 +1,51 @@
+<div class="search-page-container">
+  <div class="search-header">
+    <h1>Search Users</h1>
+    <div class="search-box">
+      <input type="text" 
+             [(ngModel)]="searchQuery"
+             (keyup.enter)="onSearch()"
+             placeholder="Search by username or handle..."
+             class="search-input">
+      <button (click)="onSearch()" class="search-button">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="search-results">
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- No results state -->
+    <div *ngIf="hasSearched && !isLoading && searchResults.length === 0" class="no-results">
+      <i class="bi bi-emoji-frown"></i>
+      <p>No users found matching "{{searchQuery}}"</p>
+    </div>
+
+    <!-- Results list -->
+    <div *ngIf="!isLoading && searchResults.length > 0" class="results-list">
+      <div *ngFor="let user of searchResults" class="user-card" [routerLink]="['/profile', user.uniqueNameIdentifier]">
+        <div class="user-avatar">
+            @if (user.profileImage && user.profileImage.imageUrl) {
+              <img [src]="user.profileImage.imageUrl" 
+                   alt="{{user.username}}'s profile picture" 
+                   class="avatar-image">
+            } @else {
+              <img src="assets/user.png" 
+                   alt="{{user.username}}'s profile picture" 
+                   class="avatar-image">
+            }
+        </div>
+        <div class="user-info">
+          <h3 class="username">{{user.username}}</h3>
+          <p class="user-handle">&#64;{{user.uniqueNameIdentifier}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

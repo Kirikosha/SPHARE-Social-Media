@@ -1,0 +1,26 @@
+<div class="author-info">
+  <div class="profile-pic-wrapper">
+    @if (user.imageUrl) {
+      <img
+        [src]="user.imageUrl"
+        alt="Profile Picture"
+        class="profile-pic rounded-circle"
+      />
+    } @else {
+      <img
+        src="assets/user.png"
+        alt="Profile Picture"
+        class="profile-pic rounded-circle"
+      />
+    }
+  </div>
+
+  <div class="author-details">
+    <div class="d-flex align-items-center flex-wrap">
+      <span class="author-name">{{ user.username }}</span>
+      <span class="author-handle">
+        &#64;{{ user.uniqueNameIdentifier }}
+      </span>
+    </div>
+  </div>
+</div>

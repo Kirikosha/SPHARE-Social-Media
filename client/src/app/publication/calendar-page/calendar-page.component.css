@@ -1,0 +1,90 @@
+/* calendar-page.component.css */
+.calendar-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* page-sized */
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  flex: 1;
+  border-left: 1px solid #ccc;
+}
+
+.day-cell {
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.day-cell.other-month {
+  background-color: #f9f9f9;
+  color: #aaa;
+}
+
+.day-number {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.publications {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.publication-block {
+  background-color: #e0f7fa;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.publication-block:hover {
+  background-color: #b2ebf2;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.day-number {
+  font-weight: bold;
+}
+
+.add-publication-btn {
+  padding: 0 0.25rem;
+  font-size: 0.8rem;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.add-publication-btn:hover {
+  color: #0056b3;
+}

@@ -1,0 +1,56 @@
+.register-form {
+  max-width: 400px;
+  width: 100%;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image-upload {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+}
+
+.profile-preview {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #f0f2f5;
+}
+
+.upload-label {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  background-color: #1da1f2;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.upload-label:hover {
+  background-color: #1991db;
+}
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+  .register-form {
+    padding: 15px;
+    box-shadow: none;
+    border: 1px solid #e6ecf0;
+  }
+  
+  .profile-image-upload {
+    width: 80px;
+    height: 80px;
+  }
+}

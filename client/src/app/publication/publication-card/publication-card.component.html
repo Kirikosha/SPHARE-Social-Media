@@ -1,0 +1,103 @@
+<div class="publication-card" *ngIf="publication">
+  <div class="publication-content">
+    <div class="publication-header">
+      <app-icon [user] = "publication.author"></app-icon>
+      <div class="publication-meta">
+        <span class="post-time">
+          · {{ formatDate(publication.postedAt) }}
+        </span>
+
+        <span class="updated-time" *ngIf="publication.updatedAt">
+          · <i class="bi bi-pencil-fill"></i>
+          {{ formatDate(publication.updatedAt) }}
+        </span>
+
+        <div class="scheduled-time" *ngIf="publication.remindAt">
+          <i class="bi bi-clock"></i>
+          Scheduled for {{ formatDateTime(publication.remindAt) }}
+        </div>
+
+    <div class="click-to-open" (click)="goToPublicationPage(publication.id)">
+      <div *ngIf="!isEditing">
+        <div class="publication-text">
+          <p>{{publication.content}}</p>
+        </div>
+        
+        <div class="publication-images" *ngIf="publication.images && publication.images.length > 0">
+          <div class="image-grid" [ngClass]="getImageGridClass(publication.images.length)">
+            <div class="image-container" *ngFor="let image of publication.images">
+              <img [src]="image" alt="Publication image" class="publication-image">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>  
+
+
+    <div *ngIf="isEditing">
+      <div class="edit-controls">
+        <textarea [(ngModel)]="editedContent" class="form-control edit-textarea"></textarea>
+        
+        <div class="schedule-edit" *ngIf="publication.remindAt">
+          <label class="form-label">Scheduled Time:</label>
+          <input type="datetime-local" class="form-control" 
+                [(ngModel)]="editedRemindAt"
+                [min]="getCurrentDateTime()">
+        </div>
+        
+        <div class="edit-buttons">
+          <button class="btn btn-outline-secondary btn-sm" (click)="cancelEditing()">Cancel</button>
+          <button class="btn btn-primary btn-sm" (click)="saveChanges()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="publication-actions">
+      <button class="action-button">
+        <i class="bi bi-chat"></i>
+        <span class="action-count">{{publication.commentAmount}}</span>
+      </button>
+      <button class="action-button" (click)="likePublicationMethod()">
+        <i class="bi"
+          [ngClass]="{
+            'bi-heart-fill text-danger': publication.isLikedByCurrentUser,
+            'bi-heart': !publication.isLikedByCurrentUser
+          }"></i>
+        <span class="action-count">{{publication.likesAmount}}</span>
+      </button>
+      <button class="action-button">
+        <i class="bi bi-share"></i>
+      </button>
+      <button class="action-button" 
+              *ngIf="accountService.currentUser()?.uniqueNameIdentifier === publication.author.uniqueNameIdentifier" 
+              (click)="isEditing ? cancelEditing() : startEditing()">
+        <i class="bi" [class.bi-pencil]="!isEditing" [class.bi-x]="isEditing"></i>
+      </button>
+      <button class="action-button" 
+              *ngIf="accountService.currentUser()?.uniqueNameIdentifier === publication.author.uniqueNameIdentifier" 
+              (click)="isEditing ? cancelEditing() : delete()">
+        <i class="bi" [class.bi-trash]="!isEditing" [class.bi-x-square]="isEditing"></i>
+      </button>
+
+      <button class="action-button" (click)="openComplaintModal()">
+        <i class="bi bi-flag"></i>
+      </button>
+      <button class="action-button" disabled>
+        <i class="bi bi-eye"></i>
+        <span class="action-count">{{publication.viewCount}}</span>
+      </button>
+    </div>
+
+    <div class="admin-actions-wrapper">
+      <ng-content></ng-content>
+    </div>
+
+    <app-make-complaint
+    [targetId]="publication.id"
+    targetType="publication"
+    [title]="'Report Publication'"
+    (complaintSubmitted)="onComplaintSubmitted()"
+    (modalClosed)="onComplaintModalClosed()">
+  </app-make-complaint>
+  </div>
+</div>

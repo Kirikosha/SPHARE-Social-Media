@@ -1,0 +1,255 @@
+<div class="complaints-page">
+  <div class="page-header">
+    <h1>Complaints Management</h1>
+    <p class="text-muted">Review and manage user complaints</p>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <nav>
+    <div class="nav nav-tabs" id="complaintsTab" role="tablist">
+      <button class="nav-link" 
+              [class.active]="activeTab === 'publication'" 
+              (click)="switchTab('publication')">
+        Publication Complaints
+        <span *ngIf="publicationComplaints.length > 0" class="badge bg-danger ms-2">
+          {{publicationComplaints.length}}
+        </span>
+      </button>
+      <button class="nav-link" 
+              [class.active]="activeTab === 'comment'" 
+              (click)="switchTab('comment')">
+        Comment Complaints
+        <span *ngIf="commentComplaints.length > 0" class="badge bg-danger ms-2">
+          {{commentComplaints.length}}
+        </span>
+      </button>
+      <button class="nav-link" 
+              [class.active]="activeTab === 'grouped'" 
+              (click)="switchTab('grouped')">
+        Grouped Publication Complaints
+        <span *ngIf="groupedComplaints.length > 0" class="badge bg-danger ms-2">
+          {{groupedComplaints.length}}
+        </span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Tab Content -->
+  <div class="tab-content p-3 border border-top-0 rounded-bottom">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2">Loading complaints...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="alert alert-danger">
+      {{error}}
+      <button class="btn btn-sm btn-outline-danger ms-2" (click)="loadComplaints()">Retry</button>
+    </div>
+
+    <!-- Publication Complaints Tab -->
+    <div *ngIf="!isLoading && !error && activeTab === 'publication'">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Publication Complaints ({{publicationComplaints.length}})</h3>
+      </div>
+
+      <div *ngIf="publicationComplaints.length === 0" class="text-center py-5">
+        <p class="text-muted">No publication complaints found</p>
+      </div>
+
+      <div *ngFor="let complaint of publicationComplaints" class="complaint-card card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <span class="badge bg-warning me-2">ID: {{complaint.id}}</span>
+            <span class="badge bg-primary">{{complaint.reason}}</span>
+          </div>
+          <small class="text-muted">{{complaint.complainedAt | date: 'medium'}}</small>
+        </div>
+        
+        <div class="card-body">
+          <div class="row">
+            <!-- Complaint Details -->
+            <div class="col-md-6">
+              <h6>Complaint Details:</h6>
+              <p><strong>Reason:</strong> {{complaint.reason}}</p>
+              <p *ngIf="complaint.explanation"><strong>Explanation:</strong> {{complaint.explanation}}</p>
+              <p><strong>Complainer ID:</strong> {{complaint.complainerId}}</p>
+            </div>
+
+            <!-- Publication Details -->
+            <div class="col-md-6">
+              <h6>Publication Details:</h6>
+              <div class="publication-preview">
+                <div class="d-flex align-items-center mb-2">
+                  <img [src]="complaint.publication.author.imageUrl || 'assets/user.png'" 
+                       alt="Author" 
+                       class="rounded-circle me-2" 
+                       style="width: 30px; height: 30px;">
+                  <div>
+                    <strong>{{complaint.publication.author.username}}</strong>
+                    <small class="text-muted d-block">>&#64;{{complaint.publication.author.uniqueNameIdentifier}}</small>
+                  </div>
+                </div>
+                <p class="mb-2">{{complaint.publication.content | slice:0:100}}...</p>
+                <small class="text-muted">
+                  Posted: {{complaint.publication.postedAt | date: 'medium'}}
+                </small>
+                <div class="mt-2">
+                  <span class="badge bg-secondary me-2">
+                    <i class="bi bi-heart"></i> {{complaint.publication.likesAmount}}
+                  </span>
+                  <span class="badge bg-secondary">
+                    <i class="bi bi-chat"></i> {{complaint.publication.commentAmount}}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button class="btn btn-sm btn-outline-primary me-2" 
+                  [routerLink]="['/publication', complaint.publication.id]">
+            <i class="bi bi-eye"></i> View Publication
+          </button>
+          <button class="btn btn-sm btn-success me-2">
+            <i class="bi bi-check-circle"></i> Dismiss (NOT IMPLEMENTED HERE)
+          </button>
+          <button class="btn btn-sm btn-danger">
+            <i class="bi bi-trash"></i> Delete Publication (NOT IMPLEMENTED HERE)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment Complaints Tab -->
+    <div *ngIf="!isLoading && !error && activeTab === 'comment'">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Comment Complaints ({{commentComplaints.length}})</h3>
+      </div>
+
+      <div *ngIf="commentComplaints.length === 0" class="text-center py-5">
+        <p class="text-muted">No comment complaints found</p>
+      </div>
+
+      <div *ngFor="let complaint of commentComplaints" class="complaint-card card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <span class="badge bg-warning me-2">ID: {{complaint.id}}</span>
+            <span class="badge bg-primary">{{complaint.reason}}</span>
+          </div>
+          <small class="text-muted">{{complaint.complainedAt | date: 'medium'}}</small>
+        </div>
+        
+        <div class="card-body">
+          <div class="row">
+            <!-- Complaint Details -->
+            <div class="col-md-6">
+              <h6>Complaint Details:</h6>
+              <p><strong>Reason:</strong> {{complaint.reason}}</p>
+              <p *ngIf="complaint.explanation"><strong>Explanation:</strong> {{complaint.explanation}}</p>
+              <p><strong>Complainer ID:</strong> {{complaint.complainerId}}</p>
+            </div>
+
+            <!-- Comment Details -->
+            <div class="col-md-6">
+              <h6>Comment Details:</h6>
+              <div class="comment-preview">
+                <div class="d-flex align-items-center mb-2">
+                  <img [src]="complaint.comment.author.profileImage || 'assets/user.png'" 
+                       alt="Author" 
+                       class="rounded-circle me-2" 
+                       style="width: 30px; height: 30px;">
+                  <div>
+                    <strong>{{complaint.comment.author.username}}</strong>
+                    <small class="text-muted d-block">>&#64;{{complaint.comment.author.uniqueNameIdentifier}}</small>
+                  </div>
+                </div>
+                <p class="mb-2">{{complaint.comment.content}}</p>
+                <small class="text-muted">
+                  Commented: {{complaint.comment.creationDate | date: 'medium'}}
+                </small>
+                <div class="mt-2">
+                  <button class="btn btn-sm btn-outline-secondary" 
+                          [routerLink]="['/comments', complaint.comment.id]">
+                    View Comment
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button class="btn btn-sm btn-outline-primary me-2">
+            <i class="bi bi-eye"></i> View Full Context
+          </button>
+          <button class="btn btn-sm btn-success me-2">
+            <i class="bi bi-check-circle"></i> Dismiss
+          </button>
+          <button class="btn btn-sm btn-danger">
+            <i class="bi bi-trash"></i> Delete Comment
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grouped Publication Complaints Tab -->
+    <div *ngIf="!isLoading && !error && activeTab === 'grouped'">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Grouped Publication Complaints ({{groupedComplaints.length}})</h3>
+      </div>
+
+      <div *ngIf="groupedComplaints.length === 0" class="text-center py-5">
+        <p class="text-muted">No grouped complaints found</p>
+      </div>
+
+      <div *ngFor="let group of groupedComplaints" class="group-card card mb-4">
+        <div class="card-header bg-light">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-0">Publication ID: {{group.publicationId}}</h5>
+              <small class="text-muted">Total Complaints: {{group.totalComplaints}}</small>
+            </div>
+            <span class="badge bg-danger">High Priority</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <!-- Reasons Breakdown -->
+          <h6>Complaint Reasons:</h6>
+          <div class="reasons-breakdown mb-4">
+            <div *ngFor="let reason of group.reasons" class="mb-2">
+              <div class="d-flex justify-content-between">
+                <span>{{reason.reason}}</span>
+                <span class="badge bg-secondary">{{reason.count}}</span>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar" 
+                     [style.width.%]="(reason.count / group.totalComplaints) * 100">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary" 
+                    [routerLink]="['/publication', group.publicationId]">
+              <i class="bi bi-eye me-1"></i> View Publication
+            </button>
+            <button class="btn btn-warning">
+              <i class="bi bi-exclamation-triangle me-1"></i> Review All
+            </button>
+            <button class="btn btn-danger">
+              <i class="bi bi-trash me-1"></i> Delete Publication
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

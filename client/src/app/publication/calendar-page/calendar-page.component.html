@@ -1,0 +1,36 @@
+<!-- calendar-page.component.html -->
+<div class="calendar-container">
+  <div class="calendar-header">
+    <button (click)="previousMonth()">Previous</button>
+    <h2>{{ currentMonth | date:'MMMM yyyy' }}</h2>
+    <button (click)="nextMonth()">Next</button>
+  </div>
+
+  <div class="weekdays">
+    <div *ngFor="let day of ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']">
+      {{ day }}
+    </div>
+  </div>
+
+  <div class="calendar-grid">
+    <div *ngFor="let day of daysInMonth" class="day-cell"
+        [class.other-month]="day.getMonth() !== currentMonth.getMonth()">
+      <div class="day-header">
+        <span class="day-number">{{ day.getDate() }}</span>
+        <button class="btn btn-sm btn-link add-publication-btn"
+                [routerLink]="['/publications/planned-create']"
+                [queryParams]="{date: getLocalDateTimeString(day)}"
+                title="Create planned publication">
+          <i class="bi bi-plus-circle"></i>
+        </button>
+      </div>
+      <div class="publications">
+        <div *ngFor="let pub of getPublicationsForDay(day)"
+            class="publication-block"
+            [routerLink]="['/publication', pub.id]">
+          {{ pub.content | slice:0:30 }}{{ (pub.content?.length || 0) > 30 ? '...' : '' }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

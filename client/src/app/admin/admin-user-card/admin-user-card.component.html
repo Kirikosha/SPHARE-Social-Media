@@ -1,0 +1,68 @@
+<div class="user-card card bg-dark text-light mb-3">
+  <div class="card-body">
+    <div class="d-flex align-items-start">
+      <!-- User Avatar -->
+      <div class="me-3">
+        <img [src]="user.profileImage?.imageUrl || 'assets/user.png'" 
+             class="rounded-circle user-avatar" 
+             alt="User avatar">
+      </div>
+      
+      <!-- User Info -->
+      <div class="flex-grow-1">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h5 class="card-title text-white mb-1">{{ user.username }}</h5>
+            <small class="text-muted">&#64;{{ user.uniqueNameIdentifier }}</small>
+          </div>
+          <span class="badge" [ngClass]="{
+            'bg-danger': user.blocked,
+            'bg-success': !user.blocked
+          }">
+            {{ user.blocked ? 'Blocked' : 'Active' }}
+          </span>
+        </div>
+        
+        <p class="card-text mt-2 mb-2">{{ user.email }}</p>
+        
+        <div class="d-flex align-items-center mb-2">
+          <span class="me-2">Violation Score:</span>
+          <div class="progress flex-grow-1 bg-dark" style="height: 10px;">
+            <div class="progress-bar" 
+                [ngClass]="getViolationClass()"
+                [style.width]="getViolationPercentage() + '%'">
+            </div>
+
+
+          </div>
+          <span class="ms-2">{{ user.violationScore }}</span>
+        </div>
+        
+        <small class="text-muted">
+          Violations: {{ user.amountOfViolations }} | 
+          {{ user.blocked ? ('Blocked on: ' + (user.blockedAt | date)) : '' }}
+        </small>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="d-flex justify-content-end mt-3">
+      <button class="btn btn-sm btn-outline-light me-2" 
+              (click)="viewViolations()">
+        <i class="bi bi-list-check me-1"></i> View Violations
+      </button>
+      
+      <button *ngIf="!user.blocked" 
+              class="btn btn-sm btn-outline-danger me-2" 
+              (click)="onBlockUser()">
+        <i class="bi bi-lock-fill me-1"></i> Block
+      </button>
+      
+      <button *ngIf="user.blocked" 
+              class="btn btn-sm btn-outline-success" 
+              (click)="onUnblockUser()">
+        <i class="bi bi-unlock-fill me-1"></i> Unblock
+      </button>
+    </div>
+  </div>
+</div>

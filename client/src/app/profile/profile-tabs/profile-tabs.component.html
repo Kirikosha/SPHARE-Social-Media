@@ -1,0 +1,35 @@
+<div class="custom-tabs">
+  <div class="tab-header">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'posts'"
+      (click)="activeTab = 'posts'">
+      <i class="bi bi-postcard-heart"></i> My Posts
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'comments'"
+      (click)="activeTab = 'comments'">
+      <i class="bi bi-chat-square-text"></i> My Comments
+    </button>
+  </div>
+  
+  <div class="tab-content">
+    @if (activeTab === 'posts') {
+      @if (isOwner && !accountService.currentUser()?.blocked) {
+        <app-create-publication
+          (publicationCreated)="refreshPublications()"
+          class="mb-4">
+        </app-create-publication>
+      }
+      <app-publication-my-list #publicationList></app-publication-my-list>
+    }
+    
+    @if (activeTab === 'comments') {
+      <div class="empty-state">
+        <i class="bi bi-chat-square-text"></i>
+        <p>Your comments will appear here</p>
+      </div>
+    }
+  </div>
+</div>

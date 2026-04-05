@@ -1,0 +1,125 @@
+<div class="comment-section">
+  <h3 class="comment-section-title">Comment Thread</h3>
+
+  <div *ngIf="isLoadingParent" class="loading-state">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="errorLoadingParent && !isLoadingParent" class="error-state">
+    Failed to load comment.
+    <button (click)="loadThread()">Try again</button>
+  </div>
+
+  <div *ngIf="parentComment && !isLoadingParent && !errorLoadingParent" class="comment-card parent-card">
+    <div class="comment-header">
+      <app-icon
+        [user]="parentComment.author"
+        class="comment-author">
+      </app-icon>
+
+      <div class="comment-actions">
+        <span class="comment-time">
+          {{ parentComment.creationDate | date: 'MMM d, y, h:mm a' }}
+        </span>
+
+        <button class="btn btn-link btn-sm"
+                (click)="openComplaintModal(parentComment.id)">
+          <i class="bi bi-flag"></i>
+        </button>
+
+        <button *ngIf="parentComment.author && isCommentOwner(parentComment.author.uniqueNameIdentifier)"
+                class="btn btn-link btn-sm delete-button"
+                (click)="deleteComment(parentComment.id, true)">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+
+
+    <div class="comment-content">
+      <ng-container *ngIf="!parentComment.isDeleted; else removedParent">
+        {{parentComment.content}}
+      </ng-container>
+      <ng-template #removedParent>
+        This comment was removed
+      </ng-template>
+    </div>
+  </div>
+
+  @if (!accountService.currentUser()?.blocked && parentComment) {
+    <app-comment-create
+      [publicationId]="parentComment.publicationId"
+      (commentCreated)="onReplyCreated($event)">
+    </app-comment-create>
+  }
+
+  <h3 class="comment-section-title mt-3">Replies ({{replies.length}})</h3>
+
+  <div *ngIf="isLoadingReplies" class="loading-state">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="errorLoadingReplies && !isLoadingReplies" class="error-state">
+    Failed to load replies.
+    <button (click)="loadThread()">Try again</button>
+  </div>
+
+  <div *ngIf="replies.length === 0 && !isLoadingReplies && !errorLoadingReplies" class="empty-state">
+    No replies yet. Be the first to reply!
+  </div>
+
+  <div class="comments-list">
+    <div *ngFor="let reply of replies" class="comment-card reply-card">
+      <div class="comment-header">
+        <div class="clickable"
+            (click)="openAsThread(reply.id)"
+            title="Open thread">
+          <app-icon
+            [user]="reply.author"
+            class="comment-author">
+          </app-icon>
+        </div>
+
+        <div class="comment-actions">
+          <span class="comment-time">
+            {{ reply.creationDate | date: 'MMM d, y, h:mm a' }}
+          </span>
+
+          <button class="btn btn-link btn-sm"
+                  (click)="openComplaintModal(reply.id)">
+            <i class="bi bi-flag"></i>
+          </button>
+
+          <button *ngIf="reply.author && isCommentOwner(reply.author.uniqueNameIdentifier)"
+                  class="btn btn-link btn-sm delete-button"
+                  (click)="deleteComment(reply.id, false)">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+
+
+      <div class="comment-content clickable" (click)="openAsThread(reply.id)" title="Open thread">
+        <ng-container *ngIf="!reply.isDeleted; else removedReply">
+          {{reply.content}}
+        </ng-container>
+        <ng-template #removedReply>
+          This comment was removed
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <app-make-complaint
+    [targetId]="complaintTargetId"
+    targetType="comment"
+    title="Report comment"
+    [modalId]="complaintModalId"
+    (complaintSubmitted)="onComplaintSubmitted()"
+    (modalClosed)="onComplaintModalClosed()">
+  </app-make-complaint>
+</div>

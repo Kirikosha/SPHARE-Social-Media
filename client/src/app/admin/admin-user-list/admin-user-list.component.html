@@ -1,0 +1,236 @@
+<div class="admin-user-list-container p-4">
+  <!-- Header -->
+  <div class="header mb-4">
+    <h1 class="text-dark">
+      <i class="bi bi-people-fill me-2 text-primary"></i>User Management
+    </h1>
+    <p class="text-muted">Manage all registered users of the platform</p>
+  </div>
+
+  <!-- Controls: Search + Refresh + Page Size -->
+  <div class="card shadow-sm border-0 mb-4">
+<div class="card-body">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <!-- Search (left side) -->
+    <div class="flex-grow-1" style="min-width: 200px;">
+      <div class="input-group">
+        <span class="input-group-text bg-light border text-dark">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="text"
+               class="form-control bg-white border text-dark"
+               placeholder="Search users..."
+               [(ngModel)]="searchTerm"
+               (ngModelChange)="loadUsers(1, pageSize)">
+      </div>
+      <small class="text-muted">* Search filters current page only</small>
+    </div>
+
+    <!-- Right side group: Page Size + Refresh/Info -->
+    <div class="d-flex flex-wrap align-items-center gap-3">
+      <!-- Page size selector -->
+      <div>
+        <label class="text-muted small mb-1 d-block">Items per page</label>
+        <select class="form-select form-select-sm bg-white border text-dark"
+                [value]="pageSize"
+                (change)="onPageSizeChange($event)">
+          <option *ngFor="let size of pageSizes" [value]="size">
+            {{ size }} per page
+          </option>
+        </select>
+      </div>
+      <!-- Refresh + info -->
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-muted small d-none d-md-inline">{{ showingRange }}</span>
+        <button class="btn btn-outline-primary btn-sm" (click)="loadUsers(currentPage, pageSize)" [disabled]="isLoading">
+          <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted mt-2">Loading users...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredUsers.length === 0" class="text-center py-5">
+    <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+    <h4 class="text-dark mt-3">No users found</h4>
+    <p class="text-muted">
+      {{ searchTerm ? 'Try adjusting your search terms' : 'Refresh the list or check back later' }}
+    </p>
+  </div>
+
+  <!-- User Table -->
+  <div *ngIf="!isLoading && filteredUsers.length > 0" class="user-list">
+    <div class="table-responsive rounded-3 shadow-sm border">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th (click)="sortUsers('username')" class="sortable cursor-pointer">
+              Username
+              <i class="bi" [ngClass]="{
+                'bi-arrow-up': currentSort === 'username' && isAscending,
+                'bi-arrow-down': currentSort === 'username' && !isAscending,
+                'bi-arrow-down-up': currentSort !== 'username'
+              }"></i>
+            </th>
+            <th (click)="sortUsers('email')" class="sortable cursor-pointer">
+              Email
+              <i class="bi" [ngClass]="{
+                'bi-arrow-up': currentSort === 'email' && isAscending,
+                'bi-arrow-down': currentSort === 'email' && !isAscending,
+                'bi-arrow-down-up': currentSort !== 'email'
+              }"></i>
+            </th>
+            <th (click)="sortUsers('violationScore')" class="sortable cursor-pointer">
+              Violation Score
+              <i class="bi" [ngClass]="{
+                'bi-arrow-up': currentSort === 'violationScore' && isAscending,
+                'bi-arrow-down': currentSort === 'violationScore' && !isAscending,
+                'bi-arrow-down-up': currentSort !== 'violationScore'
+              }"></i>
+            </th>
+            <th (click)="sortUsers('amountOfViolations')" class="sortable cursor-pointer">
+              Violations
+              <i class="bi" [ngClass]="{
+                'bi-arrow-up': currentSort === 'amountOfViolations' && isAscending,
+                'bi-arrow-down': currentSort === 'amountOfViolations' && !isAscending,
+                'bi-arrow-down-up': currentSort !== 'amountOfViolations'
+              }"></i>
+            </th>
+            <th (click)="sortUsers('blocked')" class="sortable cursor-pointer">
+              Status
+              <i class="bi" [ngClass]="{
+                'bi-arrow-up': currentSort === 'blocked' && isAscending,
+                'bi-arrow-down': currentSort === 'blocked' && !isAscending,
+                'bi-arrow-down-up': currentSort !== 'blocked'
+              }"></i>
+            </th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filteredUsers">
+            <td>
+              <div class="d-flex align-items-center">
+                <img [src]="user.profileImageUrl || 'assets/user.png'"
+                     class="rounded-circle me-2 border"
+                     width="40"
+                     height="40"
+                     alt="User avatar"
+                     onerror="this.src='assets/user.png'">
+                <div>
+                  <div class="fw-medium">{{ user.username }}</div>
+                  <small class="text-muted">&#64;{{ user.uniqueNameIdentifier }}</small>
+                </div>
+              </div>
+            </td>
+            <td class="small">{{ user.email }}</td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="progress" style="width: 80px; height: 8px;">
+                  <div class="progress-bar"
+                       [ngClass]="{
+                         'bg-success': user.violationScore < 20,
+                         'bg-warning': user.violationScore >= 20 && user.violationScore < 50,
+                         'bg-danger': user.violationScore >= 50
+                       }"
+                       [style.width.%]="user.violationScore > 100 ? 100 : user.violationScore">
+                  </div>
+                </div>
+                <span class="ms-2 small">{{ user.violationScore }}</span>
+              </div>
+            </td>
+            <td>{{ user.amountOfViolations }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'bg-danger': user.blocked,
+                'bg-success': !user.blocked
+              }">
+                <i class="bi" [ngClass]="user.blocked ? 'bi-lock-fill' : 'bi-check-circle-fill'"></i>
+                {{ user.blocked ? 'Blocked' : 'Active' }}
+              </span>
+            </td>
+            <td class="text-end">
+              <div class="d-flex gap-2 justify-content-end">
+                <button class="btn btn-sm btn-outline-info"
+                        [routerLink]="['/admin/violation-list', user.id]"
+                        ngbTooltip="View violations"
+                        placement="top">
+                  <i class="bi bi-list-check"></i>
+                </button>
+                <button *ngIf="!user.blocked"
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="onBlockUser(user.id)"
+                        ngbTooltip="Block user"
+                        placement="top">
+                  <i class="bi bi-lock-fill"></i>
+                </button>
+                <button *ngIf="user.blocked"
+                        class="btn btn-sm btn-outline-success"
+                        (click)="onUnblockUser(user.id)"
+                        ngbTooltip="Unblock user"
+                        placement="top">
+                  <i class="bi bi-unlock-fill"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 pt-2 border-top">
+      <!-- Info + Page Size (mobile) -->
+      <div class="mb-2 mb-md-0 text-center text-md-start">
+        <small class="text-muted d-md-none">{{ showingRange }}</small>
+      </div>
+
+      <!-- Pagination Buttons -->
+      <nav aria-label="Page navigation">
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item" [class.disabled]="!hasPreviousPage">
+            <button class="page-link" (click)="goToPage(1)" [disabled]="!hasPreviousPage" aria-label="First">
+              <i class="bi bi-chevron-double-left"></i>
+            </button>
+          </li>
+          <li class="page-item" [class.disabled]="!hasPreviousPage">
+            <button class="page-link" (click)="prevPage()" [disabled]="!hasPreviousPage" aria-label="Previous">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </li>
+          <li class="page-item" *ngFor="let page of pageNumbers" [class.disabled]="page === '...'">
+            <span *ngIf="page === '...'" class="page-link cursor-default">...</span>
+            <button *ngIf="page !== '...'" class="page-link" [class.active]="page === currentPage" (click)="goToPage(page)">
+              {{ page }}
+            </button>
+          </li>
+          <li class="page-item" [class.disabled]="!hasNextPage">
+            <button class="page-link" (click)="nextPage()" [disabled]="!hasNextPage" aria-label="Next">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </li>
+          <li class="page-item" [class.disabled]="!hasNextPage">
+            <button class="page-link" (click)="goToPage(totalPages)" [disabled]="!hasNextPage" aria-label="Last">
+              <i class="bi bi-chevron-double-right"></i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Page Info (desktop) -->
+      <div class="mt-2 mt-md-0 text-center text-md-end">
+        <small class="text-muted">Page {{ currentPage }} of {{ totalPages }}</small>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,282 @@
+
+.profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+  border-left: 1px solid #e6ecf0;
+  border-right: 1px solid #e6ecf0;
+  min-height: 100vh;
+}
+
+.cover-photo {
+  height: 200px;
+  background-color: #cfd9de;
+  width: 100%;
+}
+
+.profile-info-section {
+  position: relative;
+  padding: 0 16px;
+}
+
+.profile-pic-wrapper {
+  position: absolute;
+  top: -75px;
+  left: 16px;
+  border: 4px solid white;
+  border-radius: 50%;
+}
+
+.profile-pic {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
+
+.profile-details {
+  padding-top: 40px;
+}
+
+.profile-name {
+  font-weight: 800;
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+.profile-unique-name {
+    color: #536471;
+  font-weight: 800;
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.profile-tabs {
+  border-top: 1px solid #e6ecf0;
+}
+
+.btn-outline-dark {
+  border-color: #536471;
+  color: #0f1419;
+  font-weight: 700;
+}
+
+.btn-outline-dark:hover {
+  background-color: rgba(15, 20, 25, 0.1);
+}
+
+@media (max-width: 576px) {
+  .profile-pic {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .profile-pic-wrapper {
+    top: -50px;
+  }
+  
+  .cover-photo {
+    height: 150px;
+  }
+}
+
+.follow-button {
+  padding: 6px 16px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.profile-stats span {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.profile-stats span:hover {
+  color: #1da1f2;
+  text-decoration: underline;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.blocked-user-overlay {
+  background-color: rgba(255, 0, 0, 0.05);
+  padding: 1rem;
+  border-bottom: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.blocked-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.blocked-content {
+  opacity: 0.7;
+  position: relative;
+}
+
+.blocked-content::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.02);
+  pointer-events: none;
+}
+
+.blocked-content-message {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  border-top: 1px solid #e6ecf0;
+  
+  i {
+    font-size: 2rem;
+    color: #dc3545;
+    margin-bottom: 1rem;
+  }
+  
+  h4 {
+    color: #dc3545;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.btn[disabled] {
+  background-color: #f8f9fa !important;
+  color: #6c757d !important;
+  border-color: #dee2e6 !important;
+  cursor: not-allowed;
+}
+
+.blocked-avatar {
+  filter: grayscale(80%);
+  opacity: 0.7;
+}
+
+.blocked-avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(220, 53, 69, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+}
+
+/* Profile Info Sections */
+.profile-info-section {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid #e6ecf0;
+}
+
+.section-divider {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #0f1419;
+  margin-bottom: 8px;
+}
+
+.divider-line {
+  height: 1px;
+  background-color: #e6ecf0;
+  width: 100%;
+}
+
+/* Profile Info Items */
+.profile-info-item {
+  display: flex;
+  align-items: flex-start;
+  color: #0f1419;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.profile-info-item i {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* Interest Badges */
+.interest-badge {
+  background-color: #e8f5fe;
+  color: #1da1f2;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.interest-badge:hover {
+  background-color: #d1ecff;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+  .profile-info-section {
+    padding: 12px;
+  }
+  
+  .section-title {
+    font-size: 1rem;
+  }
+  
+  .profile-info-item {
+    font-size: 0.9rem;
+  }
+  
+  .interest-badge {
+    padding: 3px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Ensure proper spacing */
+.profile-details .profile-info-section:first-child {
+  margin-top: 0;
+}
+
+/* If you want a more subtle look for the sections */
+.profile-info-section {
+  background-color: #f8f9fa;
+  border: none;
+}
+
+/* Or if you want a card-like appearance */
+.profile-info-section {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f2f5;
+}
+
+.pright {
+  padding-right: 5px;
+}

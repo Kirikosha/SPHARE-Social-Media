@@ -1,0 +1,138 @@
+.header-container {
+  width: 100%;
+  margin: 0 auto;
+}
+
+header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0 auto;
+}
+
+header {
+  background-color:#37353E;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 6px 18px 0 rgba(34, 48, 62, 0.35);
+}
+
+.logo {
+  padding: 10px 0;
+  margin-right: 32px;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.hover {
+  padding: 2px;
+  border: 3px solid; /* Reduced thickness from 8px to 3px */
+  border-image: none;
+  border-color: #000;
+  -webkit-mask:
+    conic-gradient(from 180deg at top 3px right 3px, #0000 90deg,#000 0)
+    var(--_i,200%) 0  /200% var(--_i,3px) border-box no-repeat,
+    conic-gradient(at bottom 3px left  3px,  #0000 90deg,#000 0)
+    0   var(--_i,200%)/var(--_i,3px) 200% border-box no-repeat,
+    linear-gradient(#000 0 0) padding-box no-repeat;
+  transition: .3s, -webkit-mask-position .3s .3s;
+}
+.hover:hover {
+  --_i: 100%;
+  color: black;
+  transition: .3s, -webkit-mask-size .3s .3s;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+}
+
+.main-nav ul {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.main-nav li {
+  display: inline-block;
+  margin-left: 0;
+  padding-top: 0;
+  position: relative;
+}
+
+.main-nav a {
+  color: #ECECBB;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.main-nav a:hover {
+  color: #7ADAA5;
+}
+
+
+.main-nav a.forward::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background-color: #7ADAA5;
+  position: absolute;
+  top: 0;
+  width: 0%;
+  transition: all ease-in-out 250ms;
+}
+
+.main-nav a.forward:hover::before {
+  width: 100%;
+}
+
+/* Remove or comment out the previous nav a::before and nav a:hover::before rules */
+
+.main-nav .dropdown, .main-nav > div {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+button {
+  display: inline;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  background: transparent;
+  color: currentColor;
+  user-select: none;
+  -webkit-appearance: none;
+}
+
+.btn {
+  position: relative;
+  padding: 0.4rem 1.2rem; /* Smaller vertical and horizontal padding */
+  color: #ECECBB;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  text-align: center;
+  font-size: 0.95rem; /* Slightly smaller font */
+}
+.btn__text {
+  z-index: 1;
+  position: relative;
+  display: inline-block;
+  transition: 250ms all ease;
+  font-size: var(--btn-font-size);
+}
+
+.btn:active .btn__text {
+  transform: translate(0.5rem, -0.5rem);
+  color: #7ADAA5;
+}

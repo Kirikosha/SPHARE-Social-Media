@@ -1,0 +1,57 @@
+<header>
+  <div class="header-container container">
+    <h1 class="logo hover" routerLink="/" routerLinkActive="active">BlackBox</h1>
+
+    <nav class="main-nav">
+    <ul>
+<!--      @if (accountService.currentUser()){-->
+        <li>
+          <a (click)="goToProfile()" routerLinkActive="active" class="nav-link forward">Profile</a>
+        </li>
+
+        <li>
+          <a routerLink="/publications/calendar" routerLinkActive="active" class="nav-link forward">Calendar</a>
+        </li>
+        <li>
+          <a routerLink="/search" routerLinkActive="active" class="nav-link forward">Search</a>
+        </li>
+<!--        <li>-->
+<!--          <a routerLink="/recommended-publications" routerLinkActive="active" class="nav-link">Recommendations</a>-->
+<!--        </li>-->
+<!--      }-->
+<!--      @if (accountService.currentUser()?.role === 'Admin'){-->
+        <li>
+          <a routerLink="/admin-panel" routerLinkActive="active" class="nav-link forward">Admin</a>
+        </li>
+<!--      }-->
+    </ul>
+
+    @if (accountService.currentUser()){
+      <div dropdown class="dropdown">
+        <a dropdownToggle class="dropdown-toggle text-light text-decoration-none">
+          Welcome {{accountService.currentUser()?.username}}
+        </a>
+
+        <div *dropdownMenu class="dropdown-menu">
+          <a class="dropdown-item" (click)="logout()">Logout</a>
+        </div>
+      </div>
+    }
+      @else {
+      <div>
+
+        <button class="btn" routerLink="/register">
+        <span class="btn__inner">
+          <span class="btn__text">Register</span>
+        </span>
+      </button>
+        <button class="btn" routerLink="/login">
+        <span class="btn__inner">
+          <span class="btn__text">Login</span>
+        </span>
+      </button>
+      </div>
+    }
+    </nav>
+  </div>
+</header>

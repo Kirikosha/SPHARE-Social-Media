@@ -1,0 +1,76 @@
+<!-- Backdrop -->
+<div class="modal-backdrop" *ngIf="file"></div>
+
+<!-- Modal -->
+<div class="cropper-modal" *ngIf="file">
+  <div class="cropper-header">
+    <h5>Edit Image</h5>
+    <button type="button" class="btn-close" (click)="cancelCrop()"></button>
+  </div>
+
+  <!-- Mode Tabs -->
+  <div class="mode-tabs">
+    <button
+      class="btn btn-sm"
+      [class.btn-primary]="mode === 'crop'"
+      [class.btn-outline-secondary]="mode !== 'crop'"
+      (click)="mode = 'crop'"
+    >
+      Crop
+    </button>
+    <button
+      class="btn btn-sm"
+      [class.btn-primary]="mode === 'draw'"
+      [class.btn-outline-secondary]="mode !== 'draw'"
+      (click)="proceedToDraw()"
+      [disabled]="!croppedImage && mode !== 'draw'"
+    >
+      Draw
+    </button>
+  </div>
+
+  <div class="cropper-container">
+    <!-- Cropper Mode -->
+    <div *ngIf="mode === 'crop'">
+      <image-cropper
+        [imageFile]="file"
+        [maintainAspectRatio]="true"
+        [aspectRatio]="1"
+        format="jpeg"
+        (imageCropped)="imageCropped($event)"
+        [resizeToWidth]="800"
+        [onlyScaleDown]="true"
+        [cropperMinWidth]="256"
+        [alignImage]="'center'"
+        style="max-height: 60vh; width: 100%; display: block;">
+      </image-cropper>
+    </div>
+
+    <!-- Drawing Mode -->
+    <div *ngIf="mode === 'draw' && drawingImageSrc">
+      <easy-image-drawing
+        [height]="500"
+        [width]="500"
+        [src]="drawingImageSrc"
+        saveButtonColor="#4caf50"
+        undoButtonColor="#f44336"
+        (savedImage)="handleSavedImage($event)"
+      >
+      </easy-image-drawing>
+    </div>
+  </div>
+
+  <div class="cropper-controls d-flex justify-content-end gap-2 p-3">
+    <button type="button" class="btn btn-outline-secondary" (click)="cancelCrop()">
+      Cancel
+    </button>
+<button
+  type="button"
+  class="btn btn-primary"
+  (click)="applyCrop()"
+  [disabled]="!croppedImage && !finalDrawingBlob"
+>
+  Apply
+</button>
+  </div>
+</div>

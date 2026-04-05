@@ -1,0 +1,77 @@
+<div class="publication-detail-container">
+  <!-- Back button -->
+  <button class="back-button" (click)="goBack()">
+    <i class="bi bi-arrow-left"></i> Back
+  </button>
+
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Publication content -->
+  <div *ngIf="publication && !isLoading" class="publication-content">
+    <div class="publication-header">
+      <app-icon [user]="publication.author"></app-icon>
+
+      <div class="publication-meta">
+        <span class="post-time">
+          · {{ publication.postedAt | date: 'MMM d, y, h:mm a' }}
+        </span>
+
+        <span *ngIf="publication.updatedAt" class="updated-time">
+          · Edited {{ publication.updatedAt | date: 'MMM d, y, h:mm a' }}
+        </span>
+
+        <div class="scheduled-time" *ngIf="publication.remindAt">
+          <i class="bi bi-clock"></i>
+          Scheduled for {{ publication.remindAt | date: 'MMM d, y, h:mm a' }}
+        </div>
+
+<div class="conditional-info" *ngIf="publication.conditionType !== undefined && publication.conditionTarget !== null">
+          <i class="bi bi-bullseye"></i>
+          Will post when {{ publication.conditionType | lowercase }} {{ formatConditionOperator(publication.comparisonOperator) }} {{ publication.conditionTarget }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Publication text -->
+    <div class="publication-text">
+      <p>{{publication.content}}</p>
+    </div>
+
+    <!-- Images -->
+    <div *ngIf="publication.images && publication.images.length > 0" class="publication-images">
+      <div class="image-grid" [ngClass]="getImageGridClass(publication.images.length)">
+        <div class="image-container" *ngFor="let image of publication.images">
+          <img [src]="image" alt="Publication image" class="publication-image">
+        </div>
+      </div>
+    </div>
+
+    <!-- Publication stats -->
+    <div class="publication-stats">
+      <span>{{publication.likesAmount}} Likes</span>
+    </div>
+
+    <!-- Publication actions -->
+    <div class="publication-actions">
+      <button class="action-button">
+        <i class="bi bi-chat"></i>
+      </button>
+      <button class="action-button" (click)="likePublication()">
+        <i class="bi"
+          [ngClass]="{
+            'bi-heart-fill text-danger': publication.isLikedByCurrentUser,
+            'bi-heart': !publication.isLikedByCurrentUser
+          }"></i>
+      </button>
+      <button class="action-button" (click)="sharePublication()">
+        <i class="bi bi-share"></i>
+      </button>
+    </div>
+  </div>
+  <app-comment-section [publicationId]="publication!.id" [uniqueNameIdentifier]="publication!.author.uniqueNameIdentifier"></app-comment-section>
+</div>

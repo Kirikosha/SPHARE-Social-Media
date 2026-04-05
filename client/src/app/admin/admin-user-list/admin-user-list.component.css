@@ -1,0 +1,110 @@
+.admin-user-list-container {
+  min-height: 100%;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.sortable:hover {
+  color: #0d6efd !important;
+}
+
+.sortable i {
+  font-size: 0.85em;
+  margin-left: 4px;
+  transition: transform 0.2s;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-default {
+  cursor: default;
+}
+
+/* Table styling */
+.table > :not(caption) > * > * {
+  background-color: transparent;
+  padding: 0.75rem;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Pagination */
+.pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+  font-weight: 500;
+}
+
+.pagination .page-link {
+  color: #0d6efd;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s;
+}
+
+.pagination .page-link:hover:not(.disabled) {
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+  color: #0a58ca;
+}
+
+.pagination .page-link.disabled,
+.pagination .page-link[disabled] {
+  color: #6c757d;
+  pointer-events: none;
+  background-color: #fff;
+  border-color: #dee2e6;
+}
+
+/* Badge spacing */
+.badge i {
+  margin-right: 4px;
+  font-size: 0.9em;
+}
+
+/* Avatar */
+img.rounded-circle {
+  object-fit: cover;
+  transition: opacity 0.2s;
+}
+
+img.rounded-circle:hover {
+  opacity: 0.9;
+}
+
+/* Progress bar */
+.progress {
+  background-color: #e9ecef;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.progress-bar {
+  transition: width 0.3s ease;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .table th, .table td {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+
+  .progress {
+    width: 60px !important;
+  }
+}

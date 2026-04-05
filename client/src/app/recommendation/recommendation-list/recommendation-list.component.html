@@ -1,0 +1,34 @@
+<div class="recommendations-container">
+  <div class="header">
+    <h2 class="title">Recommended Publications</h2>
+    <button class="refresh-btn" (click)="loadPublications()" [disabled]="isLoading">
+      <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-spinner">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  }
+  @else if (publications.length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-info-circle"></i>
+      <p>No recommendations found. Follow more users to see recommendations.</p>
+    </div>
+  }
+  @else {
+    <div class="publications-list">
+      @for (publication of publications; track publication.id) {
+        <app-publication-card 
+          [publication]="publication"
+          (editPublication)="handlePublicationUpdate($event)"
+          (deletePublication)="handlePublicationDelete($event)"
+          (likePublication)="handlePublicationLike($event)">
+        </app-publication-card>
+      }
+    </div>
+  }
+</div>

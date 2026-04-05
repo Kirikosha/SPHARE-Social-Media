@@ -1,0 +1,222 @@
+.edit-profile-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.page-title {
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.profile-image-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.profile-image-wrapper {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #f0f2f5;
+}
+
+.edit-image-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: #1da1f2;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-image-button:hover {
+  background-color: #1991db;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.form-control:focus {
+  border-color: #1da1f2;
+  box-shadow: 0 0 0 2px rgba(29, 161, 242, 0.2);
+  outline: none;
+}
+
+.input-group {
+  display: flex;
+}
+
+.input-group-text {
+  padding: 10px 15px;
+  background-color: #f0f2f5;
+  border: 1px solid #ddd;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+}
+
+.input-group .form-control {
+  border-radius: 0 8px 8px 0;
+}
+
+.form-actions {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.save-button {
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-weight: 600;
+  min-width: 150px;
+}
+
+@media (max-width: 576px) {
+  .edit-profile-container {
+    padding: 15px;
+  }
+  
+  .profile-image-wrapper {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* Validation styles */
+.is-invalid {
+  border-color: #dc3545;
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Form group spacing */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Make sure the input group doesn't break validation styling */
+.input-group .is-invalid {
+  z-index: 3; /* Make sure border appears above other elements */
+}
+/* Section divider styles */
+.section-divider {
+  margin: 2.5rem 0 1.5rem 0;
+  position: relative;
+}
+
+.section-title {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.divider-line {
+  height: 1px;
+  background-color: #e9ecef;
+  width: 100%;
+}
+
+/* Interests tags styles */
+.interests-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.interest-tag {
+  display: inline-flex;
+  align-items: center;
+  background-color: #e7f5ff;
+  color: #0c63e4;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: #0c63e4;
+  font-size: 18px;
+  line-height: 1;
+  margin-left: 6px;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.tag-remove:hover {
+  opacity: 1;
+}
+
+/* Character counter */
+.text-muted {
+  font-size: 0.85rem;
+}
+
+/* Spacing adjustments */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* Textarea specific styles */
+textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Date input styling */
+input[type="date"] {
+  font-family: inherit;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .interest-tag {
+    font-size: 12px;
+    padding: 3px 10px;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+  }
+}

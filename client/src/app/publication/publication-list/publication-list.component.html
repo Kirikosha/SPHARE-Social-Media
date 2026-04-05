@@ -1,0 +1,32 @@
+<div class="publication-list-container">
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p>Loading publications...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && publications.length === 0">
+    <i class="bi bi-newspaper"></i>
+    <h3>No publications found</h3>
+    <p *ngIf="isCurrentUserProfile">When you create publications, they'll appear here.</p>
+    <p *ngIf="!isCurrentUserProfile">This user hasn't posted anything yet.</p>
+  </div>
+
+  <!-- Publications List -->
+  <div class="publications-list">
+    <app-publication-card 
+      *ngFor="let publication of publications"
+      [publication]="publication"
+      (editPublication)="onUpdatePublication($event)"
+      (deletePublication)="onDeletePublication($event)"
+      (likePublication)="onLikePublication($event)">
+        <app-create-violation 
+          [item]="publication" 
+          (itemDeleted)="onAdminPublicationDeleted($event)">
+        </app-create-violation>
+    </app-publication-card>
+  </div>
+</div>

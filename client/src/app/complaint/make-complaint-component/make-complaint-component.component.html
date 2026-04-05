@@ -1,0 +1,47 @@
+<!-- Bootstrap Modal -->
+<div class="modal fade" [id]="modalId" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="complaintModalLabel">{{title}}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="complaintForm">
+          <div class="mb-3">
+            <label class="form-label">Reason for reporting</label>
+            <select class="form-select" formControlName="reason">
+              <option value="">Select a reason</option>
+              <option value="spam">Spam</option>
+              <option value="harassment">Harassment or bullying</option>
+              <option value="hate_speech">Hate speech</option>
+              <option value="violence">Violence or dangerous organizations</option>
+              <option value="false_info">False information</option>
+              <option value="intellectual_property">Intellectual property violation</option>
+              <option value="other">Other</option>
+            </select>
+            @if (complaintForm.get('reason')?.invalid && complaintForm.get('reason')?.touched) {
+              <div class="text-danger small">Please select a reason</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Additional details (optional)</label>
+            <textarea class="form-control" 
+                      formControlName="explanation" 
+                      rows="3"
+                      placeholder="Please provide more details about your report..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" 
+                (click)="submitComplaint()"
+                [disabled]="!complaintForm.valid">
+          Submit Report
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

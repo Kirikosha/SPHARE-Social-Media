@@ -1,0 +1,157 @@
+<div class="chat-list-container">
+  <!-- Header -->
+  <div class="chat-list-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mb-0">
+        <i class="bi bi-chat-dots me-2"></i>
+        Messages
+      </h2>
+      <button class="btn btn-outline-primary btn-sm" (click)="refreshChats()" [disabled]="isLoading">
+        <i class="bi bi-arrow-repeat" [class.spin]="isLoading"></i>
+        Refresh
+      </button>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="search-container mt-3">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search"></i>
+        </span>
+        <input 
+          type="text" 
+          class="form-control border-start-0 ps-0" 
+          placeholder="Search conversations..." 
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch()"
+          [disabled]="isLoading">
+        <button 
+          *ngIf="searchTerm" 
+          class="btn btn-outline-secondary border-start-0" 
+          type="button"
+          (click)="clearSearch()">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-muted mt-2">Loading conversations...</p>
+  </div>
+  
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-container text-center py-5">
+    <div class="mb-3">
+      <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 3rem;"></i>
+    </div>
+    <h5 class="text-danger">Something went wrong</h5>
+    <p class="text-muted">{{ error }}</p>
+    <button class="btn btn-primary mt-2" (click)="refreshChats()">
+      <i class="bi bi-arrow-repeat me-2"></i>
+      Try Again
+    </button>
+  </div>
+  
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && !error && filteredChats.length === 0" class="empty-container text-center py-5">
+    <div class="mb-3">
+      <i class="bi bi-chat-dots text-muted" style="font-size: 4rem;"></i>
+    </div>
+    <h5 *ngIf="!searchTerm">No conversations yet</h5>
+    <h5 *ngIf="searchTerm">No matches found</h5>
+    <p *ngIf="!searchTerm" class="text-muted">
+      Start a conversation with someone to begin chatting
+    </p>
+    <p *ngIf="searchTerm" class="text-muted">
+      No conversations match "{{ searchTerm }}"
+    </p>
+    <button *ngIf="searchTerm" class="btn btn-outline-secondary mt-2" (click)="clearSearch()">
+      <i class="bi bi-x me-2"></i>
+      Clear search
+    </button>
+    <button *ngIf="!searchTerm" class="btn btn-primary mt-2" routerLink="/users">
+      <i class="bi bi-person-plus me-2"></i>
+      Find people
+    </button>
+  </div>
+  
+  <!-- Chat List -->
+  <div *ngIf="!isLoading && !error && filteredChats.length > 0" class="chat-items">
+    <div class="chat-section">
+      <!-- Unread Chats Section - FIXED: Using method instead of inline expression -->
+      <div *ngIf="hasUnreadChats()" class="chat-section-header">
+        <span class="badge bg-primary rounded-pill">Unread</span>
+      </div>
+      
+      <div *ngFor="let chat of filteredChats; trackBy: trackByChatId" 
+           class="chat-item"
+           [class.unread]="chat.unreadCount > 0"
+           [routerLink]="['/chat', chat.id]"
+           routerLinkActive="active"
+           [attr.aria-label]="'Chat with ' + (getOtherChatUser(chat.participants)?.username || 'Unknown user')">
+        
+        <!-- Avatar -->
+        <div class="chat-avatar position-relative">
+          <div *ngIf="getOtherChatUser(chat.participants)?.profileImageUrl; else avatarPlaceholder" class="avatar-image">
+            <img [src]="getOtherChatUser(chat.participants)?.profileImageUrl" 
+                 [alt]="getOtherChatUser(chat.participants)?.username || 'User avatar'">
+          </div>
+          <ng-template #avatarPlaceholder>
+            <div class="avatar-placeholder">
+              {{ getInitials(getOtherChatUser(chat.participants)?.username || 'User') }}
+            </div>
+          </ng-template>
+          
+          <!-- Online Status Indicator -->
+          <span class="status-dot" 
+                [class.online]="getOtherChatUser(chat.participants)?.isOnline === true"
+                [class.offline]="!getOtherChatUser(chat.participants)?.isOnline"
+                [title]="getOtherChatUser(chat.participants)?.isOnline ? 'Online' : 'Offline'">
+          </span>
+        </div>
+        
+        <!-- Chat Info -->
+        <div class="chat-info flex-grow-1 min-width-0">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <h6 class="chat-name mb-0 text-truncate">
+              {{ getOtherChatUser(chat.participants)?.username || 'Unknown User' }}
+            </h6>
+            <small class="chat-time text-muted flex-shrink-0 ms-2">
+              {{ formatLastMessageTime(chat) }}
+            </small>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center">
+            <p class="chat-last-message mb-0 text-truncate text-muted">
+              <span *ngIf="chat.lastMessage" class="message-preview">
+                {{ chat.lastMessage }}
+              </span>
+              <span *ngIf="!chat.lastMessage" class="text-muted fst-italic">
+                No messages yet
+              </span>
+            </p>
+            
+            <!-- Unread Badge -->
+            <span *ngIf="chat.unreadCount > 0" 
+                  class="unread-badge badge bg-primary rounded-pill flex-shrink-0 ms-2">
+              {{ chat.unreadCount > 99 ? '99+' : chat.unreadCount }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Load More - FIXED: Conditionally shown based on total chats -->
+    <div *ngIf="filteredChats.length < totalChats" class="text-center py-3">
+      <button class="btn btn-outline-primary btn-sm" (click)="loadMore()">
+        <i class="bi bi-chevron-down me-2"></i>
+        Load more
+      </button>
+    </div>
+  </div>
+</div>

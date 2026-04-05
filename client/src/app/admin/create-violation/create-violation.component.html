@@ -1,0 +1,47 @@
+<button *ngIf="isAdmin" 
+        class="btn btn-sm btn-outline-danger admin-delete-button"
+        (click)="openModal()">
+  <i class="bi bi-trash-fill"></i>
+</button>
+
+<!-- Deletion Modal -->
+<div *ngIf="showModal" class="modal-backdrop" (click)="closeModal()"></div>
+
+<div *ngIf="showModal" class="violation-modal">
+  <div class="modal-header">
+    <h5>Delete {{isPublicationF ? 'Publication' : 'Comment'}}</h5>
+    <button class="btn-close" (click)="closeModal()"></button>
+  </div>
+  
+  <div class="modal-body">
+    <p>You're about to delete this {{isPublicationF ? 'publication' : 'comment'}} by 
+       <strong>{{item.author.username}}</strong>. Please select a reason:</p>
+    
+    <div class="mb-3">
+      <select class="form-select" [(ngModel)]="deletionReason">
+        <option value="" disabled selected>Select a reason...</option>
+        <option *ngFor="let reason of reasons" [value]="reason">{{reason}}</option>
+      </select>
+    </div>
+    
+    <div *ngIf="deletionReason === 'Other'" class="mb-3">
+      <textarea class="form-control" 
+                placeholder="Please specify the reason..."
+                [(ngModel)]="deletionReason"></textarea>
+    </div>
+  </div>
+  
+  <div class="modal-footer">
+    <button class="btn btn-outline-secondary" 
+            (click)="closeModal()"
+            [disabled]="isDeleting">
+      Cancel
+    </button>
+    <button class="btn btn-danger" 
+            (click)="confirmDeletion()"
+            [disabled]="!deletionReason || isDeleting">
+      <span *ngIf="!isDeleting">Confirm Delete</span>
+      <span *ngIf="isDeleting" class="spinner-border spinner-border-sm"></span>
+    </button>
+  </div>
+</div>

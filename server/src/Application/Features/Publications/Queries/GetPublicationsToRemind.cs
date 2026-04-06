@@ -1,11 +1,10 @@
-﻿using Domain.DTOs.PublicationDTOs;
+﻿using Application.DTOs.PublicationDTOs;
+using Domain.DTOs.PublicationDTOs;
 using Domain.Enums;
 
 namespace Application.Features.Publications.Queries;
 
 using Core;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
 

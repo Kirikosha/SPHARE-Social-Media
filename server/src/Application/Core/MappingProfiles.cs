@@ -1,15 +1,14 @@
-﻿using Domain.DTOs.MessagingDTOs;
+﻿using Application.DTOs;
+using Application.DTOs.CommentDTOs;
+using Application.DTOs.ComplaintDTOs;
+using Application.DTOs.DetailedUserInfoDTOs;
+using Application.DTOs.MessagingDTOs;
+using Application.DTOs.PublicationDTOs;
+using Application.DTOs.UserDTOs;
+using Application.DTOs.ViolationDTOs;
 
 namespace Application.Core;
-
 using AutoMapper;
-using Domain.DTOs;
-using Domain.DTOs.CommentDTOs;
-using Domain.DTOs.ComplaintDTOs;
-using Domain.DTOs.DetailedUserInfoDTOs;
-using Domain.DTOs.PublicationDTOs;
-using Domain.DTOs.UserDTOs;
-using Domain.DTOs.ViolationDTOs;
 using Domain.Entities;
 using Domain.Entities.Complaints;
 

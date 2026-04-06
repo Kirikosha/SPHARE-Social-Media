@@ -1,17 +1,20 @@
-﻿using Application.Core;
-using Application.Helpers;
+﻿using Application.Behaviors;
+using Application.Core;
+using Application.Interfaces;
+using Application.Interfaces.Services;
 using Application.Repositories.SpamRepository;
 using Application.Repositories.UserActivityLogRepository;
-using Application.Services.EmailService;
 using Application.Services.PasswordResetService;
 using Application.Services.PhotoService;
 using Application.Services.TokenService;
 using Application.Services.UserActionLogger;
 using Application.Services.UserInterestsUpdateService;
 using Application.Services.ViolationService;
-using Application.Transaction;
 using Application.Validators;
 using FluentValidation;
+using Infrastructure.Persistence;
+using Infrastructure.Services;
+using Infrastructure.Settings;
 using MediatR;
 
 namespace API.Extensions;
@@ -28,6 +31,7 @@ public static class ApplicationServiceExtensions
         services.AddValidatorsFromAssemblyContaining<LoginDtoValidator>();
 
         // Pipeline Behaviors
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));
 
         // Application Services

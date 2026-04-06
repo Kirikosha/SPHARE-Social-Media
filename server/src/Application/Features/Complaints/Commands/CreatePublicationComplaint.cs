@@ -1,5 +1,5 @@
 ﻿using Application.Core;
-using Application.Repositories.SpamRepository;
+using Application.Interfaces.Repositories;
 using Domain.DTOs.ComplaintDTOs;
 using Domain.Entities.Complaints;
 using Infrastructure;

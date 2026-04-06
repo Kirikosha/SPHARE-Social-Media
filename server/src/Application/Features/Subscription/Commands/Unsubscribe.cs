@@ -1,5 +1,5 @@
 ﻿using Application.Core;
-using Application.Services.SubscriptionService;
+using Application.Interfaces.Services;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 

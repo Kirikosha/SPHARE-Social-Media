@@ -1,10 +1,10 @@
-﻿using Application.Services.UserActionLogger;
+﻿using Application.Interfaces.Logger;
+using Application.Interfaces.Services;
 using Domain.Enums;
 
 namespace Application.Features.Publications.Commands;
 
 using Core;
-using Services.PhotoService;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;

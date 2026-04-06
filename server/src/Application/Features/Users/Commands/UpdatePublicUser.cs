@@ -1,8 +1,9 @@
-﻿namespace Application.Features.Users.Commands;
+﻿using Application.Interfaces.Services;
+
+namespace Application.Features.Users.Commands;
 
 using Core;
 using Application.Features.Images.Commands;
-using Services.PhotoService;
 using AutoMapper;
 using Domain.DTOs.UserDTOs;
 using Infrastructure;

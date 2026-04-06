@@ -1,12 +1,11 @@
-﻿namespace Application.Features.Violations.Queries;
+﻿using Application.DTOs.ViolationDTOs;
+
+namespace Application.Features.Violations.Queries;
 
 using Core;
 using AutoMapper;
-using Domain.DTOs.ViolationDTOs;
 using Domain.Entities;
-using Infrastructure;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
 

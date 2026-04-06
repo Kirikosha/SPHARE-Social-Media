@@ -1,5 +1,5 @@
 ﻿using Application.Core;
-using Application.Services.SubscriptionService;
+using Application.Interfaces.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.DTOs.UserDTOs;

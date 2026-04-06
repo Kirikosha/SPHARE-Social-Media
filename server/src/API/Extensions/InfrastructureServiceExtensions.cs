@@ -1,6 +1,7 @@
-﻿using Application.Services.SubscriptionService;
+﻿using Application.Interfaces.Services;
 using Infrastructure;
 using Infrastructure.Neo4j;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Neo4j.Driver;
 using Serilog;

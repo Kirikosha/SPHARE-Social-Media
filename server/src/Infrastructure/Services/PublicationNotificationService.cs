@@ -3,7 +3,6 @@ using Application.Features.Publications.Commands;
 using Application.Features.Publications.Queries;
 using Application.Features.Users.Queries;
 using Application.Interfaces.Services;
-using Application.Services.SubscriptionService;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

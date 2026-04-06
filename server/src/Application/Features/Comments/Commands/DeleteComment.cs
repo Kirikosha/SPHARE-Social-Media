@@ -1,4 +1,4 @@
-﻿using Application.Services.UserActionLogger;
+﻿using Application.Interfaces.Logger;
 using Domain.Enums;
 
 namespace Application.Features.Comments.Commands;

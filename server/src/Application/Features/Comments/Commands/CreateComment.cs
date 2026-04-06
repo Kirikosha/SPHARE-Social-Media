@@ -1,5 +1,5 @@
-﻿using Application.Repositories.SpamRepository;
-using Application.Services.UserActionLogger;
+﻿using Application.Interfaces.Logger;
+using Application.Interfaces.Repositories;
 using Domain.DTOs.UserDTOs;
 using Domain.Enums;
 

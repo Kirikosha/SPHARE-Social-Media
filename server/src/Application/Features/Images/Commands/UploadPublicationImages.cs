@@ -1,7 +1,8 @@
-﻿namespace Application.Features.Images.Commands;
+﻿using Application.Interfaces.Services;
+
+namespace Application.Features.Images.Commands;
 
 using Core;
-using Services.PhotoService;
 using Microsoft.AspNetCore.Http;
 using System.Threading;
 using System.Threading.Tasks;

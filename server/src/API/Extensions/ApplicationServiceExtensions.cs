@@ -1,18 +1,18 @@
 ﻿using Application.Behaviors;
 using Application.Core;
 using Application.Interfaces;
+using Application.Interfaces.Logger;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
-using Application.Repositories.SpamRepository;
 using Application.Repositories.UserActivityLogRepository;
-using Application.Services.PasswordResetService;
-using Application.Services.PhotoService;
+using Application.Services;
 using Application.Services.TokenService;
-using Application.Services.UserActionLogger;
-using Application.Services.UserInterestsUpdateService;
-using Application.Services.ViolationService;
+using Application.Settings;
 using Application.Validators;
 using FluentValidation;
+using Infrastructure.HostedServices;
 using Infrastructure.Persistence;
+using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Infrastructure.Settings;
 using MediatR;
@@ -42,11 +42,13 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IViolationService, ViolationService>();
         services.AddScoped<ISpamRepository, SpamRepository>();
         services.AddScoped<IUserActivityLogRepository, UserActivityLogRepository>();
+        services.AddScoped<IUserInterestUpdater, UserInterestUpdateService>();
         services.AddScoped(typeof(IUserActionLogger<>), typeof(UserActionLogger<>));
 
-        // Options Pattern
+        // Options
         services.Configure<CloudinarySettings>(configuration.GetSection("CloudinarySettings"));
         services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+        services.Configure<InterestUpdateSettings>(configuration.GetSection("InterestUpdate"));
 
         // AutoMapper
         services.AddAutoMapper(typeof(MappingProfiles).Assembly);

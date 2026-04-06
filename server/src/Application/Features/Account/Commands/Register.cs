@@ -1,6 +1,4 @@
 ﻿using Application.Core;
-using Application.Services.PhotoService;
-using Application.Services.SubscriptionService;
 using Application.Services.TokenService;
 using Domain.DTOs.AccountDTOs;
 using Domain.Enums;
@@ -8,6 +6,7 @@ using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
+using Application.Interfaces.Services;
 
 namespace Application.Features.Account.Commands;
 public class Register

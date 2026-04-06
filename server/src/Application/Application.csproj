@@ -19,6 +19,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.19" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.1" />
@@ -29,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\EmailService\" />
+    <Folder Include="MessagingWebSockets\" />
   </ItemGroup>
 
 </Project>

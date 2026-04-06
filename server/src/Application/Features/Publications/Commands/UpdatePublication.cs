@@ -1,4 +1,4 @@
-﻿using Application.Services.UserActionLogger;
+﻿using Application.Interfaces.Logger;
 using Domain.DTOs.UserDTOs;
 
 namespace Application.Features.Publications.Commands;

@@ -36,7 +36,7 @@
   resize: none;
   width: 100%;
   background-color: white;
-  color: #ffffff;
+  color: black;
 }
 
 .post-textarea:empty:before {

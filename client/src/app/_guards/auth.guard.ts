@@ -1,17 +1,22 @@
 import { inject } from '@angular/core';
-import { CanActivateFn } from '@angular/router';
+import { CanActivateFn, Router } from '@angular/router';
 import { AccountService } from '../_services/account.service';
-import { ToastrService } from 'ngx-toastr';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter, take, map } from 'rxjs';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = () => {
   const accountService = inject(AccountService);
-  const toastr = inject(ToastrService);
-  // TODO: add toastr
+  const router = inject(Router);
 
-  if (accountService.currentUser()){
-    return true;
-  } else{
-    toastr.error('You have to be authenticated to proceed!');
-    return false;
-  }
+  return toObservable(accountService.isInitialized).pipe(
+    filter(initialized => initialized),  // wait until true
+    take(1),
+    map(() => {
+      if (accountService.currentUser()) {
+        return true;
+      }
+      router.navigateByUrl('/login');
+      return false;
+    })
+  );
 };

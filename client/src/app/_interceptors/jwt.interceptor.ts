@@ -1,29 +1,34 @@
-import { HttpErrorResponse, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AccountService } from '../_services/account.service';
 import { BehaviorSubject, catchError, filter, Observable, switchMap, take, throwError } from 'rxjs';
 import { AccountModel } from '../_models/accountModel';
+import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
+import { TokenStorageService } from '../_services/token-storage.service';
 
 let isRefreshing = false;
 const refreshDone$ = new BehaviorSubject<AccountModel | null>(null);
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
-  const accountService = inject(AccountService);
+  const tokenStorage = inject(TokenStorageService);
 
   const isSignalRRequest =
     req.url.includes('/chat?') ||
     req.url.endsWith('/chat') ||
     req.url.includes('/chat/negotiate');
 
-  const user = accountService.currentUser();
-  if (user?.token && !isSignalRRequest) {
+  const isRefreshRequest = req.url.includes('/account/refresh');
+
+  const user = tokenStorage.currentUser();
+  if (user?.token && !isSignalRRequest && !isRefreshRequest) {
     req = addToken(req, user.token);
   }
 
   return next(req).pipe(
     catchError(err => {
-      if (err instanceof HttpErrorResponse && err.status === 401) {
-        return handle401(req, next, accountService);
+      if (err instanceof HttpErrorResponse && err.status === 401 && !isRefreshRequest) {
+        return handle401(req, next, tokenStorage);
       }
       return throwError(() => err);
     })
@@ -39,39 +44,45 @@ function addToken(req: HttpRequest<unknown>, token: string): HttpRequest<unknown
 function handle401(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
-  accountService: AccountService
+  tokenStorage: TokenStorageService
 ): Observable<any> {
-  const user = accountService.currentUser();
+  const user = tokenStorage.currentUser();
+  const router = inject(Router);
+  const http = inject(HttpClient);
 
   if (!user?.refreshToken) {
-    accountService.logout();
+    tokenStorage.clearUser();
+    router.navigateByUrl('/login');
     return throwError(() => new Error('No refresh token available'));
   }
 
   if (!isRefreshing) {
-    // First request to hit 401 — start the refresh
     isRefreshing = true;
     refreshDone$.next(null);
 
-    return accountService.refresh(user.refreshToken).pipe(
+    return http.post<AccountModel>(
+      environment.apiUrl + '/account/refresh',
+      JSON.stringify(user.refreshToken),
+      { headers: { 'Content-Type': 'application/json' } }
+    ).pipe(
       switchMap(newUser => {
         isRefreshing = false;
+        tokenStorage.setUser(newUser);
         refreshDone$.next(newUser);
-        // Retry the original request with the new token
         return next(addToken(req, newUser.token));
       }),
       catchError(err => {
         isRefreshing = false;
-        accountService.logout();
+        tokenStorage.clearUser();
+        router.navigateByUrl('/login');
         return throwError(() => err);
       })
     );
   }
 
-  // Other requests that hit 401 while refresh is in progress — wait for it
   return refreshDone$.pipe(
-    filter(user => user !== null),
+    filter(u => u !== null),
     take(1),
-    switchMap(user => next(addToken(req, user!.token)))
+    switchMap(u => next(addToken(req, u!.token)))
   );
 }

@@ -2,9 +2,11 @@
 using Application.Features.Complaints.Commands;
 using Application.Features.Complaints.Queries;
 using Application.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
+[Authorize]
 public class ComplaintController : BaseApiController
 {
     [HttpPost("publication")]

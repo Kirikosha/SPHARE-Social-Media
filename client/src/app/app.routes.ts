@@ -17,24 +17,28 @@ import { PrivateChatComponent } from '../chat/private-chat/private-chat.componen
 import { ChatListComponent } from '../chat/chat-list/chat-list.component';
 import { CalendarPageComponent } from './publication/calendar-page/calendar-page.component';
 import { CreatePlannedPublicationComponent } from './publication/create-planned-publication/create-planned-publication.component';
+import { authGuard } from './_guards/auth.guard';
 
 export const routes: Routes = [
-    {path: 'login', component:LoginComponent},
-    {path: 'register', component: RegisterComponent},
-    {path: 'profile/:uniqueNameIdentifier', component: ProfileComponent},
-    {path: 'edit-profile', component: EditComponent},
-    {path: 'publication/:id', component: PublicationPageComponent},
-    {path: 'publications/calendar', component: CalendarPageComponent},
-    {path: 'publications/planned-create', component: CreatePlannedPublicationComponent},
-    {path: 'search', component: SearchPageComponent},
-    {path: 'admin-panel', component: AdminPanelComponent},
-    {path: 'admin/user-list', component: AdminUserListComponent},
-    {path: 'admin/violation-list/:userId', component: AdminViolationsComponent},
-    {path: 'password-reset', component: PasswordResetComponent},
-    {path: 'recommended-publications', component: RecommendationListComponent},
-    {path: 'complaints', component: ComplaintsListComponent},
-    {path: 'comments/:id', component: CommentPageComponent},
-    {path: 'chats', component: ChatListComponent},
-    {path: 'chat/:id', component: PrivateChatComponent},
-    {path: '', component: HomeComponent}
-       ];
+    // Public routes — no guard
+    { path: 'login', component: LoginComponent },
+    { path: 'register', component: RegisterComponent },
+    { path: 'password-reset', component: PasswordResetComponent },
+
+    // Protected routes
+    { path: '', component: HomeComponent, canActivate: [authGuard] },
+    { path: 'profile/:uniqueNameIdentifier', component: ProfileComponent, canActivate: [authGuard] },
+    { path: 'edit-profile', component: EditComponent, canActivate: [authGuard] },
+    { path: 'publication/:id', component: PublicationPageComponent, canActivate: [authGuard] },
+    { path: 'publications/calendar', component: CalendarPageComponent, canActivate: [authGuard] },
+    { path: 'publications/planned-create', component: CreatePlannedPublicationComponent, canActivate: [authGuard] },
+    { path: 'search', component: SearchPageComponent, canActivate: [authGuard] },
+    { path: 'admin-panel', component: AdminPanelComponent, canActivate: [authGuard] },
+    { path: 'admin/user-list', component: AdminUserListComponent, canActivate: [authGuard] },
+    { path: 'admin/violation-list/:userId', component: AdminViolationsComponent, canActivate: [authGuard] },
+    { path: 'recommended-publications', component: RecommendationListComponent, canActivate: [authGuard] },
+    { path: 'complaints', component: ComplaintsListComponent, canActivate: [authGuard] },
+    { path: 'comments/:id', component: CommentPageComponent, canActivate: [authGuard] },
+    { path: 'chats', component: ChatListComponent, canActivate: [authGuard] },
+    { path: 'chat/:id', component: PrivateChatComponent, canActivate: [authGuard] },
+];

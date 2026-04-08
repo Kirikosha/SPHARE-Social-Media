@@ -2,6 +2,7 @@
 using Application.DTOs.UserDTOs;
 using Application.DTOs.ViolationDTOs;
 using Application.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
@@ -10,6 +11,7 @@ using Application.Features.Users.Queries;
 using Application.Features.Violations.Queries;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize]
 public class AdminController : BaseApiController
 {
     [HttpGet("get-users")]

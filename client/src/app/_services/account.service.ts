@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { catchError, map, Observable, tap, throwError} from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AccountModel } from '../_models/accountModel';
 import { LoginModel } from '../_models/loginModel';
-import { catchError, map, Observable, tap, throwError} from 'rxjs';
 import { isTokenExpired } from '../_utilities/jwtDecode';
+import { TokenStorageService } from './token-storage.service';
+
 
 @Injectable({
   providedIn: 'root'
@@ -13,32 +15,37 @@ import { isTokenExpired } from '../_utilities/jwtDecode';
 export class AccountService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private tokenStorage = inject(TokenStorageService);
+  currentUser = this.tokenStorage.currentUser;
+  isInitialized = signal<boolean>(false);
   baseUrl = environment.apiUrl;
-  currentUser = signal<AccountModel | null>(null);
 
   constructor() {
-    const userJson = localStorage.getItem('user');
-    if (userJson) {
-      const user: AccountModel = JSON.parse(userJson);
-
+    const user = this.tokenStorage.getUser();
+    if (user) {
       if (!isTokenExpired(user.token)) {
-        // Access token still valid — load normally
-        this.currentUser.set(user);
+        this.tokenStorage.setUser(user);
+        this.isInitialized.set(true);
       } else if (user.refreshToken) {
-        // Access token expired but refresh token exists — try silent refresh
         this.refresh(user.refreshToken).subscribe({
-          next: () => {},
-          error: () => this.logout()
+          next: () => this.isInitialized.set(true),
+          error: () => {
+            this.logout();
+            this.isInitialized.set(true);
+          }
         });
       } else {
         this.logout();
+        this.isInitialized.set(true);
       }
+    } else {
+      this.isInitialized.set(true);
     }
   }
 
-  login(model: LoginModel): Observable<void> {
+  login(model: LoginModel): Observable<AccountModel> {
     return this.http.post<AccountModel>(this.baseUrl + '/account/login', model).pipe(
-      map(user => {
+      tap(user => {
         if (user) {
           this.setUser(user);
         }
@@ -60,10 +67,10 @@ export class AccountService {
   refresh(refreshToken: string): Observable<AccountModel> {
     return this.http.post<AccountModel>(
       this.baseUrl + '/account/refresh',
-      JSON.stringify(refreshToken), 
+      JSON.stringify(refreshToken),
       { headers: { 'Content-Type': 'application/json' } }
     ).pipe(
-      tap(user => this.setUser(user)),
+      tap(user => this.tokenStorage.setUser(user)),
       catchError(err => {
         this.logout();
         return throwError(() => err);
@@ -82,15 +89,13 @@ export class AccountService {
   }
 
   logout() {
-    localStorage.removeItem('user');
-    this.currentUser.set(null);
+    this.tokenStorage.clearUser();
     this.router.navigateByUrl('/login');
   }
 
   // keeps localStorage and signal in sync
   private setUser(user: AccountModel) {
-    localStorage.setItem('user', JSON.stringify(user));
-    this.currentUser.set(user);
+    this.tokenStorage.setUser(user);
   }
 
   forgotPassword(email: string) {

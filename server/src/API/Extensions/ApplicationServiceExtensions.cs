@@ -51,7 +51,7 @@ public static class ApplicationServiceExtensions
 
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IAdminService, AdminService>();
-        services.AddScoped<CommentService, CommentService>();
+        services.AddScoped<ICommentService, CommentService>();
         services.AddScoped<IComplaintService, ComplaintService>();
         services.AddScoped<ILikeService, LikeService>();
         services.AddScoped<IMessagingService, MessagingService>();

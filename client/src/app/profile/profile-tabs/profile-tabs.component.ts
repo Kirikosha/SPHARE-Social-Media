@@ -36,7 +36,7 @@ export class ProfileTabsComponent implements OnInit {
 
   refreshPublications(): void {
     if (this.publicationList) {
-      this.publicationList.loadPublications(this.uniqueNameIdentifier);
+      this.publicationList.loadPublications(this.uniqueNameIdentifier, 1);
     }
   }
 }

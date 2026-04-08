@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.UserDTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
@@ -16,6 +17,7 @@ public class PublicUserController : BaseApiController
             new GetPublicUserByUniqueNameIdentifier.Query() { UniqueNameIdentifier = uNi }));
     }
 
+    [Authorize]
     [HttpGet("my-profile")]
     public async Task<ActionResult> GetMyProfile()
     {
@@ -24,6 +26,7 @@ public class PublicUserController : BaseApiController
         return HandleResult(await Mediator.Send(new GetPublicUserById.Query() { Id = id }));
     }
 
+    [Authorize]
     [HttpPut("edit")]
     public async Task<ActionResult<PublicUserDto>> UpdateProfile([FromForm]UpdatePublicUserDto updateUser)
     {

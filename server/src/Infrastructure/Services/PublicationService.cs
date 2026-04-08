@@ -321,7 +321,7 @@ public class PublicationService(ApplicationDbContext context, IMapper mapper, IL
     public async Task<Result<bool>> CreatePublicationAsync(CreatePublicationDto createDto, string creatorId, 
         CancellationToken ct)
     {
-        User? user = await context.Users.FindAsync(createDto, ct);
+        User? user = await context.Users.FindAsync(creatorId, ct);
         if (user == null)
             return Result<bool>
                 .Failure("Account does not exist therefore publication cannot be created", 403);

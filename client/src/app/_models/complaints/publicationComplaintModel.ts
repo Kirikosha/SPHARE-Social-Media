@@ -1,4 +1,4 @@
-import { PublicationModel } from "../publications/publicationModel";
+import { PublicationModel } from "../publications/publicationModel.js";
 
 export interface PublicationComplaintModel {
     id: number,

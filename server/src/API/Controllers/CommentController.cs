@@ -1,5 +1,6 @@
 ﻿using Application.Core.Pagination;
 using Application.DTOs.CommentDTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
@@ -36,6 +37,7 @@ public class CommentController : BaseApiController
         return HandleResult(await Mediator.Send(new GetCommentAmount.Query { PublicationId = id }));
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<CommentDto>> CreateComment(CreateCommentDto commentModel)
     {
@@ -45,6 +47,7 @@ public class CommentController : BaseApiController
             .Send(new CreateComment.Command() { Comment = commentModel, UserId = userId }));
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteComment(string id)
     {

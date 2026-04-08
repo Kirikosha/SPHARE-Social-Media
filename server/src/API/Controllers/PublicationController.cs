@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.LikeDTOs;
 using Application.DTOs.PublicationDTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 public class PublicationController : BaseApiController
 {
+    [Authorize]
     [HttpPost("create-publication")]
     public async Task<ActionResult> CreatePublication(CreatePublicationDto publication)
     {
@@ -19,6 +21,7 @@ public class PublicationController : BaseApiController
         return HandleResult(await Mediator.Send(new CreatePublication.Command { CreatorId = userId, Publication = publication }));
     }
 
+    [Authorize]
     [HttpPut("update-publication")]
     public async Task<ActionResult<PublicationDto>> UpdatePublication(UpdatePublicationDto publication)
     {
@@ -29,6 +32,7 @@ public class PublicationController : BaseApiController
 
     }
 
+    [Authorize]
     [HttpGet("publication-of-{uniqueNameIdentifier}")]
     public async Task<ActionResult<List<PublicationDto>>> GetPublicationsOfAuthor(string uniqueNameIdentifier)
     {
@@ -43,6 +47,7 @@ public class PublicationController : BaseApiController
         ));
     }
 
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<PublicationDto>> GetPublicationById(string id)
     {
@@ -55,12 +60,14 @@ public class PublicationController : BaseApiController
         }));
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeletePublication(string id)
     {
         return HandleResult(await Mediator.Send(new DeletePublication.Command { Id = id }));
     }
 
+    [Authorize]
     [HttpGet("like/{id}")]
     public async Task<ActionResult<LikeDto>> LikePublication(string id)
     {
@@ -82,6 +89,7 @@ public class PublicationController : BaseApiController
         return HandleResult(await Mediator.Send(new GetPlannedPublications.Query { UserId = userId }));
     }
     */
+    [Authorize]
     [HttpGet("publication-calendar")]
     public async Task<ActionResult> GetPublicationModelForCalendar()
     {
@@ -90,6 +98,7 @@ public class PublicationController : BaseApiController
         return HandleResult(await Mediator.Send(new GetPublicationsCalendar.Query { UserId = userId }));
     }
 
+    [Authorize]
     [HttpGet("publication/view-update/{id}")]
     public async Task<ActionResult> PublicationViewAdded(string id)
     {

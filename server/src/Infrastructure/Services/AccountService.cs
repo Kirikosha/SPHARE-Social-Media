@@ -13,7 +13,8 @@ namespace Infrastructure.Services;
 public class AccountService(ApplicationDbContext context, ICloudinaryService cloudinaryService,
     INeo4JSubscriptionService neo4JSubscriptionService, ITokenService tokenService) : IAccountService
 {
-    const int RandomNameIdentifierKeyValueLength = 7;
+    private const int MaxActiveRefreshTokens = 5;
+    private const int RandomNameIdentifierKeyValueLength = 7;
     public async Task<Result<AccountClaimsDto>> RegisterAsync(RegisterDto registerDto, CancellationToken ct)
     {
             bool exists = await context.Users
@@ -24,7 +25,7 @@ public class AccountService(ApplicationDbContext context, ICloudinaryService clo
 
             using var hmac = new HMACSHA512();
 
-            string uniqueNameIdentifier = await BuildUniqueNameIdentifier(registerDto.Username);
+            string uniqueNameIdentifier = await BuildUniqueNameIdentifier(registerDto.Username, ct);
 
             var user = new User
             {
@@ -76,6 +77,24 @@ public class AccountService(ApplicationDbContext context, ICloudinaryService clo
 
             await context.SpamRatings.AddAsync(rating, ct);
 
+            var activeTokens = user.RefreshTokens
+                .Where(rt => rt.IsActive)
+                .OrderBy(rt => rt.Created)
+                .ToList();
+
+            if (activeTokens.Count >= MaxActiveRefreshTokens)
+            {
+                var toRevoke = activeTokens.Take(activeTokens.Count - MaxActiveRefreshTokens + 1);
+                foreach (var rt in toRevoke)
+                    rt.IsRevoked = true;
+            }
+        
+            var stale = user.RefreshTokens
+                .Where(rt => rt.IsExpired)
+                .ToList();
+
+            context.RemoveRange(stale);
+            
             var refreshToken = tokenService.CreateRefreshToken();
             user.RefreshTokens.Add(refreshToken);
             await context.SaveChangesAsync(ct);
@@ -154,6 +173,24 @@ public class AccountService(ApplicationDbContext context, ICloudinaryService clo
                 return Result<AccountClaimsDto>.Failure("Invalid credentials", 401);
         }
 
+        var activeTokens = user.RefreshTokens
+            .Where(rt => rt.IsActive)
+            .OrderBy(rt => rt.Created)
+            .ToList();
+
+        if (activeTokens.Count >= MaxActiveRefreshTokens)
+        {
+            var toRevoke = activeTokens.Take(activeTokens.Count - MaxActiveRefreshTokens + 1);
+            foreach (var rt in toRevoke)
+                rt.IsRevoked = true;
+        }
+        
+        var stale = user.RefreshTokens
+            .Where(rt => rt.IsExpired)
+            .ToList();
+
+        context.RemoveRange(stale);
+        
         var refreshToken = tokenService.CreateRefreshToken();
         user.RefreshTokens.Add(refreshToken);
         await context.SaveChangesAsync(ct);
@@ -172,15 +209,18 @@ public class AccountService(ApplicationDbContext context, ICloudinaryService clo
         return Result<AccountClaimsDto>.Success(account);
     }
 
-    private async Task<string> BuildUniqueNameIdentifier(string username)
+    private async Task<string> BuildUniqueNameIdentifier(string username, CancellationToken ct)
     {
         StringBuilder sb = new StringBuilder(username);
-        bool nameIdentifierExists = await context.Users.AnyAsync(a => string.Equals(a.UniqueNameIdentifier, username)); 
+        bool nameIdentifierExists = await context.Users
+            .AnyAsync(a => string.Equals(a.UniqueNameIdentifier, sb.ToString()), ct);
+        
         while (nameIdentifierExists)
         {
             sb.Append('-');
             sb.Append(GenerateRandomString());
-            nameIdentifierExists = await context.Users.AnyAsync(a => string.Equals(a.UniqueNameIdentifier, username)); 
+            nameIdentifierExists = await context.Users
+                .AnyAsync(a => string.Equals(a.UniqueNameIdentifier, sb.ToString()), ct);
         }
 
         return sb.ToString();
@@ -189,14 +229,14 @@ public class AccountService(ApplicationDbContext context, ICloudinaryService clo
     private static string GenerateRandomString()
     {
         StringBuilder sb = new StringBuilder();
-        Random rand = new Random();
         int randCharValue;
         int randCaseValue;
         char letter;
+    
         for (int i = 0; i < RandomNameIdentifierKeyValueLength; i++)
         {
-            randCharValue = rand.Next(0, 26);
-            randCaseValue = rand.Next(0, 1);
+            randCharValue = Random.Shared.Next(0, 26);
+            randCaseValue = Random.Shared.Next(0, 2);
 
             letter = Convert.ToChar(randCharValue + 65);
             letter = randCaseValue == 0 ? char.ToLower(letter) : letter;

@@ -32,7 +32,9 @@ export class LoginComponent {
       };
 
       this.accountService.login(loginModel).subscribe({
-        next: () => this.router.navigate(['/']),
+        next: (user) => {
+          this.router.navigate(['/']);
+        },
         error: (err) => this.handleLoginError(err)
       });
     }

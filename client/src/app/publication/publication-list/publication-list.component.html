@@ -1,5 +1,5 @@
 <div class="publication-list-container">
-  <!-- Loading State -->
+  <!-- Initial Loading State -->
   <div class="loading-state" *ngIf="isLoading">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
@@ -16,17 +16,31 @@
   </div>
 
   <!-- Publications List -->
-  <div class="publications-list">
+  <div class="publications-list" *ngIf="publications.length > 0">
     <app-publication-card 
       *ngFor="let publication of publications"
       [publication]="publication"
       (editPublication)="onUpdatePublication($event)"
       (deletePublication)="onDeletePublication($event)"
       (likePublication)="onLikePublication($event)">
-        <app-create-violation 
-          [item]="publication" 
-          (itemDeleted)="onAdminPublicationDeleted($event)">
-        </app-create-violation>
+      <app-create-violation 
+        [item]="publication" 
+        (itemDeleted)="onAdminPublicationDeleted($event)">
+      </app-create-violation>
     </app-publication-card>
   </div>
+
+  <!-- Loading More Indicator -->
+  <div class="loading-more" *ngIf="isLoadingMore">
+    <div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+    <span>Loading more...</span>
+  </div>
+
+  <!-- End of List Message -->
+  <div class="end-message" *ngIf="!hasNextPage && publications.length > 0">
+    <p>There aren't any publications left.</p>
+  </div>
+
+  <!-- Intersection Observer Sentinel (invisible trigger) -->
+  <div #scrollSentinel class="scroll-sentinel"></div>
 </div>

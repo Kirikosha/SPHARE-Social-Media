@@ -1,11 +1,13 @@
-﻿using Application.DTOs.AccountDTOs;
+﻿using Application.Core;
+using Application.DTOs.AccountDTOs;
 using Application.Features.Account.Commands;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 public class AccountController : BaseApiController
 {
-    [ProducesResponseType(typeof(AccountClaimsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Result<AccountClaimsDto>), StatusCodes.Status200OK)]
     [HttpPost("login")]
     public async Task<ActionResult> Login(LoginDto loginModel)
     {

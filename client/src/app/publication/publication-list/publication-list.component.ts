@@ -1,14 +1,16 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { PublicationService } from '../../_services/publication.service';
-import { mapPublicationToCard, PublicationModel } from '../../_models/publications/publicationModel';
-import { AccountService } from '../../_services/account.service';
-import { ToastrService } from 'ngx-toastr';
+import { Component, inject, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PublicationCardComponent } from "../publication-card/publication-card.component";
-import { UpdatePublicationModel } from '../../_models/publications/updatePublicationModel';
 import { ActivatedRoute } from '@angular/router';
-import { CreateViolationComponent } from "../../admin/create-violation/create-violation.component";
+import { ToastrService } from 'ngx-toastr';
+
+import { PublicationService } from '../../_services/publication.service';
+import { AccountService } from '../../_services/account.service';
+import { mapPublicationToCard, PublicationModel } from '../../_models/publications/publicationModel';
+import { UpdatePublicationModel } from '../../_models/publications/updatePublicationModel';
 import { PublicationCardModel } from '../../_models/publications/publicationCardModel';
+import { PublicationCardComponent } from "../publication-card/publication-card.component";
+import { CreateViolationComponent } from "../../admin/create-violation/create-violation.component";
+import { PagedList, PaginationParams } from '../../_models/shared/pagination/pagination';
 
 @Component({
   selector: 'app-publication-my-list',
@@ -17,22 +19,39 @@ import { PublicationCardModel } from '../../_models/publications/publicationCard
   templateUrl: './publication-list.component.html',
   styleUrl: './publication-list.component.css'
 })
-export class PublicationListComponent implements OnInit{
+export class PublicationListComponent implements OnInit, AfterViewInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private publicationService = inject(PublicationService);
   accountService = inject(AccountService);
   private toastr = inject(ToastrService);
-  
+
   publications: PublicationCardModel[] = [];
   isLoading = true;
+  isLoadingMore = false;
   isCurrentUserProfile = false;
+  hasNextPage = false;
+  
+  private currentPage = 1;
+  private pageSize = 10;
+  private uniqueNameIdentifier = '';
+  private observer: IntersectionObserver | null = null;
+
+  @ViewChild('scrollSentinel') scrollSentinel!: ElementRef;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      const uniqueNameIdentifier = params['uniqueNameIdentifier'];
-      this.checkIfCurrentUser(uniqueNameIdentifier);
-      this.loadPublications(uniqueNameIdentifier);
+      this.uniqueNameIdentifier = params['uniqueNameIdentifier'];
+      this.checkIfCurrentUser(this.uniqueNameIdentifier);
+      this.resetAndLoad();
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.setupIntersectionObserver();
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
   }
 
   private checkIfCurrentUser(uniqueNameIdentifier: string): void {
@@ -40,37 +59,66 @@ export class PublicationListComponent implements OnInit{
     this.isCurrentUserProfile = currentUser?.uniqueNameIdentifier === uniqueNameIdentifier;
   }
 
-loadPublications(uniqueNameIdentifier: string): void {
-  this.isLoading = true;
-  this.publicationService.getPublications(uniqueNameIdentifier).subscribe({
-    next: (publications) => {
-      const currentUser = this.accountService.currentUser();
-      const isOwnProfile = currentUser?.uniqueNameIdentifier === uniqueNameIdentifier;
-      const now = new Date();
-      
-      this.isLoading = false;
-    },
-    error: (error) => {
-      this.toastr.error('Failed to load publications', error.message);
-      this.isLoading = false;
-    }
-  });
-}
+  private resetAndLoad(): void {
+    this.publications = [];
+    this.currentPage = 1;
+    this.hasNextPage = false;
+    this.isLoading = true;
+    this.loadPublications(this.uniqueNameIdentifier, this.currentPage);
+  }
 
-onUpdatePublication(publication: UpdatePublicationModel): void {
-  this.publicationService.updatePublication(publication).subscribe({
-    next: (updatedCard: PublicationCardModel) => {
-      const index = this.publications.findIndex(p => p.id === updatedCard.id);
-      if (index !== -1) {
-        this.publications[index] = updatedCard;
-        this.toastr.success('Publication updated successfully');
+  loadPublications(uniqueNameIdentifier: string, page: number): void {
+    const params: PaginationParams = { page, pageSize: this.pageSize };
+    
+    this.publicationService.getPublications(uniqueNameIdentifier, params).subscribe({
+      next: (response: PagedList<PublicationCardModel>) => {
+        this.publications = page === 1 ? response.items : [...this.publications, ...response.items];
+        this.hasNextPage = response.hasNextPage;
+        this.isLoading = false;
+        this.isLoadingMore = false;
+      },
+      error: (error) => {
+        this.toastr.error('Failed to load publications', error.message);
+        this.isLoading = false;
+        this.isLoadingMore = false;
       }
-    },
-    error: (error) => {
-      this.toastr.error('Failed to update publication', error.message);
+    });
+  }
+
+  loadMore(): void {
+    if (this.hasNextPage && !this.isLoadingMore && !this.isLoading) {
+      this.isLoadingMore = true;
+      this.currentPage++;
+      this.loadPublications(this.uniqueNameIdentifier, this.currentPage);
     }
-  });
-}
+  }
+
+  private setupIntersectionObserver(): void {
+    this.observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        this.loadMore();
+      }
+    }, { rootMargin: '200px' });
+
+    if (this.scrollSentinel?.nativeElement) {
+      this.observer.observe(this.scrollSentinel.nativeElement);
+    }
+  }
+
+  onUpdatePublication(publication: UpdatePublicationModel): void {
+    this.publicationService.updatePublication(publication).subscribe({
+      next: (updatedCard: PublicationCardModel) => {
+        const index = this.publications.findIndex(p => p.id === updatedCard.id);
+        if (index !== -1) {
+          this.publications[index] = updatedCard;
+          this.toastr.success('Publication updated successfully');
+        }
+      },
+      error: (error) => {
+        this.toastr.error('Failed to update publication', error.message);
+      }
+    });
+  }
 
   onDeletePublication(publicationId: string): void {
     if (!confirm('Are you sure you want to delete this publication?')) return;

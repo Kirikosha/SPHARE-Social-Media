@@ -1,20 +1,29 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpResponse } from '@angular/common/http';
 import { map, catchError, throwError } from 'rxjs';
 import { ApiResponse } from '../_models/shared/apiResponse';
 
 export const apiEnvelopeInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     map(event => {
-      if (event.type === 4 && event.hasOwnProperty('body')) {
-        const response = event as any;
-        const body: ApiResponse<any> = response.body;
+      if (event instanceof HttpResponse && event.body) {
+        const body = event.body;
         
-        if (body?.isSuccess && body.value !== undefined) {
-          return response.clone({ body: body.value });
-        }
+        const isEnveloped = 
+          typeof body === 'object' && 
+          body !== null && 
+          'isSuccess' in body && 
+          'value' in body;
         
-        if (!body?.isSuccess) {
-          throw new Error(body.error ?? 'API request failed');
+        if (isEnveloped) {
+          const apiResponse = body as ApiResponse<any>;
+          
+          if (apiResponse.isSuccess && apiResponse.value !== undefined) {
+            return event.clone({ body: apiResponse.value });
+          }
+          
+          if (!apiResponse.isSuccess) {
+            throw new Error(apiResponse.error ?? 'API request failed');
+          }
         }
       }
       return event;

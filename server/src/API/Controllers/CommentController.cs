@@ -1,11 +1,11 @@
 ﻿using Application.Core.Pagination;
+using Application.DTOs.CommentDTOs;
 
 namespace API.Controllers;
 
 using Application.Features.Comments.Commands;
 using Application.Features.Comments.Queries;
 using Application.Helpers;
-using Domain.DTOs.CommentDTOs;
 using Microsoft.AspNetCore.Mvc;
 
 public class CommentController : BaseApiController
@@ -14,14 +14,14 @@ public class CommentController : BaseApiController
     public async Task<ActionResult> GetComments(string publicationId, [FromQuery] PaginationParams paginationParams)
     {
         return HandleResult(await Mediator.Send(new GetCommentsByPublicationId.Query() { PublicationId = 
-            publicationId, Params = paginationParams}));
+            publicationId, Pagination = paginationParams}));
     }
 
     [HttpGet("{parentId}/replies")]
     public async Task<ActionResult> GetReplies(string parentId, [FromQuery] PaginationParams paginationParams)
     {
         return HandleResult(await Mediator
-            .Send(new GetReplies.Query() { ParentId = parentId, Params = paginationParams}));
+            .Send(new GetReplies.Query() { ParentId = parentId, Pagination = paginationParams}));
     }
 
     [HttpGet("{id}/comment")]
@@ -33,7 +33,7 @@ public class CommentController : BaseApiController
     [HttpGet("{id}/comment-amount")]
     public async Task<ActionResult> GetCommentAmount(string id)
     {
-        return HandleResult(await Mediator.Send(new GetCommentAmount.Query { Id = id }));
+        return HandleResult(await Mediator.Send(new GetCommentAmount.Query { PublicationId = id }));
     }
 
     [HttpPost]

@@ -28,7 +28,7 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Tag> Tags { get; set; }
     public DbSet<UserInterestTag> UserInterestTags { get; set; }
     public DbSet<PublicationView> PublicationViews { get; set; }
-    
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<JobCheckpoint> JobCheckpoints { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

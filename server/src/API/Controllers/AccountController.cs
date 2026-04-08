@@ -1,5 +1,5 @@
-﻿using Application.Features.Account.Commands;
-using Domain.DTOs.AccountDTOs;
+﻿using Application.DTOs.AccountDTOs;
+using Application.Features.Account.Commands;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;

@@ -1,10 +1,7 @@
 ﻿namespace Application.Features.Users.Queries;
-
+using Application.Interfaces.Services;
 using Core;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,15 +12,12 @@ public class GetUserEmailsByIds
         public required List<string> Ids { get; set; }
     }
 
-    public class Handler(ApplicationDbContext context) 
+    public class Handler(IUserService userService) 
         : IRequestHandler<Query, Result<List<string>>>
     {
         public async Task<Result<List<string>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            return Result<List<string>>.Success(await context.Users
-            .Where(a => request.Ids.Contains(a.Id))
-            .Select(a => a.Email)
-            .ToListAsync(cancellationToken));
+            return await userService.GetUserEmailsByIdsAsync(request.Ids, cancellationToken);
         }
     }
 }

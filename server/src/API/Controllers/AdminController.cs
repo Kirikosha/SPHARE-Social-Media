@@ -1,4 +1,6 @@
 ﻿using Application.Core.Pagination;
+using Application.DTOs.UserDTOs;
+using Application.DTOs.ViolationDTOs;
 using Application.Helpers;
 
 namespace API.Controllers;
@@ -6,8 +8,6 @@ namespace API.Controllers;
 using Application.Features.AdminFeatures.Commands;
 using Application.Features.Users.Queries;
 using Application.Features.Violations.Queries;
-using Domain.DTOs.UserDTOs;
-using Domain.DTOs.ViolationDTOs;
 using Microsoft.AspNetCore.Mvc;
 
 public class AdminController : BaseApiController

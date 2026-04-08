@@ -1,7 +1,6 @@
-﻿using Application.Core;
-using Infrastructure;
-
-namespace Application.Features.Messaging.Commands;
+﻿namespace Application.Features.Messaging.Commands;
+using Core;
+using Application.Interfaces.Services;
 
 public class CreateChat
 {
@@ -11,22 +10,11 @@ public class CreateChat
         public required string User2Id { get; init; }
     }
     
-    public class Handler(ApplicationDbContext context) : IRequestHandler<Command, Result<Chat>>
+    public class Handler(IMessagingService messagingService) : IRequestHandler<Command, Result<Chat>>
     {
         public async Task<Result<Chat>> Handle(Command request, CancellationToken cancellationToken)
         {
-            Chat chat = new Chat
-            {
-                Id = Guid.NewGuid().ToString(),
-                Participants = new List<ChatUser>
-                {
-                    new() { UserId = request.User1Id },
-                    new() { UserId = request.User2Id }
-                }
-            };
-
-            await context.Chats.AddAsync(chat, cancellationToken);
-            return Result<Chat>.Success(chat);
+            return await messagingService.CreateChatAsync(request.User1Id, request.User1Id, cancellationToken);
         }
     }
 }

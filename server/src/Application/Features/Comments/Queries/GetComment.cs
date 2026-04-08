@@ -1,10 +1,7 @@
-﻿using Application.Core;
-using Domain.DTOs.CommentDTOs;
-using Domain.DTOs.UserDTOs;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore;
-
-namespace Application.Features.Comments.Queries;
+﻿namespace Application.Features.Comments.Queries;
+using Core;
+using DTOs.CommentDTOs;
+using Application.Interfaces.Services;
 public class GetComment
 {
     public class Query : IRequest<Result<CommentDto>>
@@ -12,33 +9,11 @@ public class GetComment
         public required string Id { get; init; }
     }
 
-    public class Handler(ApplicationDbContext context) : IRequestHandler<Query, Result<CommentDto>>
+    public class Handler(ICommentService commentService) : IRequestHandler<Query, Result<CommentDto>>
     {
         public async Task<Result<CommentDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var comment = await context.Comments
-                .Where(c => c.Id == request.Id)
-                .Select(c => new CommentDto
-                {
-                    Id = c.Id,
-                    Content = c.Content,
-                    CreationDate = c.CreationDate,
-                    PublicationId = c.PublicationId,
-                    IsDeleted = c.IsDeleted,
-                    Author = new PublicUserBriefDto
-                    {
-                        Id = c.Author.Id,
-                        Blocked = c.Author.Blocked,
-                        ImageUrl = c.Author.ProfileImage == null ? null : c.Author.ProfileImage.ImageUrl,
-                        UniqueNameIdentifier = c.Author.UniqueNameIdentifier,
-                        Username = c.Author.Username
-                    },
-
-                    RepliesAmount = c.TotalRepliesCount
-                }).SingleOrDefaultAsync(cancellationToken);
-
-            return comment == null ? Result<CommentDto>.Failure("Comment was not found", 404) 
-                : Result<CommentDto>.Success(comment);
+            return await commentService.GetCommentByIdAsync(request.Id, cancellationToken);
         }
     }
 }

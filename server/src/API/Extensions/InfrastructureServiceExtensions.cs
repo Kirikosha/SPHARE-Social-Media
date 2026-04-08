@@ -1,6 +1,7 @@
-﻿using Application.Services.SubscriptionService;
+﻿using Application.Interfaces.Services;
 using Infrastructure;
 using Infrastructure.Neo4j;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Neo4j.Driver;
 using Serilog;
@@ -29,7 +30,7 @@ public static class InfrastructureServiceExtensions
             );
             services.AddSingleton(neo4JDriver);
             services.AddTransient<INeo4jDataAccess, Neo4jDataAccess>();
-            services.AddScoped<ISubscriptionService, SubscriptionService>();
+            services.AddScoped<INeo4JSubscriptionService, Neo4JSubscriptionService>();
         }
         catch (Exception ex)
         {

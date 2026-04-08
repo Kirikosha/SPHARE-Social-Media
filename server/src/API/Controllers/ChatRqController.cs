@@ -1,8 +1,8 @@
-﻿using Application.Features.Messaging.Commands;
+﻿using Application.DTOs;
+using Application.DTOs.MessagingDTOs;
+using Application.Features.Messaging.Commands;
 using Application.Features.Messaging.Queries;
 using Application.Helpers;
-using Domain.DTOs;
-using Domain.DTOs.MessagingDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

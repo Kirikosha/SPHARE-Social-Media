@@ -1,13 +1,15 @@
-﻿namespace Application.Interfaces.Services;
+﻿using Application.Core;
+using Application.DTOs.UserDTOs;
+
+namespace Application.Interfaces.Services;
 
 public interface ISubscriptionService
 {
-    Task FollowAsync(string followerId, string followedId);
-    Task UnfollowAsync(string followerId, string followedId);
-    Task<List<string>> GetFollowersAsync(string userId);
-    Task<List<string>> GetFollowingAsync(string userId);
-    Task CreateUserNodeAsync(string userId);
-    Task<bool> IsFollowing(string userId, string followedId);
-    Task<int> GetFollowerCountAsync(string userId);
-    Task<int> GetFollowingCountAsync(string userId);
+    Task<Result<bool>> IsFollowing(string userId, string uniqueNameIdentifier, CancellationToken ct);
+    Task<Result<int>> GetSubscriptionsCount(string uniqueNameIdentifier, CancellationToken ct);
+    Task<Result<List<PublicUserDto>>> GetSubscriptions(string uniqueNameIdentifier, CancellationToken ct);
+    Task<Result<int>> GetFollowersCount(string uniqueNameIdentifier, CancellationToken ct);
+    Task<Result<List<PublicUserDto>>> GetFollowers(string uniqueNameIdentifier, CancellationToken ct);
+    Task<Result<bool>> Subscribe(string userId, string followUserUniqueNameIdentifier, CancellationToken ct);
+    Task<Result<bool>> Unsubscribe(string userId, string followUserUniqueNameIdentifier, CancellationToken ct);
 }

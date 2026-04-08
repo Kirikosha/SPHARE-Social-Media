@@ -1,60 +1,48 @@
-﻿using Application.Interfaces.Services;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
-using Infrastructure.Settings;
+﻿using Application.Core;
+using Application.Interfaces.Services;
+using Domain.Entities;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public class PhotoService : IPhotoService
+public class PhotoService(ICloudinaryService cloudinaryService, ApplicationDbContext context) : IPhotoService
 {
-    private readonly Cloudinary _cloudinary;
-    public PhotoService(IOptions<CloudinarySettings> config)
+    public async Task<Result<bool>> DeleteProfileImageAsync(string publicId, CancellationToken ct)
     {
-        var acc = new Account(config.Value.CloudName, config.Value.ApiKey, config.Value.ApiSecret);
-        _cloudinary = new Cloudinary(acc);
+        var result = await cloudinaryService.DeletePhotoAsync(publicId);
+        if (result.Error != null)
+            return Result<bool>.Failure($"Image was not deleted due to an error. Error: {result.Error}", 500);
+
+        var image = await context.Images.FirstOrDefaultAsync(a => a.PublicId == publicId, ct);
+        if (image == null) return Result<bool>.Failure($"Image does not exist in the database", 500);
+        context.Images.Remove(image);
+        return Result<bool>.Success(true); 
     }
 
-    public async Task<ImageUploadResult> AddPhotoAsync(IFormFile image)
+    public async Task<Result<List<Image>>> UploadPublicationImages(List<IFormFile> images, CancellationToken ct)
     {
-        var uploadResult = new ImageUploadResult();
+        var uploadedImages = new List<Image>();
 
-        if (image.Length > 0)
+        foreach (var image in images)
         {
-            using var stream = image.OpenReadStream();
-            var uploadParmas = new ImageUploadParams
+            try
             {
-                File = new FileDescription(image.FileName, stream)
-            };
+                var response = await cloudinaryService.AddPhotoAsync(image);
+                if (response.Error != null) continue;
 
-            uploadResult = await _cloudinary.UploadAsync(uploadParmas);
-        }
-        return uploadResult;
-    }
-
-    public async Task<ImageUploadResult> AddProfilePhotoAsync(IFormFile image)
-    {
-        var uploadResult = new ImageUploadResult();
-
-        if (image.Length > 0)
-        {
-            using var stream = image.OpenReadStream();
-            var uploadParmas = new ImageUploadParams
+                uploadedImages.Add(new Image
+                {
+                    PublicId = response.PublicId,
+                    ImageUrl = response.Url.AbsoluteUri
+                });
+            }
+            catch (Exception ex)
             {
-                File = new FileDescription(image.FileName, stream),
-                Transformation = new Transformation().Height(500).Width(500)
-                .Crop("fill").Gravity("face")
-            };
-
-            uploadResult = await _cloudinary.UploadAsync(uploadParmas);
+                return Result<List<Image>>.Failure($"During image upload error arised. Error: {ex.Message}", 500);
+            }
         }
-        return uploadResult;
-    }
 
-    public async Task<DeletionResult> DeletePhotoAsync(string publicId)
-    {
-        var deleteParams = new DeletionParams(publicId);
-        return await _cloudinary.DestroyAsync(deleteParams);
+        return Result<List<Image>>.Success(uploadedImages);
     }
 }

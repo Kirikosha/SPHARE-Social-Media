@@ -14,17 +14,17 @@ public class PublicationNotificationService : BackgroundService
     private readonly ILogger<PublicationNotificationService> _logger;
     private readonly IMediator _mediator;
     private readonly IEmailService _emailService;
-    private readonly ISubscriptionService _subscriptionService;
+    private readonly INeo4JSubscriptionService _neo4JSubscriptionService;
     private readonly TimeSpan _checkInterval = TimeSpan.FromSeconds(60);
     private const int BatchSize = 20;
 
     public PublicationNotificationService(ILogger<PublicationNotificationService> logger, IMediator mediator, 
-        IEmailService emailService, ISubscriptionService subscriptionService)
+        IEmailService emailService, INeo4JSubscriptionService neo4JSubscriptionService)
     {
         _logger = logger;
         _mediator = mediator;
         _emailService = emailService;
-        _subscriptionService = subscriptionService;
+        _neo4JSubscriptionService = neo4JSubscriptionService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -118,7 +118,7 @@ public class PublicationNotificationService : BackgroundService
 
     private async Task<List<string>> GetFollowersIds(string authorId)
     {
-        List<string> ids = await _subscriptionService.GetFollowersAsync(authorId);
+        List<string> ids = await _neo4JSubscriptionService.GetFollowersAsync(authorId);
         return ids;
     }
 

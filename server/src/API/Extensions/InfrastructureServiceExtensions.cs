@@ -30,7 +30,7 @@ public static class InfrastructureServiceExtensions
             );
             services.AddSingleton(neo4JDriver);
             services.AddTransient<INeo4jDataAccess, Neo4jDataAccess>();
-            services.AddScoped<ISubscriptionService, SubscriptionService>();
+            services.AddScoped<INeo4JSubscriptionService, Neo4JSubscriptionService>();
         }
         catch (Exception ex)
         {

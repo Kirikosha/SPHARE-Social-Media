@@ -1,9 +1,10 @@
-﻿namespace API.Controllers;
+﻿using Application.DTOs.UserDTOs;
+
+namespace API.Controllers;
 
 using Application.Features.Users.Commands;
 using Application.Features.Users.Queries;
 using Application.Helpers;
-using Domain.DTOs.UserDTOs;
 using Microsoft.AspNetCore.Mvc;
 
 public class PublicUserController : BaseApiController
@@ -32,6 +33,6 @@ public class PublicUserController : BaseApiController
     [HttpGet("user-search")]
     public async Task<ActionResult<List<PublicUserDto>>> SearchForUserByUniqueNameIdentifier([FromQuery] string searchQuery)
     {
-        return HandleResult(await Mediator.Send(new GetUsersByUniqueNameIdentifier.Query { UniqueNameIdentifier = searchQuery }));
+        return HandleResult(await Mediator.Send(new GetUsersBySearchString.Query { SearchString = searchQuery }));
     }
 }

@@ -1,9 +1,6 @@
-﻿using Application.Core;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore;
-
-namespace Application.Features.Publications.Commands;
-
+﻿namespace Application.Features.Publications.Commands;
+using Core;
+using Application.Interfaces.Services;
 public class UpdatePublicationViews
 {
     public class Command : IRequest<Result<int>>
@@ -11,18 +8,11 @@ public class UpdatePublicationViews
         public required string PublicationId { get; set; }
     }
     
-    public class Handler(ApplicationDbContext context) : IRequestHandler<Command, Result<int>>
+    public class Handler(IPublicationService publicationService) : IRequestHandler<Command, Result<int>>
     {
         public async Task<Result<int>> Handle(Command request, CancellationToken cancellationToken)
         {
-            await context.Publications.Where(p => p.Id == request.PublicationId)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(p => p.ViewCount, p => p.ViewCount + 1), cancellationToken);
-
-            var viewCount = await context.Publications.Where(a => a.Id == request.PublicationId)
-                .Select(x => x.ViewCount).FirstOrDefaultAsync(cancellationToken);
-
-            return Result<int>.Success(viewCount);
+            return await publicationService.UpdatePublicationViewsAsync(request.PublicationId, cancellationToken);
         }
     }
 }

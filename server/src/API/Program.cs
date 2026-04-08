@@ -1,6 +1,6 @@
 using API.Extensions;
 using API.Middleware;
-using Application.MessagingWebSockets;
+using Infrastructure.Messaging;
 using Serilog;
 using Serilog.Events;
 

@@ -1,12 +1,7 @@
-﻿using Application.Core;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Domain.DTOs.PublicationDTOs;
-using Domain.Enums;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore;
-
-namespace Application.Features.Publications.Queries;
+﻿namespace Application.Features.Publications.Queries;
+using Core;
+using DTOs.PublicationDTOs;
+using Application.Interfaces.Services;
 
 public class GetPublicationsCalendar
 {
@@ -15,16 +10,11 @@ public class GetPublicationsCalendar
         public required string UserId { get; set; }
     }
     
-    public class Handler(ApplicationDbContext context, IMapper mapper) : IRequestHandler<Query, Result<List<PublicationCalendarDto>>>
+    public class Handler(IPublicationService publicationService) : IRequestHandler<Query, Result<List<PublicationCalendarDto>>>
     {
         public async Task<Result<List<PublicationCalendarDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var publications = await context.Publications
-                .Where(a => a.AuthorId == request.UserId && a.PublicationType == PublicationTypes.planned)
-                .ProjectTo<PublicationCalendarDto>(mapper.ConfigurationProvider)
-                .ToListAsync(cancellationToken);
-
-            return Result<List<PublicationCalendarDto>>.Success(publications);
+            return await publicationService.GetPublicationsCalendarAsync(request.UserId, cancellationToken);
         }
     }
 }

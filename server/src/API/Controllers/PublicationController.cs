@@ -1,11 +1,12 @@
-﻿namespace API.Controllers;
+﻿using Application.DTOs.LikeDTOs;
+using Application.DTOs.PublicationDTOs;
+
+namespace API.Controllers;
 
 using Application.Features.Likes.Commands;
 using Application.Features.Publications.Commands;
 using Application.Features.Publications.Queries;
 using Application.Helpers;
-using Domain.DTOs.LikeDTOs;
-using Domain.DTOs.PublicationDTOs;
 using Microsoft.AspNetCore.Mvc;
 
 public class PublicationController : BaseApiController

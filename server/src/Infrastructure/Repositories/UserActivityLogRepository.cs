@@ -1,9 +1,8 @@
 ﻿using Application.DTOs;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
-using Infrastructure;
 
-namespace Application.Repositories.UserActivityLogRepository;
+namespace Infrastructure.Repositories;
 
 public class UserActivityLogRepository(ApplicationDbContext context) : IUserActivityLogRepository
 {

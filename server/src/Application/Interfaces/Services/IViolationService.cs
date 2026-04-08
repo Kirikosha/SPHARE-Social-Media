@@ -1,9 +1,9 @@
-﻿namespace Application.Interfaces.Services;
+﻿using Application.DTOs.ViolationDTOs;
 
-using Domain.Entities;
-using System.Threading.Tasks;
+namespace Application.Interfaces.Services;
 
 public interface IViolationService
 {
-    Task<bool> RegisterViolationAsync(User user, Violation violation, int scoreIncrease, bool isPublication);
+    Task<List<ViolationDto>> GetViolationsByUserId(string userId, CancellationToken ct);
+    Task<bool> CreateViolation(Violation violation, CancellationToken ct);
 }

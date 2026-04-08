@@ -1,7 +1,7 @@
-﻿using Application.Features.Complaints.Commands;
+﻿using Application.DTOs.ComplaintDTOs;
+using Application.Features.Complaints.Commands;
 using Application.Features.Complaints.Queries;
 using Application.Helpers;
-using Domain.DTOs.ComplaintDTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;

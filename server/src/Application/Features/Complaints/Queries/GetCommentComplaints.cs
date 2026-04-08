@@ -1,25 +1,17 @@
-﻿using Application.Core;
-using AutoMapper;
-using Domain.DTOs.ComplaintDTOs;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore;
-
-namespace Application.Features.Complaints.Queries;
+﻿namespace Application.Features.Complaints.Queries;
+using Core;
+using DTOs.ComplaintDTOs;
+using Application.Interfaces.Services;
 public class GetCommentComplaints
 {
-    public class Query : IRequest<Result<List<CommentComplaintDto>>>
-    {
-    }
-
-    public class Handler(ApplicationDbContext context, IMapper mapper)
+    public class Query : IRequest<Result<List<CommentComplaintDto>>> { }
+    
+    public class Handler(IComplaintService complaintService)
         : IRequestHandler<Query, Result<List<CommentComplaintDto>>>
     {
         public async Task<Result<List<CommentComplaintDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var commentComplaints = await context.CommentComplaints.Include(a => a.Comment).ThenInclude(a => a.Author).ToListAsync();
-
-            return Result<List<CommentComplaintDto>>
-                .Success(mapper.Map<List<CommentComplaintDto>>(commentComplaints));
+            return await complaintService.GetCommentComplaintsAsync(cancellationToken);
         }
     }
 }

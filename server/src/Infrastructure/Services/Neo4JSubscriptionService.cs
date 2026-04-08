@@ -1,0 +1,131 @@
+﻿using Application.Interfaces.Services;
+
+namespace Infrastructure.Services;
+
+using Neo4j;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class Neo4JSubscriptionService(INeo4jDataAccess neo4j) : INeo4JSubscriptionService
+{
+
+    public async Task<List<string>> GetFollowersAsync(string userId)
+    {
+        var query = @"
+            MATCH (f:User)-[:FOLLOWS]->(u:User {id: $userId})
+            RETURN f.id as id";
+
+        var result = await neo4j.ExecuteReadListAsync(query, "id", new Dictionary<string, object>
+        {
+            {
+                "userId", userId
+            }
+        });
+
+        return result.ToList();
+    }
+
+    public async Task<List<string>> GetFollowingAsync(string userId)
+    {
+        var query = @"
+            MATCH (u:User {id: $userId})-[:FOLLOWS]->(f:User)
+            RETURN f.id as id";
+
+        var result = await neo4j.ExecuteReadListAsync(query, "id", new Dictionary<string, object>
+        {
+            { "userId", userId }
+        });
+
+        return result.ToList();
+    }
+
+    public async Task FollowAsync(string followerId, string followedId)
+    {
+        var query = @"
+            MATCH (a:User {id: $followerId}), (b:User {id: $followedId})
+            MERGE (a)-[:FOLLOWS]->(b)";
+
+        await neo4j.ExecuteWriteAsync(query, new Dictionary<string, object>
+        {
+            {"followerId", followerId },
+            {"followedId", followedId }
+        });
+    }
+
+    public async Task UnfollowAsync(string followerId, string followedId)
+    {
+        var query = @"
+            MATCH (a:User {id: $followerId})-[r:FOLLOWS]->(b:User {id: $followedId})
+            DELETE r";
+
+        await neo4j.ExecuteWriteAsync(query, new Dictionary<string, object>
+        {
+            {"followerId", followerId },
+            {"followedId", followedId }
+        });
+    }
+
+    public async Task CreateUserNodeAsync(string userId)
+    {
+        var query = @"
+        MERGE (u:User {id: $id})";
+
+        await neo4j.ExecuteWriteAsync(query, new Dictionary<string, object>
+        {
+            { "id", userId }
+        });
+    }
+
+    public async Task<bool> IsFollowing(string userId, string followedId)
+    {
+        var query = @"
+        MATCH (a:User {id: $userId})-[:FOLLOWS]->(b:User {id: $followedId})
+        RETURN COUNT(*) AS count";
+
+        var result = await neo4j.ExecuteReadListAsync(query, "count", new Dictionary<string, object>
+    {
+        { "userId", userId },
+        { "followedId", followedId }
+    });
+
+        return result.Count > 0 && int.Parse(result[0]) > 0;
+    }
+    
+    public async Task<int> GetFollowerCountAsync(string userId)
+    {
+        var query = @"
+        MATCH (f:User)-[:FOLLOWS]->(u:User {id: $userId})
+        RETURN count(f) AS count";
+
+        var result = await neo4j.ExecuteReadListAsync(query, "count", new Dictionary<string, object>
+        {
+            { "userId", userId }
+        });
+
+        var countString = result.SingleOrDefault(); // Throws if 0 or >1 rows
+        if (!int.TryParse(countString, out var followerCount))
+            throw new InvalidOperationException("Unexpected count format from Neo4j");
+
+        return followerCount;
+    }
+    
+    public async Task<int> GetFollowingCountAsync(string userId)
+    {
+        var query = @"
+        MATCH (u:User {id: $userId})-[:FOLLOWS]->(f:User)
+        RETURN count(f) AS count";
+
+        var result = await neo4j.ExecuteReadListAsync(query, "count", new Dictionary<string, object>
+        {
+            { "userId", userId }
+        });
+
+        var countString = result.SingleOrDefault(); // Throws if 0 or >1 rows
+        if (!int.TryParse(countString, out var followerCount))
+            throw new InvalidOperationException("Unexpected count format from Neo4j");
+
+        return followerCount;
+    }
+}

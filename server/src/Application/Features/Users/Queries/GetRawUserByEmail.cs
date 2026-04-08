@@ -1,8 +1,6 @@
 ﻿namespace Application.Features.Users.Queries;
-
+using Application.Interfaces.Services;
 using Core;
-using Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,13 +10,11 @@ public class GetRawUserByEmail
     {
         public required string Email { get; set; }
     }
-    public class Handler(ApplicationDbContext context) : IRequestHandler<Query, Result<User>>
+    public class Handler(IUserService userService) : IRequestHandler<Query, Result<User>>
     {
         public async Task<Result<User>> Handle(Query request, CancellationToken cancellationToken)
         {
-            User? user = await context.Users.FirstOrDefaultAsync(a => a.Email == request.Email, cancellationToken);
-            return user == null ? Result<User>.Failure("User was not found", 404) 
-                : Result<User>.Success(user);
+            return await userService.GetUserByEmailAsync(request.Email, cancellationToken);
         }
     }
 }

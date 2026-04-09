@@ -7,7 +7,7 @@ export interface MemberModel {
     username: string,
     uniqueNameIdentifier: string,
     joinedAt: string
-    profileImage: ImageModel
+    imageUrl: string
     blocked: boolean
     userProfileDetails?: UserProfileDetailsModel
     address?: AddressModel

@@ -25,18 +25,17 @@
                    (change)="handleImageUpload($event)" style="display: none;">
           </label>
           
-          <!-- Three radio buttons -->
           <div class="btn-group post-type-toggle" role="group">
             <input type="radio" class="btn-check" name="publicationType" id="ordinaryPost" 
-                   [(ngModel)]="publicationType" value="ordinary">
+                  [(ngModel)]="publicationType" (ngModelChange)="onPublicationTypeChange($event)" value="ordinary">
             <label class="btn btn-outline-danger" for="ordinaryPost">Post Now</label>
             
             <input type="radio" class="btn-check" name="publicationType" id="plannedPost" 
-                   [(ngModel)]="publicationType" value="planned">
+                  [(ngModel)]="publicationType" (ngModelChange)="onPublicationTypeChange($event)" value="planned">
             <label class="btn btn-outline-danger" for="plannedPost">Schedule</label>
             
             <input type="radio" class="btn-check" name="publicationType" id="conditionalPost" 
-                   [(ngModel)]="publicationType" value="plannedConditional">
+                  [(ngModel)]="publicationType" (ngModelChange)="onPublicationTypeChange($event)" value="plannedConditional">
             <label class="btn btn-outline-danger" for="conditionalPost">Conditional</label>
           </div>
         </div>
@@ -45,8 +44,12 @@
         <div class="extra-options">
           <!-- Schedule options (shown only for 'planned') -->
           <div class="schedule-options" *ngIf="publicationType === 'planned'">
-            <input type="datetime-local" class="form-control schedule-input" 
-                   [min]="minScheduleDate" [(ngModel)]="scheduledDate" name="scheduledDate">
+          <input type="datetime-local" 
+                class="form-control schedule-input" 
+                [min]="minScheduleDate" 
+                [(ngModel)]="scheduledDate" 
+                name="scheduledDate"
+                (click)="openDatePicker($event)">
           </div>
           
           <!-- Conditional options (shown only for 'plannedConditional') -->

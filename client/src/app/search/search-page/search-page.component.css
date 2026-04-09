@@ -99,11 +99,15 @@
 
 .user-avatar {
   margin-right: 15px;
+  position: relative; /* Added for overlay positioning */
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
 }
 
 .avatar-image {
-  width: 50px;
-  height: 50px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -125,6 +129,37 @@
   font-size: 0.9rem;
 }
 
+/* Blocked State Styles */
+.blocked-avatar {
+  filter: grayscale(80%);
+  opacity: 0.7;
+}
+
+.blocked-avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(220, 53, 69, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1rem;
+}
+
+.blocked-badge {
+  font-size: 0.75rem;
+  padding: 0.25em 0.5em;
+}
+
+.blocked-badge i {
+  font-size: 0.7rem;
+  margin-right: 2px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
   .search-page-container {
@@ -139,8 +174,12 @@
     padding: 12px;
   }
   
-  .avatar-image {
+  .user-avatar {
     width: 40px;
     height: 40px;
+  }
+  
+  .blocked-avatar-overlay {
+    font-size: 0.8rem;
   }
 }

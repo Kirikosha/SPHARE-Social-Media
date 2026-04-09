@@ -2,6 +2,8 @@
   padding: 2rem;
   max-width: 800px;
   margin: 0 auto;
+  background-color: #f8f9fa;
+  border-radius: 12px;
 
   .header {
     h1 {
@@ -13,17 +15,28 @@
     transition: background-color 0.2s ease;
     
     &:hover {
-      background-color: rgba(255, 255, 255, 0.03) !important;
+      background-color: #f8f9fa !important;
     }
   }
 
   .text-muted {
-    color: #aaa !important;
+    color: #6c757d !important;
   }
 
   .empty-state {
     i {
       opacity: 0.7;
     }
+  }
+
+  .card {
+    border-radius: 8px;
+    background-color: white;
+  }
+
+  .card-header {
+    background-color: white;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 1rem 1.25rem;
   }
 }

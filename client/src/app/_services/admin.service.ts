@@ -32,11 +32,15 @@ getUsers(params?: PaginationParams): Observable<PagedList<AdminUserModel>> {
   }
 
   blockUser(userId: string){
-    return this.http.post(`${this.baseUrl}/admin/block-user`, userId);
+    return this.http.post(`${this.baseUrl}/admin/block-user`, JSON.stringify(userId), {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   unblockUser(userId: string){
-    return this.http.post(`${this.baseUrl}/admin/unblock-user`, userId);
+      return this.http.post(`${this.baseUrl}/admin/unblock-user`, JSON.stringify(userId), {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   deleteComment(violationData: CreateViolationModel){

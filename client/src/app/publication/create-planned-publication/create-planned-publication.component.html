@@ -1,1 +1,8 @@
-<app-create-publication [prefillDateString]="selectedDateString"></app-create-publication>
+<div class="create-publication-page">
+  <div class="create-publication-wrapper">
+<app-create-publication 
+  [prefillDateString]="selectedDateString"
+  (publicationCreated)="onPublicationCreated()">
+</app-create-publication>
+  </div>
+</div>

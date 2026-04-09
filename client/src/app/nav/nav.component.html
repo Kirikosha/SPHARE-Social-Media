@@ -1,10 +1,10 @@
 <header>
   <div class="header-container container">
-    <h1 class="logo hover" routerLink="/" routerLinkActive="active">BlackBox</h1>
+    <h1 class="logo hover" routerLink="/" routerLinkActive="active">SPHARE</h1>
 
     <nav class="main-nav">
     <ul>
-<!--      @if (accountService.currentUser()){-->
+      @if (accountService.currentUser()){
         <li>
           <a (click)="goToProfile()" routerLinkActive="active" class="nav-link forward">Profile</a>
         </li>
@@ -15,15 +15,15 @@
         <li>
           <a routerLink="/search" routerLinkActive="active" class="nav-link forward">Search</a>
         </li>
-<!--        <li>-->
-<!--          <a routerLink="/recommended-publications" routerLinkActive="active" class="nav-link">Recommendations</a>-->
-<!--        </li>-->
-<!--      }-->
-<!--      @if (accountService.currentUser()?.role === 'Admin'){-->
+        <li>
+          <a routerLink="/recommended-publications" routerLinkActive="active" class="nav-link forward">Recommendations</a>
+        </li>
+      }
+      @if (accountService.currentUser()?.role === 'Admin'){
         <li>
           <a routerLink="/admin-panel" routerLinkActive="active" class="nav-link forward">Admin</a>
         </li>
-<!--      }-->
+      }
     </ul>
 
     @if (accountService.currentUser()){

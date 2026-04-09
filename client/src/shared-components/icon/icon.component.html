@@ -1,23 +1,35 @@
 <div class="author-info">
-  <div class="profile-pic-wrapper">
+  <div class="profile-pic-wrapper" [class.blocked]="user.blocked">
     @if (user.imageUrl) {
       <img
         [src]="user.imageUrl"
         alt="Profile Picture"
         class="profile-pic rounded-circle"
+        [class.blocked-avatar]="user.blocked"
       />
     } @else {
       <img
         src="assets/user.png"
         alt="Profile Picture"
         class="profile-pic rounded-circle"
+        [class.blocked-avatar]="user.blocked"
       />
+    }
+    @if (user.blocked) {
+      <div class="blocked-avatar-overlay">
+        <i class="bi bi-lock-fill"></i>
+      </div>
     }
   </div>
 
   <div class="author-details">
     <div class="d-flex align-items-center flex-wrap">
       <span class="author-name">{{ user.username }}</span>
+      @if (user.blocked) {
+        <span class="badge bg-danger ms-2 blocked-badge">
+          <i class="bi bi-lock-fill"></i> Blocked
+        </span>
+      }
       <span class="author-handle">
         &#64;{{ user.uniqueNameIdentifier }}
       </span>

@@ -52,9 +52,21 @@ export class CreatePublicationComponent implements OnChanges{
         this.toastrService.error("Please enter a valid target number for the condition");
         return;
       }
-    } else if (this.publicationType === 'planned' && !this.scheduledDate) {
-      this.toastrService.error("Please select a schedule date and time");
-      return;
+    } else if (this.publicationType === 'planned') {
+      if (!this.scheduledDate) {
+        this.toastrService.error("Please select a schedule date and time");
+        return;
+      }
+      
+      // Validate that scheduled date is at least 1 hour in the future
+      const scheduledDateTime = new Date(this.scheduledDate);
+      const minAllowedDate = new Date();
+      minAllowedDate.setHours(minAllowedDate.getHours() + 1);
+      
+      if (scheduledDateTime < minAllowedDate) {
+        this.toastrService.error("Scheduled time must be at least 1 hour in the future");
+        return;
+      }
     }
 
     this.isPosting = true;
@@ -179,7 +191,45 @@ export class CreatePublicationComponent implements OnChanges{
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['prefillDateString'] && this.prefillDateString) {
       this.publicationType = 'planned';
-      this.scheduledDate = this.prefillDateString;
+      const prefillDate = new Date(this.prefillDateString);
+      const minAllowedDate = new Date();
+      minAllowedDate.setHours(minAllowedDate.getHours() + 1);
+      minAllowedDate.setMinutes(minAllowedDate.getMinutes() - 1);
+      
+      // Use prefill if valid, otherwise use default (now + 1h)
+      if (prefillDate >= minAllowedDate) {
+        this.scheduledDate = this.formatDateTimeLocal(prefillDate);
+      } else {
+        this.setDefaultScheduleDate();
+      }
     }
+  }
+
+  onPublicationTypeChange(type: string) {
+    if (type === 'planned' && !this.scheduledDate) {
+      this.setDefaultScheduleDate();
+    }
+  }
+  openDatePicker(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.showPicker && !input.disabled) {
+      input.showPicker();
+    }
+  }
+
+    private setDefaultScheduleDate() {
+    const defaultDate = new Date();
+    defaultDate.setHours(defaultDate.getHours() + 1);
+    this.scheduledDate = this.formatDateTimeLocal(defaultDate);
+  }
+
+  // Helper to format Date to YYYY-MM-DDTHH:mm for datetime-local input
+  private formatDateTimeLocal(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 }

@@ -87,8 +87,8 @@ loadMember(): void {
       });
       
       
-      if (member.profileImage?.imageUrl) {
-        this.profileImagePreview = member.profileImage.imageUrl;
+      if (member.imageUrl) {
+        this.profileImagePreview = member.imageUrl;
       }
     },
     error: (err) => {

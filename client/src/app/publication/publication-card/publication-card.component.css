@@ -279,6 +279,8 @@
   align-items: flex-start;
   gap: 12px;
   margin-bottom: 12px;
+  padding-right: 50px;
+  position: relative; 
 }
 .publication-meta {
   margin-left: auto;
@@ -329,4 +331,19 @@
 
 .view-count-number {
   font-size: 0.8rem;
+}
+
+.deleted-message {
+  color: #6c757d;
+  font-style: italic;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.deleted-actions {
+  justify-content: center;
+  color: #dc3545;
+  padding: 12px 0;
+  border-top: 1px solid #e6ecf0;
+  margin-top: 12px;
 }

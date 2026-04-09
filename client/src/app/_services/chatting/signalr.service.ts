@@ -10,7 +10,7 @@ export interface Message {
 }
 
 export interface PresenceEvent {
-  userId: number;
+  userId: string;
   isOnline: boolean;
 }
 
@@ -46,7 +46,7 @@ export class SignalrService {
   public userJoinedChat$ = new Subject<number>(); // userId
   public userLeftChat$ = new Subject<number>(); // userId
   
-  private url = "https://localhost:5600"
+  private url = "https://localhost:5000"
   // Store token getter function
   private tokenGetter: (() => string | Promise<string>) | null = null;
 
@@ -120,7 +120,7 @@ export class SignalrService {
     });
 
     // Presence events
-    this.hubConnection.on('ContactPresenceChanged', (userId: number, isOnline: boolean) => {
+    this.hubConnection.on('ContactPresenceChanged', (userId: string, isOnline: boolean) => {
       this.contactPresenceChanged$.next({ userId, isOnline });
     });
 

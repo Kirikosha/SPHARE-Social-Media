@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { SignalrService, Message, TypingEvent } from '../../app/_services/chatting/signalr.service';
+import { SignalrService, Message, TypingEvent, PresenceEvent } from '../../app/_services/chatting/signalr.service';
 import { ChatService } from '../../app/_services/chatting/chat.service';
 import { AccountService } from '../../app/_services/account.service';
 import { MessageDto } from '../../app/_models/chatting/messageDto';
@@ -92,37 +92,38 @@ export class PrivateChatComponent implements OnInit, OnDestroy, AfterViewChecked
   /**
    * Load chat details and messages using the new /open-chat endpoint
    */
-  private loadChatDetails(): void {
-    this.isLoading = true;
-    this.error = null;
-    
-    this.subscriptions.push(
-      this.chatService.getChat(this.chatId).subscribe({
-        next: (chat) => {
-          this.chat = chat;
-          
-          // Extract messages - API returns newest first (descending), we want oldest first for display
-          this.messages = chat.messages ? [...chat.messages].reverse() : [];
-          
-          // Determine if there might be more messages (if we got exactly pageSize)
-          this.hasMoreMessages = chat.messages?.length === this.pageSize;
-          
-          // Get the other participant (1-on-1 chat)
-          this.otherUser = this.getOtherParticipant(chat);
-          
-          this.isLoading = false;
-          
-          // Mark as read (implement later)
-          this.markAsRead();
-        },
-        error: (err) => {
-          console.error('Failed to load chat:', err);
-          this.error = 'Failed to load conversation';
-          this.isLoading = false;
+private loadChatDetails(): void {
+  this.isLoading = true;
+  this.error = null;
+  
+  this.subscriptions.push(
+    this.chatService.getChat(this.chatId).subscribe({
+      next: (chat) => {
+        this.chat = chat;
+        this.messages = chat.messages ? [...chat.messages].reverse() : [];
+        this.hasMoreMessages = chat.messages?.length === this.pageSize;
+        
+        // Store current online status before replacing the user object
+        const currentOnlineStatus = this.otherUser?.isOnline;
+        
+        this.otherUser = this.getOtherParticipant(chat);
+        
+        // Preserve real-time presence status over stale API data
+        if (this.otherUser && currentOnlineStatus !== undefined) {
+          this.otherUser.isOnline = currentOnlineStatus;
         }
-      })
-    );
-  }
+        
+        this.isLoading = false;
+        this.markAsRead();
+      },
+      error: (err) => {
+        console.error('Failed to load chat:', err);
+        this.error = 'Failed to load conversation';
+        this.isLoading = false;
+      }
+    })
+  );
+}
 
   /**
    * Load more messages (older messages) via pagination endpoint
@@ -234,6 +235,16 @@ export class PrivateChatComponent implements OnInit, OnDestroy, AfterViewChecked
         this.error = 'Failed to send message. Please try again.';
         this.isSending = false;
       })
+    );
+
+    this.subscriptions.push(
+      this.signalRService.contactPresenceChanged$.subscribe((event: PresenceEvent) => {
+        // Check if this is the other user in the chat
+        // Note: You may need to convert types if userId is string vs number
+        if (this.otherUser && String(event.userId) === this.otherUser.userId) {
+          this.otherUser.isOnline = event.isOnline;
+      }
+    })
     );
   }
 

@@ -30,19 +30,33 @@
     <!-- Results list -->
     <div *ngIf="!isLoading && searchResults.length > 0" class="results-list">
       <div *ngFor="let user of searchResults" class="user-card" [routerLink]="['/profile', user.uniqueNameIdentifier]">
-        <div class="user-avatar">
-            @if (user.profileImage && user.profileImage.imageUrl) {
-              <img [src]="user.profileImage.imageUrl" 
+        <div class="user-avatar" [class.blocked]="user.blocked">
+            @if (user.imageUrl) {
+              <img [src]="user.imageUrl" 
                    alt="{{user.username}}'s profile picture" 
-                   class="avatar-image">
+                   class="avatar-image"
+                   [class.blocked-avatar]="user.blocked">
             } @else {
               <img src="assets/user.png" 
                    alt="{{user.username}}'s profile picture" 
-                   class="avatar-image">
+                   class="avatar-image"
+                   [class.blocked-avatar]="user.blocked">
+            }
+            @if (user.blocked) {
+              <div class="blocked-avatar-overlay">
+                <i class="bi bi-lock-fill"></i>
+              </div>
             }
         </div>
         <div class="user-info">
-          <h3 class="username">{{user.username}}</h3>
+          <div class="d-flex align-items-center flex-wrap gap-2">
+            <h3 class="username">{{user.username}}</h3>
+            @if (user.blocked) {
+              <span class="badge bg-danger blocked-badge">
+                <i class="bi bi-lock-fill"></i> Blocked
+              </span>
+            }
+          </div>
           <p class="user-handle">&#64;{{user.uniqueNameIdentifier}}</p>
         </div>
       </div>

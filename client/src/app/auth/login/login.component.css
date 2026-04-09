@@ -1,0 +1,9 @@
+.container {
+  padding-top: 3rem;
+  padding-bottom: 2rem;
+}
+
+form {
+  width: 100%;
+  max-width: 400px;
+}

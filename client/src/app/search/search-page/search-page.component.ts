@@ -32,7 +32,9 @@ export class SearchPageComponent {
 
     this.memberService.searchForUser(this.searchQuery).subscribe({
       next: (data: MemberModel[]) => {
+        console.log('Search results:', data);
         this.searchResults = data;
+        console.log('Updated searchResults:', this.searchResults);
         this.isLoading = false;
       },
       error: (error) => {

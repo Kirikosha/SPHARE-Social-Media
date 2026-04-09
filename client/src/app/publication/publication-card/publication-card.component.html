@@ -13,13 +13,22 @@
       </div>
     </div>
 
-    <div class="click-to-open" (click)="goToPublicationPage(publication.id)">
+    <div class="click-to-open" (click)="!publication.isDeleted && goToPublicationPage(publication.id)">
       <div *ngIf="!isEditing">
-        <div class="publication-text">
+        <!-- Deleted Message -->
+        <div class="publication-text" *ngIf="publication.isDeleted">
+          <p class="deleted-message text-muted fst-italic">
+            <i class="bi bi-trash-fill me-2"></i>This publication was deleted
+          </p>
+        </div>
+        
+        <!-- Normal Content -->
+        <div class="publication-text" *ngIf="!publication.isDeleted">
           <p>{{publication.content}}</p>
         </div>
         
-        <div class="publication-images" *ngIf="publication.images && publication.images.length > 0">
+        <!-- Images - hidden when deleted -->
+        <div class="publication-images" *ngIf="!publication.isDeleted && publication.images && publication.images.length > 0">
           <div class="image-grid" [ngClass]="getImageGridClass(publication.images.length)">
             <div class="image-container" *ngFor="let image of publication.images">
               <img [src]="image" alt="Publication image" class="publication-image">
@@ -29,8 +38,8 @@
       </div>
     </div>
 
-
-    <div *ngIf="isEditing">
+    <!-- Rest of the template remains the same... -->
+    <div *ngIf="isEditing && !publication.isDeleted">
       <div class="edit-controls">
         <textarea [(ngModel)]="editedContent" class="form-control edit-textarea"></textarea>
         
@@ -48,7 +57,8 @@
       </div>
     </div>
 
-    <div class="publication-actions">
+    <!-- Actions - hide or disable if deleted -->
+    <div class="publication-actions" *ngIf="!publication.isDeleted">
       <button class="action-button">
         <i class="bi bi-chat"></i>
         <span class="action-count">{{publication.commentAmount}}</span>
@@ -79,23 +89,30 @@
         <i class="bi bi-flag"></i>
       </button>
       
-      <!-- Changed from disabled button to static display element -->
       <div class="view-count-display">
         <i class="bi bi-eye"></i>
         <span class="view-count-number">{{publication.viewCount}}</span>
       </div>
     </div>
 
-    <div class="admin-actions-wrapper">
+    <!-- Deleted indicator for actions area -->
+    <div class="publication-actions deleted-actions" *ngIf="publication.isDeleted">
+      <span class="text-muted fst-italic">
+        <i class="bi bi-trash me-2"></i>Deleted
+      </span>
+    </div>
+
+    <div class="admin-actions-wrapper" *ngIf="!publication.isDeleted">
       <ng-content></ng-content>
     </div>
 
     <app-make-complaint
-    [targetId]="publication.id"
-    targetType="publication"
-    [title]="'Report Publication'"
-    (complaintSubmitted)="onComplaintSubmitted()"
-    (modalClosed)="onComplaintModalClosed()">
-  </app-make-complaint>
+      *ngIf="!publication.isDeleted"
+      [targetId]="publication.id"
+      targetType="publication"
+      [title]="'Report Publication'"
+      (complaintSubmitted)="onComplaintSubmitted()"
+      (modalClosed)="onComplaintModalClosed()">
+    </app-make-complaint>
   </div>
 </div>

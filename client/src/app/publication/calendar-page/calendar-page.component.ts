@@ -75,5 +75,13 @@ private publicationService = inject(PublicationService)
     const dayOfMonth = ('0' + day.getDate()).slice(-2);
     return `${year}-${month}-${dayOfMonth}T12:00`;
   }
-
+  isPastDate(day: Date): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const compareDay = new Date(day);
+    compareDay.setHours(0, 0, 0, 0);
+    
+    return compareDay < today;
+  }
 }

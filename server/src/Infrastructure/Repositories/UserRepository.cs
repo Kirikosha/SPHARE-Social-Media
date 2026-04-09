@@ -134,7 +134,7 @@ public class UserRepository : IUserRepository
         Username             = u.Username,
         UniqueNameIdentifier = u.UniqueNameIdentifier,
         JoinedAt             = u.DateOfCreation.ToString("yyyy-MM-dd"),
-        ProfileImage         = u.ProfileImage != null ? u.ProfileImage.ImageUrl : null,
+        ImageUrl         = u.ProfileImage != null ? u.ProfileImage.ImageUrl : null,
         Blocked              = u.Blocked,
         UserProfileDetails   = u.ProfileDetails != null
             ? new UserProfileDetailsDto

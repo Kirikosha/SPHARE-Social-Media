@@ -1,0 +1,12 @@
+.create-publication-page {
+  max-width: 600px; /* or whatever width matches your feed layout */
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.create-publication-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  /* Add any other styling that mimics your feed's post creator container */
+}

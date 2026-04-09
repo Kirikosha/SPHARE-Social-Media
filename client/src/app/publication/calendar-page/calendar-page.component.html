@@ -17,10 +17,12 @@
         [class.other-month]="day.getMonth() !== currentMonth.getMonth()">
       <div class="day-header">
         <span class="day-number">{{ day.getDate() }}</span>
-        <button class="btn btn-sm btn-link add-publication-btn"
-                [routerLink]="['/publications/planned-create']"
-                [queryParams]="{date: getLocalDateTimeString(day)}"
-                title="Create planned publication">
+        <button 
+          *ngIf="!isPastDate(day)"
+          class="btn btn-sm btn-link add-publication-btn"
+          [routerLink]="['/publications/planned-create']"
+          [queryParams]="{date: getLocalDateTimeString(day)}"
+          title="Create planned publication">
           <i class="bi bi-plus-circle"></i>
         </button>
       </div>

@@ -116,10 +116,10 @@
             <i class="bi bi-eye"></i> View Publication
           </button>
           <button class="btn btn-sm btn-success me-2">
-            <i class="bi bi-check-circle"></i> Dismiss (NOT IMPLEMENTED HERE)
+            <i class="bi bi-check-circle"></i> Dismiss
           </button>
           <button class="btn btn-sm btn-danger">
-            <i class="bi bi-trash"></i> Delete Publication (NOT IMPLEMENTED HERE)
+            <i class="bi bi-trash"></i> Delete Publication
           </button>
         </div>
       </div>
@@ -159,7 +159,7 @@
               <h6>Comment Details:</h6>
               <div class="comment-preview">
                 <div class="d-flex align-items-center mb-2">
-                  <img [src]="complaint.comment.author.profileImage || 'assets/user.png'" 
+                  <img [src]="complaint.comment.author.imageUrl || 'assets/user.png'" 
                        alt="Author" 
                        class="rounded-circle me-2" 
                        style="width: 30px; height: 30px;">

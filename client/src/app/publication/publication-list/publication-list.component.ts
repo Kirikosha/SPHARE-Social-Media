@@ -150,6 +150,6 @@ export class PublicationListComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   onAdminPublicationDeleted(itemId: string): void {
-    this.publications = this.publications.filter(p => p.id !== itemId);
+    this.resetAndLoad();
   }
 }

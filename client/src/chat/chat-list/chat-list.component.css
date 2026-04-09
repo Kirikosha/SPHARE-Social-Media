@@ -358,3 +358,26 @@
     color: #e9ecef;
   }
 }
+
+/* Remove the full-width border when contained */
+.chat-list-container {
+  border-right: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  max-height: calc(100vh - 100px); /* Prevent overflow on mobile */
+  overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  .chat-list-container {
+    border-radius: 0;
+    box-shadow: none;
+    max-height: 100vh;
+  }
+}

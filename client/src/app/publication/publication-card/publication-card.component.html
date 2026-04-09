@@ -1,21 +1,17 @@
 <div class="publication-card" *ngIf="publication">
   <div class="publication-content">
     <div class="publication-header">
-      <app-icon [user] = "publication.author"></app-icon>
+      <app-icon [user]="publication.author"></app-icon>
       <div class="publication-meta">
-        <span class="post-time">
-          · {{ formatDate(publication.postedAt) }}
-        </span>
-
+        <span class="post-time">· {{ formatDate(publication.postedAt) }}</span>
         <span class="updated-time" *ngIf="publication.updatedAt">
-          · <i class="bi bi-pencil-fill"></i>
-          {{ formatDate(publication.updatedAt) }}
+          · <i class="bi bi-pencil-fill"></i> {{ formatDate(publication.updatedAt) }}
         </span>
-
         <div class="scheduled-time" *ngIf="publication.remindAt">
-          <i class="bi bi-clock"></i>
-          Scheduled for {{ formatDateTime(publication.remindAt) }}
+          <i class="bi bi-clock"></i> Scheduled for {{ formatDateTime(publication.remindAt) }}
         </div>
+      </div>
+    </div>
 
     <div class="click-to-open" (click)="goToPublicationPage(publication.id)">
       <div *ngIf="!isEditing">
@@ -31,7 +27,7 @@
           </div>
         </div>
       </div>
-    </div>  
+    </div>
 
 
     <div *ngIf="isEditing">
@@ -82,10 +78,12 @@
       <button class="action-button" (click)="openComplaintModal()">
         <i class="bi bi-flag"></i>
       </button>
-      <button class="action-button" disabled>
+      
+      <!-- Changed from disabled button to static display element -->
+      <div class="view-count-display">
         <i class="bi bi-eye"></i>
-        <span class="action-count">{{publication.viewCount}}</span>
-      </button>
+        <span class="view-count-number">{{publication.viewCount}}</span>
+      </div>
     </div>
 
     <div class="admin-actions-wrapper">

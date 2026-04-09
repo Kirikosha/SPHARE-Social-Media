@@ -12,15 +12,11 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); 
 }
 
-
-
 .publication-text {
   margin-bottom: 12px;
   font-size: 1.1rem;
   line-height: 1.4;
   text-align: left;
-  padding-left: 52px;
-  margin-left: -52px;
 }
 
 .publication-images {
@@ -313,4 +309,24 @@
 }
 .conditional-info i {
   margin-right: 0.25rem;
+}
+
+.view-count-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #657786;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  /* No hover effects, no cursor pointer */
+  cursor: default;
+  user-select: none;
+}
+
+.view-count-display i {
+  font-size: 1.1rem;
+}
+
+.view-count-number {
+  font-size: 0.8rem;
 }

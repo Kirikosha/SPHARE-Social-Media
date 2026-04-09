@@ -1,9 +1,13 @@
-import { ImageModel } from "../imageModel";
-import { MemberModel } from "../user/memberModel";
 import { PublicUserBriefModel } from "../user/publicUserBriefModel";
 import { PublicationCardModel } from "./publicationCardModel";
 
-export interface PublicationModel{
+export enum PublicationTypes {
+  ordinary = 0,
+  planned = 1,
+  plannedConditional = 2
+}
+
+export interface PublicationModel {
     id: string;
     content?: string;
     postedAt: Date;
@@ -14,13 +18,23 @@ export interface PublicationModel{
     likesAmount: number;
     isLikedByCurrentUser: boolean;
     commentAmount: number;
-    conditionType?: 'SubscriberCount';
-    publicationType: string;
-    conditionTarget?: number;
-    comparisonOperator?: 'GreaterThanOrEqual'
+    conditionType?: 'SubscriberCount' | null;
+    publicationType: PublicationTypes;  // Use the enum type
+    conditionTarget?: number | null;
+    comparisonOperator?: 'GreaterThanOrEqual' | null;
     viewCount: number;
     isDeleted: boolean;
 }
+
+// Helper to convert enum number to string for display
+export const getPublicationTypeString = (type: PublicationTypes): string => {
+  switch (type) {
+    case PublicationTypes.ordinary: return 'ordinary';
+    case PublicationTypes.planned: return 'planned';
+    case PublicationTypes.plannedConditional: return 'plannedConditional';
+    default: return 'unknown';
+  }
+};
 
 export const mapPublicationToCard = (pub: PublicationModel): PublicationCardModel => ({
   id: pub.id,
@@ -33,7 +47,7 @@ export const mapPublicationToCard = (pub: PublicationModel): PublicationCardMode
   likesAmount: pub.likesAmount,
   isLikedByCurrentUser: pub.isLikedByCurrentUser,
   commentAmount: pub.commentAmount,
-  publicationType: pub.publicationType,  // ✅ Union type is assignable to string
+  publicationType: getPublicationTypeString(pub.publicationType),  // Map number to string
   viewCount: pub.viewCount,
   isDeleted: pub.isDeleted
 });

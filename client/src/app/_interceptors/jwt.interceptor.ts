@@ -1,6 +1,5 @@
 import { HttpClient, HttpErrorResponse, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { AccountService } from '../_services/account.service';
 import { BehaviorSubject, catchError, filter, Observable, switchMap, take, throwError } from 'rxjs';
 import { AccountModel } from '../_models/accountModel';
 import { Router } from '@angular/router';
@@ -12,6 +11,8 @@ const refreshDone$ = new BehaviorSubject<AccountModel | null>(null);
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenStorage = inject(TokenStorageService);
+  const router = inject(Router);
+  const http = inject(HttpClient);
 
   const isSignalRRequest =
     req.url.includes('/chat?') ||
@@ -28,7 +29,8 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError(err => {
       if (err instanceof HttpErrorResponse && err.status === 401 && !isRefreshRequest) {
-        return handle401(req, next, tokenStorage);
+        // Pass all dependencies as arguments instead of injecting inside
+        return handle401(req, next, tokenStorage, router, http);
       }
       return throwError(() => err);
     })
@@ -44,11 +46,11 @@ function addToken(req: HttpRequest<unknown>, token: string): HttpRequest<unknown
 function handle401(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
-  tokenStorage: TokenStorageService
+  tokenStorage: TokenStorageService,
+  router: Router,
+  http: HttpClient
 ): Observable<any> {
   const user = tokenStorage.currentUser();
-  const router = inject(Router);
-  const http = inject(HttpClient);
 
   if (!user?.refreshToken) {
     tokenStorage.clearUser();

@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { CommentModel, CreateCommentModel } from '../_models/commentModel';
+import { PaginationParams, PagedList } from '../_models/shared/pagination/pagination';
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +15,32 @@ export class CommentService {
     return this.http.post<CommentModel>(this.baseUrl + `/comment`, commentModel);
   }
 
-  getCommentsByPublicationId(publicationId: string){
-    return this.http.get<CommentModel[]>(this.baseUrl + `/comment/${publicationId}`);
+  getCommentsByPublicationId(publicationId: string, params?: PaginationParams){
+    let httpParams = new HttpParams();
+    if (params?.page) {
+      httpParams = httpParams.set('page', params.page.toString());
+    }
+    if (params?.pageSize) {
+      httpParams = httpParams.set('pageSize', params.pageSize.toString());
+    }
+    return this.http.get<PagedList<CommentModel>>(
+      this.baseUrl + `/comment/${publicationId}`, 
+      { params: httpParams }
+    );
   }
 
-  getReplies(parentId: string) {
-    return this.http.get<CommentModel[]>(this.baseUrl + `/comment/${parentId}/replies`);
+  getReplies(parentId: string, params?: PaginationParams) {
+    let httpParams = new HttpParams();
+    if (params?.page) {
+      httpParams = httpParams.set('page', params.page.toString());
+    }
+    if (params?.pageSize) {
+      httpParams = httpParams.set('pageSize', params.pageSize.toString());
+    }
+    return this.http.get<PagedList<CommentModel>>(
+      this.baseUrl + `/comment/${parentId}/replies`, 
+      { params: httpParams }
+    );
   }
 
   getComment(id: string) {

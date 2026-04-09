@@ -1,125 +1,180 @@
-<div class="comment-section">
-  <h3 class="comment-section-title">Comment Thread</h3>
+<!-- comment-page.component.html -->
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="comment-section">
+        <h3 class="comment-section-title">Comment Thread</h3>
 
-  <div *ngIf="isLoadingParent" class="loading-state">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
+        <!-- Navigation Buttons -->
+        <div class="comment-navigation mb-3" *ngIf="!isLoadingParent && !errorLoadingParent && parentComment">
+          <div class="btn-group" role="group">
+            <!-- Back button (history back) -->
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary btn-sm"
+              (click)="goBack()">
+              <i class="bi bi-arrow-left me-1"></i>
+              Back
+            </button>
 
-  <div *ngIf="errorLoadingParent && !isLoadingParent" class="error-state">
-    Failed to load comment.
-    <button (click)="loadThread()">Try again</button>
-  </div>
-
-  <div *ngIf="parentComment && !isLoadingParent && !errorLoadingParent" class="comment-card parent-card">
-    <div class="comment-header">
-      <app-icon
-        [user]="parentComment.author"
-        class="comment-author">
-      </app-icon>
-
-      <div class="comment-actions">
-        <span class="comment-time">
-          {{ parentComment.creationDate | date: 'MMM d, y, h:mm a' }}
-        </span>
-
-        <button class="btn btn-link btn-sm"
-                (click)="openComplaintModal(parentComment.id)">
-          <i class="bi bi-flag"></i>
-        </button>
-
-        <button *ngIf="parentComment.author && isCommentOwner(parentComment.author.uniqueNameIdentifier)"
-                class="btn btn-link btn-sm delete-button"
-                (click)="deleteComment(parentComment.id, true)">
-          <i class="bi bi-trash"></i>
-        </button>
-      </div>
-    </div>
-
-
-    <div class="comment-content">
-      <ng-container *ngIf="!parentComment.isDeleted; else removedParent">
-        {{parentComment.content}}
-      </ng-container>
-      <ng-template #removedParent>
-        This comment was removed
-      </ng-template>
-    </div>
-  </div>
-
-  @if (!accountService.currentUser()?.blocked && parentComment) {
-    <app-comment-create
-      [publicationId]="parentComment.publicationId"
-      (commentCreated)="onReplyCreated($event)">
-    </app-comment-create>
-  }
-
-  <h3 class="comment-section-title mt-3">Replies ({{replies.length}})</h3>
-
-  <div *ngIf="isLoadingReplies" class="loading-state">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
-
-  <div *ngIf="errorLoadingReplies && !isLoadingReplies" class="error-state">
-    Failed to load replies.
-    <button (click)="loadThread()">Try again</button>
-  </div>
-
-  <div *ngIf="replies.length === 0 && !isLoadingReplies && !errorLoadingReplies" class="empty-state">
-    No replies yet. Be the first to reply!
-  </div>
-
-  <div class="comments-list">
-    <div *ngFor="let reply of replies" class="comment-card reply-card">
-      <div class="comment-header">
-        <div class="clickable"
-            (click)="openAsThread(reply.id)"
-            title="Open thread">
-          <app-icon
-            [user]="reply.author"
-            class="comment-author">
-          </app-icon>
+            <!-- Back to publication -->
+            <button 
+              type="button" 
+              class="btn btn-outline-primary btn-sm"
+              (click)="goBackToPublication()">
+              <i class="bi bi-journal-text me-1"></i>
+              Back to publication
+            </button>
+          </div>
+        </div>
+        <!-- Parent comment loading -->
+        <div *ngIf="isLoadingParent" class="loading-state">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </div>
 
-        <div class="comment-actions">
-          <span class="comment-time">
-            {{ reply.creationDate | date: 'MMM d, y, h:mm a' }}
-          </span>
-
-          <button class="btn btn-link btn-sm"
-                  (click)="openComplaintModal(reply.id)">
-            <i class="bi bi-flag"></i>
-          </button>
-
-          <button *ngIf="reply.author && isCommentOwner(reply.author.uniqueNameIdentifier)"
-                  class="btn btn-link btn-sm delete-button"
-                  (click)="deleteComment(reply.id, false)">
-            <i class="bi bi-trash"></i>
-          </button>
+        <!-- Parent comment error -->
+        <div *ngIf="errorLoadingParent && !isLoadingParent" class="error-state">
+          Failed to load comment.
+          <button (click)="loadThread()">Try again</button>
         </div>
-      </div>
 
+        <!-- Parent comment content -->
+        <div *ngIf="parentComment && !isLoadingParent && !errorLoadingParent" class="comment-card parent-card">
+          <div class="comment-header">
+            <app-icon [user]="parentComment.author" class="comment-author"></app-icon>
 
-      <div class="comment-content clickable" (click)="openAsThread(reply.id)" title="Open thread">
-        <ng-container *ngIf="!reply.isDeleted; else removedReply">
-          {{reply.content}}
-        </ng-container>
-        <ng-template #removedReply>
-          This comment was removed
-        </ng-template>
+            <div class="comment-actions">
+              <span class="comment-time">
+                {{ parentComment.creationDate | date: 'MMM d, y, h:mm a' }}
+              </span>
+
+              <button class="btn btn-link btn-sm" (click)="openComplaintModal(parentComment.id)">
+                <i class="bi bi-flag"></i>
+              </button>
+
+              <button *ngIf="parentComment.author && isCommentOwner(parentComment.author.uniqueNameIdentifier)"
+                      class="btn btn-link btn-sm delete-button"
+                      (click)="deleteComment(parentComment.id, true)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="comment-content">
+            <ng-container *ngIf="!parentComment.isDeleted; else removedParent">
+              {{parentComment.content}}
+            </ng-container>
+            <ng-template #removedParent>
+              This comment was removed
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Reply creation -->
+        @if (!accountService.currentUser()?.blocked && parentComment) {
+          <app-comment-create
+            [publicationId]="parentComment.publicationId"
+            (commentCreated)="onReplyCreated($event)">
+          </app-comment-create>
+        }
+
+        <h3 class="comment-section-title mt-3">Replies ({{repliesTotalCount}})</h3>
+
+        <div *ngIf="isLoadingReplies && replies.length === 0" class="loading-state">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <div *ngIf="errorLoadingReplies && !isLoadingReplies" class="error-state">
+          Failed to load replies.
+          <button (click)="loadThread()">Try again</button>
+        </div>
+
+        <div *ngIf="replies.length === 0 && !isLoadingReplies && !errorLoadingReplies" class="empty-state">
+          No replies yet. Be the first to reply!
+        </div>
+
+        <div class="comments-list">
+          <div *ngFor="let reply of replies" class="comment-card reply-card">
+            <div class="comment-header">
+              <div class="comment-author-wrapper">
+                <app-icon [user]="reply.author" class="comment-author"></app-icon>
+              </div>
+
+              <div class="comment-actions">
+                <span class="comment-time">
+                  {{ reply.creationDate | date: 'MMM d, y, h:mm a' }}
+                </span>
+
+                <button class="btn btn-link btn-sm" (click)="openComplaintModal(reply.id)">
+                  <i class="bi bi-flag"></i>
+                </button>
+
+                <button *ngIf="reply.author && isCommentOwner(reply.author.uniqueNameIdentifier)"
+                        class="btn btn-link btn-sm delete-button"
+                        (click)="deleteComment(reply.id, false)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- REMOVED: clickable class and (click) handler - text is now selectable -->
+            <div class="comment-content">
+              <ng-container *ngIf="!reply.isDeleted; else removedReply">
+                {{reply.content}}
+              </ng-container>
+              <ng-template #removedReply>
+                This comment was removed
+              </ng-template>
+            </div>
+
+            <!-- NEW: Thread action footer -->
+            <div class="comment-footer">
+              <button type="button" 
+                      class="thread-link"
+                      (click)="openAsThread(reply.id)"
+                      [attr.aria-label]="'Open thread' + (reply.repliesAmount ? ' with ' + reply.repliesAmount + ' replies' : '')">
+                <i class="bi bi-chat-dots"></i>
+                <span *ngIf="reply.repliesAmount; else noReplies">
+                  {{reply.repliesAmount}} repl{{reply.repliesAmount === 1 ? 'y' : 'ies'}}
+                </span>
+                <ng-template #noReplies>
+                  Open thread
+                </ng-template>
+              </button>
+            </div>
+          </div>
+
+          <div #repliesScrollSentinel 
+              class="scroll-sentinel" 
+              *ngIf="repliesHasNextPage && !errorLoadingReplies">
+          </div>
+          
+          <div *ngIf="isRepliesScrollLoading" class="loading-more text-center py-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="ms-2">Loading more replies...</span>
+          </div>
+          
+          <div *ngIf="!repliesHasNextPage && replies.length > 0 && !errorLoadingReplies" 
+              class="end-of-comments text-center py-3">
+            <small class="text-muted">No more replies to load</small>
+          </div>
+        </div>
+
+        <app-make-complaint
+          [targetId]="complaintTargetId"
+          targetType="comment"
+          title="Report comment"
+          [modalId]="complaintModalId"
+          (complaintSubmitted)="onComplaintSubmitted()"
+          (modalClosed)="onComplaintModalClosed()">
+        </app-make-complaint>
       </div>
     </div>
   </div>
-
-  <app-make-complaint
-    [targetId]="complaintTargetId"
-    targetType="comment"
-    title="Report comment"
-    [modalId]="complaintModalId"
-    (complaintSubmitted)="onComplaintSubmitted()"
-    (modalClosed)="onComplaintModalClosed()">
-  </app-make-complaint>
 </div>

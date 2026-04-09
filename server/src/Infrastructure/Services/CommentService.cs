@@ -288,38 +288,27 @@ public class CommentService(ApplicationDbContext context, IUserActionLogger<Comm
     private async Task PersistCommentAsync(
         Comment comment, string? effectiveParentId, CancellationToken cancellationToken)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        try
+        context.Comments.Add(comment);
+        await context.SaveChangesAsync(cancellationToken);
+
+        if (effectiveParentId != null)
         {
-            context.Comments.Add(comment);
-            await context.SaveChangesAsync(cancellationToken);
+            await context.Database.ExecuteSqlInterpolatedAsync($@"
+            WITH RECURSIVE ancestors AS (
+                SELECT ""Id"", ""ParentCommentId""
+                FROM ""Comments""
+                WHERE ""Id"" = {effectiveParentId}
 
-            if (effectiveParentId != null)
-            {
-                await context.Database.ExecuteSqlInterpolatedAsync($@"
-                    WITH RECURSIVE ancestors AS (
-                        SELECT ""Id"", ""ParentCommentId""
-                        FROM ""Comments""
-                        WHERE ""Id"" = {effectiveParentId}
+                UNION ALL
 
-                        UNION ALL
-
-                        SELECT c.""Id"", c.""ParentCommentId""
-                        FROM ""Comments"" c
-                        JOIN ancestors a ON c.""Id"" = a.""ParentCommentId""
-                    )
-                    UPDATE ""Comments""
-                    SET ""TotalRepliesCount"" = ""TotalRepliesCount"" + 1
-                    WHERE ""Id"" IN (SELECT ""Id"" FROM ancestors)
-                ", cancellationToken);
-            }
-
-            await transaction.CommitAsync(cancellationToken);
-        }
-        catch
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
+                SELECT c.""Id"", c.""ParentCommentId""
+                FROM ""Comments"" c
+                JOIN ancestors a ON c.""Id"" = a.""ParentCommentId""
+            )
+            UPDATE ""Comments""
+            SET ""TotalRepliesCount"" = ""TotalRepliesCount"" + 1
+            WHERE ""Id"" IN (SELECT ""Id"" FROM ancestors)
+        ", cancellationToken);
         }
     }
 

@@ -11,10 +11,11 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   
   return next(req).pipe(
     catchError(error => {
+      console.log('HTTP Error:', error);
       if (error) {
         switch (error.status) {
           case 400:
-            if (error.error.errors) {
+            if (error.error?.errors) {
               const modalStateErrors = [];
               for (const key in error.error.errors) {
                 if (error.error.errors[key]) {
@@ -23,13 +24,14 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
               }
               throw modalStateErrors.flat();
             } else {
-              toastr.error(error.error, error.status);
+              const errorMessage = error.error?.message || 'Bad Request';
+              toastr.error(errorMessage, error.status.toString());
             }
             break;
           case 401:
             if (!req.url.includes('/account/refresh')) {
               localStorage.removeItem('user');
-              toastr.error('Unauthorized - Please login', error.status);
+              toastr.error('Unauthorized - Please login', error.status.toString());
               router.navigateByUrl('/login');
             }
             break;

@@ -19,7 +19,7 @@ export class PublicationPageComponent {
   private accountService = inject(AccountService);
   private publicationService = inject(PublicationService);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  router = inject(Router);
   private toastr = inject(ToastrService);
   
   publication?: PublicationModel;
@@ -84,7 +84,11 @@ export class PublicationPageComponent {
     });
   }
   goBack() {
-    this.router.navigate([`/profile/${this.publication!.author.uniqueNameIdentifier}`])    
+    if (this.publication?.author?.uniqueNameIdentifier) {
+      this.router.navigate([`/profile/${this.publication.author.uniqueNameIdentifier}`]);
+    } else {
+      this.router.navigate(['/']); // Fallback to home
+    }
   }
 
   formatConditionOperator(operator?: 'GreaterThanOrEqual'): string {

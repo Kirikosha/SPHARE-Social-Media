@@ -92,3 +92,133 @@
 .clickable {
   cursor: pointer;
 }
+
+.scroll-sentinel {
+  height: 1px;
+}
+
+.loading-more {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.end-of-comments {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.comment-navigation {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.comment-navigation .btn {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+/* On mobile, stack buttons if needed */
+@media (max-width: 576px) {
+  .comment-navigation .btn-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .comment-navigation .btn {
+    border-radius: 0.25rem !important;
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* Modern Thread Button */
+.thread-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  background-color: rgba(13, 110, 253, 0.08);
+  border: 1px solid rgba(13, 110, 253, 0.15);
+  border-radius: 20px;
+  color: #0d6efd;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1.5;
+  margin-top: 0.5rem;
+}
+
+.thread-link:hover {
+  background-color: rgba(13, 110, 253, 0.15);
+  border-color: rgba(13, 110, 253, 0.3);
+  color: #0b5ed7;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(13, 110, 253, 0.1), 0 2px 4px -1px rgba(13, 110, 253, 0.06);
+}
+
+.thread-link:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.thread-link i {
+  font-size: 0.9rem;
+}
+
+.thread-count {
+  font-weight: 600;
+  min-width: 1ch;
+  text-align: center;
+}
+
+/* Comment Footer Layout */
+.comment-footer {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Ensure content is selectable (no longer clickable) */
+.comment-content {
+  cursor: text;
+  user-select: text;
+}
+
+/* Remove clickable cursor from author wrapper (formerly clickable) */
+.comment-author-wrapper {
+  cursor: default;
+}
+
+/* Optional: Alternative subtle variant for secondary actions */
+.thread-link.subtle {
+  background-color: rgba(108, 117, 125, 0.08);
+  border-color: rgba(108, 117, 125, 0.15);
+  color: #6c757d;
+}
+
+.thread-link.subtle:hover {
+  background-color: rgba(108, 117, 125, 0.15);
+  border-color: rgba(108, 117, 125, 0.3);
+  color: #5c636a;
+}
+
+/* Mobile optimization */
+@media (max-width: 576px) {
+  .thread-link {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .thread-text {
+    display: none; /* Show only icon and count on very small screens */
+  }
+  
+  .thread-link::after {
+    content: '';
+  }
+}

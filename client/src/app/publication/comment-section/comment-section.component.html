@@ -1,5 +1,6 @@
+<!-- comment-section.component.html -->
 <div class="comment-section">
-  <h3 class="comment-section-title">Comments ({{comments.length}})</h3>
+  <h3 class="comment-section-title">Comments ({{totalCount}})</h3>
   
   <!-- Comment creation -->
   @if (!accountService.currentUser()?.blocked) {
@@ -9,8 +10,8 @@
     </app-comment-create>
   }
 
-  <!-- Loading state -->
-  <div *ngIf="isLoading" class="loading-state">
+  <!-- Initial Loading state -->
+  <div *ngIf="isLoading && comments.length === 0" class="loading-state">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
@@ -18,7 +19,7 @@
 
   <!-- Error state -->
   <div *ngIf="errorLoading && !isLoading" class="error-state">
-    Failed to load comments. <button (click)="loadComments()">Try again</button>
+    Failed to load comments. <button (click)="loadComments(true)">Try again</button>
   </div>
 
   <!-- Empty state -->
@@ -30,7 +31,7 @@
   <div class="comments-list">
     <div *ngFor="let comment of comments" class="comment-card">
       <div class="comment-header">
-        <app-icon [user] = "comment.author"></app-icon>
+        <app-icon [user]="comment.author"></app-icon>
         <div class="comment-actions">
           <span class="comment-time">{{comment.creationDate | date: 'MMM d, y, h:mm a'}}</span>
 
@@ -54,23 +55,40 @@
         <ng-template #removedTemplate>
           This comment was removed
         </ng-template>
-
         <button type="button"
-                class="btn btn-link btn-sm p-0 mt-2"
+                class="replies-button"
                 (click)="openThread(comment.id)">
-          {{comment.repliesAmount || 0}} replies
+          <i class="bi bi-chat-dots"></i>
+          <span class="replies-count">{{comment.repliesAmount || 0}}</span>
+          <span class="replies-text">{{comment.repliesAmount === 1 ? 'reply' : 'replies'}}</span>
         </button>
       </div>
     </div>
-  </div>
-<app-make-complaint
-  #complaintModal
-  [targetId]="complaintTargetId"
-  targetType="comment"
-  title="Report comment"
-  [modalId]="complaintModalId"
-  (complaintSubmitted)="onComplaintSubmitted()"
-  (modalClosed)="onComplaintModalClosed()">
-</app-make-complaint>
 
+    <!-- Infinite scroll sentinel -->
+    <div #scrollSentinel class="scroll-sentinel" *ngIf="hasNextPage && !errorLoading"></div>
+    
+    <!-- Loading more indicator -->
+    <div *ngIf="isScrollLoading" class="loading-more text-center py-3">
+      <div class="spinner-border spinner-border-sm text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <span class="ms-2">Loading more comments...</span>
+    </div>
+    
+    <!-- End of comments -->
+    <div *ngIf="!hasNextPage && comments.length > 0 && !errorLoading" class="end-of-comments text-center py-3">
+      <small class="text-muted">No more comments to load</small>
+    </div>
+  </div>
+
+  <app-make-complaint
+    #complaintModal
+    [targetId]="complaintTargetId"
+    targetType="comment"
+    title="Report comment"
+    [modalId]="complaintModalId"
+    (complaintSubmitted)="onComplaintSubmitted()"
+    (modalClosed)="onComplaintModalClosed()">
+  </app-make-complaint>
 </div>

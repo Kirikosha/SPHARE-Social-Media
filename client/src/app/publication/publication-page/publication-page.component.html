@@ -1,9 +1,4 @@
 <div class="publication-detail-container">
-  <!-- Back button -->
-  <button class="back-button" (click)="goBack()">
-    <i class="bi bi-arrow-left"></i> Back
-  </button>
-
   <!-- Loading state -->
   <div *ngIf="isLoading" class="loading-spinner">
     <div class="spinner-border text-primary" role="status">
@@ -11,8 +6,13 @@
     </div>
   </div>
 
-  <!-- Publication content -->
+  <!-- Publication content (only renders when loaded) -->
   <div *ngIf="publication && !isLoading" class="publication-content">
+    <!-- Back button moved inside -->
+    <button class="back-button" (click)="goBack()">
+      <i class="bi bi-arrow-left"></i> Back
+    </button>
+
     <div class="publication-header">
       <app-icon [user]="publication.author"></app-icon>
 
@@ -30,9 +30,10 @@
           Scheduled for {{ publication.remindAt | date: 'MMM d, y, h:mm a' }}
         </div>
 
-<div class="conditional-info" *ngIf="publication.conditionType !== undefined && publication.conditionTarget !== null">
+        <!-- Fixed condition check to handle null from API -->
+        <div class="conditional-info" *ngIf="publication.conditionType && publication.conditionTarget !== null">
           <i class="bi bi-bullseye"></i>
-          Will post when {{ publication.conditionType | lowercase }} {{ formatConditionOperator(publication.comparisonOperator) }} {{ publication.conditionTarget }}
+          Will post when {{ publication.conditionType | lowercase }} {{ formatConditionOperator(publication.comparisonOperator ?? undefined) }} {{ publication.conditionTarget }}
         </div>
       </div>
     </div>
@@ -72,6 +73,17 @@
         <i class="bi bi-share"></i>
       </button>
     </div>
+
+    <!-- Comment section moved INSIDE the *ngIf block -->
+    <app-comment-section 
+      [publicationId]="publication.id" 
+      [uniqueNameIdentifier]="publication.author.uniqueNameIdentifier">
+    </app-comment-section>
   </div>
-  <app-comment-section [publicationId]="publication!.id" [uniqueNameIdentifier]="publication!.author.uniqueNameIdentifier"></app-comment-section>
+
+  <!-- Error/Empty state (optional) -->
+  <div *ngIf="!isLoading && !publication" class="error-state">
+    <p>Publication not found</p>
+    <button class="btn btn-primary" (click)="router.navigate(['/'])">Go Home</button>
+  </div>
 </div>

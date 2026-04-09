@@ -31,7 +31,22 @@
 }
 
 .comments-list {
-  margin-top: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.scroll-sentinel {
+  height: 1px;
+}
+
+.loading-more {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.end-of-comments {
+  color: #6c757d;
+  font-style: italic;
 }
 
 .comment-card {
@@ -92,4 +107,44 @@
   position: relative;
   padding: 16px 0;
   border-bottom: 1px solid #e6ecf0;
+}
+
+.replies-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid #e6ecf0;
+  border-radius: 20px;
+  color: #657786;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.replies-button:hover {
+  background: #f7f9fa;
+  border-color: #1da1f2;
+  color: #1da1f2;
+}
+
+.replies-button i {
+  font-size: 0.9rem;
+}
+
+.replies-count {
+  font-weight: 600;
+  color: inherit;
+}
+
+.replies-text {
+  color: inherit;
+}
+
+/* Optional: Active/pressed state */
+.replies-button:active {
+  transform: scale(0.98);
 }

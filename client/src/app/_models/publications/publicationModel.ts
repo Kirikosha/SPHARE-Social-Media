@@ -51,3 +51,4 @@ export const mapPublicationToCard = (pub: PublicationModel): PublicationCardMode
   viewCount: pub.viewCount,
   isDeleted: pub.isDeleted
 });
+

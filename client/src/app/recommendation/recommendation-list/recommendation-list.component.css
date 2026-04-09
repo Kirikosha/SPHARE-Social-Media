@@ -101,3 +101,37 @@
     margin-bottom: 0;
   }
 }
+
+/* Add to your existing CSS */
+
+.sentinel {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.loading-more {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #71767b;
+  font-size: 0.875rem;
+}
+
+.end-message {
+  text-align: center;
+  padding: 24px 0;
+  color: #71767b;
+  font-size: 0.875rem;
+  border-top: 1px solid #2f3336;
+  margin-top: 16px;
+}
+
+/* Ensure spinner visibility */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15em;
+}

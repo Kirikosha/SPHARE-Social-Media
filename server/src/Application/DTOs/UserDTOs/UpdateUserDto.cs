@@ -14,7 +14,7 @@ public class UpdatePublicUserDto
     public string UniqueNameIdentifier { get; set; } = string.Empty;
     public string JoinedAt { get; set; }
     public IFormFile? ProfileImage { get; set; }
-    public ImageAction Action { get; set; } = ImageAction.Keep;
+    public bool RemoveProfileImage { get; set; } = false;
     [ModelBinder(BinderType = typeof(JsonModelBinder))] 
     public SetUserProfileDetailsDto? UserProfileDetails { get; set; }
     [ModelBinder(BinderType = typeof(JsonModelBinder))] 

@@ -1,19 +1,19 @@
 <div class="recommendations-container">
   <div class="header">
     <h2 class="title">Recommended Publications</h2>
-    <button class="refresh-btn" (click)="loadPublications()" [disabled]="isLoading">
+    <button class="refresh-btn" (click)="refresh()" [disabled]="isLoading">
       <i class="bi bi-arrow-clockwise"></i> Refresh
     </button>
   </div>
 
-  @if (isLoading) {
+  @if (isLoading && (!publications || publications.length === 0)) {
     <div class="loading-spinner">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
   }
-  @else if (publications.length === 0) {
+  @else if (!publications || publications.length === 0) {
     <div class="empty-state">
       <i class="bi bi-info-circle"></i>
       <p>No recommendations found. Follow more users to see recommendations.</p>
@@ -21,7 +21,7 @@
   }
   @else {
     <div class="publications-list">
-      @for (publication of publications; track publication.id) {
+      @for (publication of publicationsForCard; track publication.id) {
         <app-publication-card 
           [publication]="publication"
           (editPublication)="handlePublicationUpdate($event)"
@@ -30,5 +30,23 @@
         </app-publication-card>
       }
     </div>
+
+    <!-- Infinite Scroll Sentinel -->
+    @if (hasMoreData) {
+      <div #sentinel class="sentinel">
+        @if (isLoadingMore) {
+          <div class="loading-more">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Loading more...</span>
+            </div>
+            <span class="loading-text">Loading more...</span>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="end-message">
+        <span>No more recommendations</span>
+      </div>
+    }
   }
 </div>

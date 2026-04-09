@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Enums;
 
 namespace Infrastructure.Services;
 
@@ -115,7 +116,15 @@ public class UserService(IUserRepository userRepository, ICloudinaryService clou
         if (!string.IsNullOrWhiteSpace(updateDto.UniqueNameIdentifier))
             user.UniqueNameIdentifier = updateDto.UniqueNameIdentifier;
 
-        if (updateDto.Action == Domain.Enums.ImageAction.New)
+        ImageAction action;
+        if (updateDto.ProfileImage != null)
+            action = ImageAction.New;
+        else if (updateDto.RemoveProfileImage && user.ProfileImage != null)
+            action = ImageAction.Delete;
+        else
+            action = ImageAction.Keep;
+
+        if (action == ImageAction.New)
         {
             var response = await cloudinaryService.AddPhotoAsync(updateDto.ProfileImage!);
             if (response.Error != null)
@@ -132,13 +141,14 @@ public class UserService(IUserRepository userRepository, ICloudinaryService clou
 
             user.ProfileImage = image;
         }
-        else if (updateDto.Action == Domain.Enums.ImageAction.Delete && user.ProfileImage != null)
+        else if (action == ImageAction.Delete)
         {
-            var result = await photoService.DeleteProfileImageAsync(user.ProfileImage.PublicId, ct);
+            var result = await photoService.DeleteProfileImageAsync(user.ProfileImage!.PublicId, ct);
             if (!result.IsSuccess)
                 return Result<PublicUserDto>.Failure(result.Error!, 500);
             user.ProfileImage = null;
         }
+
 
         if (updateDto.UserProfileDetails != null)
         {

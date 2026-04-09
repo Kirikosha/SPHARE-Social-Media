@@ -7,6 +7,7 @@ export interface UpdateMemberModel {
     uniqueNameIdentifier: string;
     joinedAt: string;
     profileImage?: File;
+    removeProfileImage: boolean;
     blocked: boolean;
     userProfileDetails?: UpdateUserProfileDetailsModel
     address?: UpdateAddressModel

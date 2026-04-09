@@ -28,6 +28,7 @@ export class EditComponent implements OnInit {
   memberModel!: MemberModel;
   editForm!: FormGroup;
   profileImagePreview?: string;
+  removeProfileImage = false;
   isLoading = false;
 
   // For handling array inputs
@@ -103,6 +104,7 @@ loadMember(): void {
       const file = input.files[0];
       this.editForm.patchValue({ profileImage: file });
       this.editForm.get('profileImage')?.updateValueAndValidity();
+      this.removeProfileImage = false;
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -111,6 +113,13 @@ loadMember(): void {
       reader.readAsDataURL(file);
     }
   }
+
+  onRemoveProfileImage(): void {
+    this.removeProfileImage = true;
+    this.profileImagePreview = undefined;           // clear preview immediately
+    this.editForm.patchValue({ profileImage: null });
+    this.editForm.get('profileImage')?.updateValueAndValidity();
+}
 
   onInterestsInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -179,6 +188,7 @@ loadMember(): void {
       uniqueNameIdentifier: this.editForm.value.uniqueNameIdentifier,
       joinedAt: this.memberModel.joinedAt,
       profileImage: this.editForm.value.profileImage,
+      removeProfileImage: this.removeProfileImage,
       blocked: this.memberModel.blocked,
       userProfileDetails: userProfileDetails,
       address: address
@@ -186,6 +196,7 @@ loadMember(): void {
 
     this.memberService.updateMember(updateModel).subscribe({
       next: () => {
+        this.removeProfileImage = false;
         this.toastr.success('Profile updated successfully');
         this.isLoading = false;
         this.loadMember(); // Refresh data

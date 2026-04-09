@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Application.Core.Pagination;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers;
 
@@ -10,10 +11,11 @@ using Microsoft.AspNetCore.Mvc;
 public class RecommendationController : BaseApiController
 {
     [HttpGet()]
-    public async Task<ActionResult> GetRecommendations()
+    public async Task<ActionResult> GetRecommendations([FromQuery] PaginationParams paginationParams)
     {
         string userId = User.GetUserId();
 
-        return HandleResult(await Mediator.Send(new GetRecommendations.Query { Page = 0, PageSize = 2, UserId = userId }));
+        return HandleResult(await Mediator.Send(new GetRecommendations.Query { Page = paginationParams.PageNumber,
+            PageSize = paginationParams.PageSize, UserId = userId }));
     }
 }

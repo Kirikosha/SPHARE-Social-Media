@@ -58,9 +58,9 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<Image>(entity =>
         {
             entity.HasOne(i => i.User)
-            .WithOne(a => a.ProfileImage)
-            .HasForeignKey<User>(u => u.ProfileImageId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithOne(a => a.ProfileImage)
+                .HasForeignKey<User>(u => u.ProfileImageId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasOne(a => a.Publication)
             .WithMany(a => a.Images)

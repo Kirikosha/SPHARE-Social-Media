@@ -46,7 +46,7 @@ export class SignalrService {
   public userJoinedChat$ = new Subject<number>(); // userId
   public userLeftChat$ = new Subject<number>(); // userId
   
-  private url = "https://localhost:5000"
+  private url = environment.baseUrl;
   // Store token getter function
   private tokenGetter: (() => string | Promise<string>) | null = null;
 

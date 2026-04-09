@@ -34,6 +34,8 @@ updateMember(model: UpdateMemberModel){
   formData.append('Username', model.username);
   formData.append('UniqueNameIdentifier', model.uniqueNameIdentifier);
   formData.append('JoinedAt', model.joinedAt);
+  formData.append('removeProfileImage', model.removeProfileImage ? 'true' : 'false');
+
   
   if (model.profileImage) {
     formData.append('ProfileImage', model.profileImage);

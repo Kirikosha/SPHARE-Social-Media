@@ -12,4 +12,5 @@ public interface ISubscriptionService
     Task<Result<List<PublicUserDto>>> GetFollowers(string uniqueNameIdentifier, CancellationToken ct);
     Task<Result<bool>> Subscribe(string userId, string followUserUniqueNameIdentifier, CancellationToken ct);
     Task<Result<bool>> Unsubscribe(string userId, string followUserUniqueNameIdentifier, CancellationToken ct);
+    Task<Result<Unit>> InitialiseSubscription(string userId);
 }

@@ -45,4 +45,28 @@ public class PhotoService(ICloudinaryService cloudinaryService, ApplicationDbCon
 
         return Result<List<Image>>.Success(uploadedImages);
     }
+
+    public async Task<Result<string>> UploadUserProfilePicture(IFormFile imageFile, string userId, CancellationToken ct)
+    {
+        try
+        {
+            var uploadResult = await cloudinaryService.AddProfilePhotoAsync(imageFile);
+            if (uploadResult.Error != null)
+                return Result<string>.Failure($"Image was not deleted due to an error. Error: {uploadResult.Error}", 500);
+
+            Image image = new Image()
+            {
+                ImageUrl = uploadResult.Url.AbsoluteUri,
+                PublicId = uploadResult.PublicId,
+                UserId = userId
+            };
+
+            await context.Images.AddAsync(image, ct);
+            return Result<string>.Success(image.Id);
+        }
+        catch (Exception)
+        {
+            return Result<string>.Failure("There was a critical error in image loading", 500);
+        }
+    }
 }

@@ -1,31 +1,33 @@
 ﻿using System.Linq.Expressions;
+using System.Text;
 using Application.Core.Pagination;
 using Application.DTOs.DetailedUserInfoDTOs;
 using Application.DTOs.UserDTOs;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Extensions;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly ApplicationDbContext _context;
-
+    private readonly ApplicationDbContext context;
+    private const int RandomNameIdentifierKeyValueLength = 7;
     public UserRepository(ApplicationDbContext context)
     {
-        _context = context;
+        this.context = context;
     }
     public async  Task<User?> GetUserByEmailWithRefreshTokensAsync(string email, CancellationToken ct)
     {
-        return await _context.Users.Include(u => u.RefreshTokens)
+        return await context.Users.Include(u => u.RefreshTokens)
             .FirstOrDefaultAsync(u => u.Email == email, ct);
     }
 
     public async Task AddRefreshTokenAsync(string userId, RefreshToken token, CancellationToken ct)
     {
-        var tokens = await _context.RefreshTokens
+        var tokens = await context.RefreshTokens
             .Where(x => x.UserId == userId)
             .OrderBy(x => x.Created)
             .ToListAsync(ct);
@@ -33,16 +35,16 @@ public class UserRepository : IUserRepository
         if (tokens.Count == 5)
         {
             var oldest = tokens.First();
-            _context.RefreshTokens.Remove(oldest);
+            context.RefreshTokens.Remove(oldest);
         }
 
         token.UserId = userId;
-        await _context.RefreshTokens.AddAsync(token, ct);
+        await context.RefreshTokens.AddAsync(token, ct);
     }
 
     public Task<PublicUserDto?> GetPublicUserByIdAsync(string id, CancellationToken ct)
     {
-        return _context.Users
+        return context.Users
             .Where(u => u.Id == id)
             .Select(ToPublicUserDto)
             .FirstOrDefaultAsync(ct);
@@ -50,7 +52,7 @@ public class UserRepository : IUserRepository
 
     public Task<PublicUserDto?> GetPublicUserByUniqueNameAsync(string uniqueName, CancellationToken ct)
     {
-        return _context.Users
+        return context.Users
             .Where(u => u.UniqueNameIdentifier == uniqueName)
             .Select(ToPublicUserDto)
             .FirstOrDefaultAsync(ct);
@@ -58,17 +60,24 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetUserByEmailAsync(string email, CancellationToken ct)
     {
-        return await _context.Users.FirstOrDefaultAsync(x => x.Email == email, ct);
+        return await context.Users.FirstOrDefaultAsync(x => x.Email == email, ct);
     }
 
     public async Task<User?> GetUserByIdAsync(string id, CancellationToken ct)
     {
-        return await _context.Users.FirstOrDefaultAsync(x => x.Id == id, ct);
+        return await context.Users.FirstOrDefaultAsync(x => x.Id == id, ct);
+    }
+
+    public async Task<User?> GetUserByRefreshTokenAsync(string token, CancellationToken ct)
+    {
+        return await context.Users
+            .Include(u => u.RefreshTokens)
+            .FirstOrDefaultAsync(u => u.RefreshTokens.Any(rt => rt.Token == token), ct);
     }
 
     public async Task<List<string>> GetUserEmailsByIds(List<string> ids, CancellationToken ct)
     {
-        return await _context.Users
+        return await context.Users
             .Where(a => ids.Contains(a.Id))
             .Select(a => a.Email)
             .ToListAsync(ct);
@@ -76,7 +85,7 @@ public class UserRepository : IUserRepository
 
     public async Task<List<PublicUserBriefDto>> SearchUsersBySearchStringAsync(string searchString, CancellationToken ct)
     {
-        var users = await _context.Users
+        var users = await context.Users
             .Where(u => EF.Functions.TrigramsSimilarity(u.UniqueNameIdentifier, searchString) > 0.3)
             .OrderByDescending(u => EF.Functions.TrigramsSimilarity(u.UniqueNameIdentifier, searchString))
             .Select(u => new PublicUserBriefDto
@@ -93,7 +102,7 @@ public class UserRepository : IUserRepository
 
     public async Task<PagedList<AdminUserDto>> GetUserList(PaginationParams paginationParams, CancellationToken ct)
     {
-        var query = _context.Users
+        var query = context.Users
             .OrderBy(u => u.Username)
             .Select(u => new AdminUserDto
             {
@@ -115,17 +124,69 @@ public class UserRepository : IUserRepository
 
     public void UpdateUser(User user, CancellationToken ct)
     {
-        _context.Users.Update(user);
+        context.Users.Update(user);
     }
 
     public async Task<User?> GetUserForUpdateByIdAsync(string id, CancellationToken ct)
     {
-        User? user = await _context.Users
+        User? user = await context.Users
             .Include(a => a.ProfileImage)
             .Include(a => a.ProfileDetails)
             .Include(a => a.Address)
             .FirstOrDefaultAsync(x => x.Id == id, ct);
         return user;
+    }
+
+    public async Task<bool> IsUserExistsByEmailAsync(string email, CancellationToken ct)
+    {
+        return await context.Users.AnyAsync(a => a.Email == email, ct);
+
+    }
+
+    public async Task<bool> CreateUserAsync(User user, CancellationToken ct)
+    {
+        await context.Users.AddAsync(user, ct);
+        var result = await context.SaveChangesAsync(ct) > 0;
+
+        return result;
+    }
+
+    public async Task<string> BuildUniqueNameIdentifier(string username, CancellationToken ct)
+    {
+        StringBuilder sb = new StringBuilder(username);
+        bool nameIdentifierExists = await context.Users
+            .AnyAsync(a => string.Equals(a.UniqueNameIdentifier, sb.ToString()), ct);
+        
+        while (nameIdentifierExists)
+        {
+            sb.Append('-');
+            sb.Append(GenerateRandomString());
+            nameIdentifierExists = await context.Users
+                .AnyAsync(a => string.Equals(a.UniqueNameIdentifier, sb.ToString()), ct);
+        }
+
+        return sb.ToString(); 
+    }
+    
+    private static string GenerateRandomString()
+    {
+        StringBuilder sb = new StringBuilder();
+        int randCharValue;
+        int randCaseValue;
+        char letter;
+    
+        for (int i = 0; i < RandomNameIdentifierKeyValueLength; i++)
+        {
+            randCharValue = Random.Shared.Next(0, 26);
+            randCaseValue = Random.Shared.Next(0, 2);
+
+            letter = Convert.ToChar(randCharValue + 65);
+            letter = randCaseValue == 0 ? char.ToLower(letter) : letter;
+
+            sb.Append(letter);
+        }
+
+        return sb.ToString();
     }
 
     private static readonly Expression<Func<User, PublicUserDto>> ToPublicUserDto = u => new PublicUserDto

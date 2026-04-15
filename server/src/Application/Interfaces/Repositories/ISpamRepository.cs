@@ -1,9 +1,12 @@
-﻿namespace Application.Interfaces.Repositories;
+﻿using Application.Core;
+
+namespace Application.Interfaces.Repositories;
 
 public interface ISpamRepository
 {
-    Task<bool> MakePublication(string userId, CancellationToken ct = default);
-    Task<bool> MakeComment(string userId, CancellationToken ct = default);
-    Task<bool> MakeLike(string userId, CancellationToken ct = default);
-    Task<bool> MakeComplaint(string userId, CancellationToken ct = default);
+    Task<bool> MakePublication(string userId, CancellationToken ct);
+    Task<bool> MakeComment(string userId, CancellationToken ct);
+    Task<bool> MakeLike(string userId, CancellationToken ct);
+    Task<bool> MakeComplaint(string userId, CancellationToken ct);
+    Task<Result<Unit>> CreateSpamRating(string userId, CancellationToken ct);
 }

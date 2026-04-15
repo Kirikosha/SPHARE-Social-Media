@@ -3,6 +3,7 @@ using Application.DTOs.UserDTOs;
 using Application.Interfaces.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
@@ -185,6 +186,19 @@ public class SubscriptionService(ApplicationDbContext context, INeo4JSubscriptio
         catch (Exception ex)
         {
             return Result<bool>.Failure(ex.Message, 500);
+        }
+    }
+
+    public async Task<Result<Unit>> InitialiseSubscription(string userId)
+    {
+        try
+        {
+            await neo4JSubscriptionService.CreateUserNodeAsync(userId);
+            return Result<Unit>.Success(Unit.Value);
+        }
+        catch (Exception)
+        {
+            return Result<Unit>.Failure("Subscription service intiialisation was unsuccessful", 500);
         }
     }
 }

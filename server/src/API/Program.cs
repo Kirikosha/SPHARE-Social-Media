@@ -17,7 +17,7 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
-
+builder.Services.AddProblemDetails();
 // chained service registration
 builder.Services
     .AddWebServices(builder.Configuration)

@@ -16,9 +16,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public class PublicationService(ApplicationDbContext context, IMapper mapper, ILikeService likeService,
-    IUserActionLogger<PublicationService> logger, ICloudinaryService cloudinaryService, ISpamRepository 
-        spamRepository, IPhotoService photoService) 
+public class PublicationService(ApplicationDbContext context, IPublicationRepository publicationRepository, 
+    IMapper mapper, ILikeService likeService, IUserActionLogger<PublicationService> logger,
+    ICloudinaryService cloudinaryService, ISpamRepository spamRepository, IPhotoService photoService,
+    IUserRepository userRepository) 
     : IPublicationService
 {
     // normal user
@@ -32,137 +33,67 @@ public class PublicationService(ApplicationDbContext context, IMapper mapper, IL
     public async Task<Result<List<PublicationNotificationDto>>> GetPublicationsToRemindAsync(DateTime postedAt, int 
             batchSize, CancellationToken ct)
     {
-        DateTime now = DateTime.UtcNow;
-        return Result<List<PublicationNotificationDto>>.Success(
-            await context.Publications
-                .AsNoTracking()
-                .Where(p =>
-                    ((p.RemindAt != null && p.RemindAt <= now) ||
-                     (p.ConditionType != null &&
-                      p.ComparisonOperator == ComparisonOperator.GreaterThanOrEqual &&
-                      p.Author.SubscriberNumber >= p.ConditionTarget))
-                    && !p.WasSent
-                    && p.PostedAt > postedAt)
-                .OrderBy(p => p.PostedAt)
-                .Select(p => new PublicationNotificationDto
-                {
-                    Id = p.Id,
-                    Content = p.Content,
-                    PostedAt = p.PostedAt,
-                    WasSent = p.WasSent,
-                    AuthorId = p.AuthorId,
-
-                    AuthorUsername = p.Author.Username,
-                    AuthorImageUrl = p.Author.ProfileImage != null
-                        ? p.Author.ProfileImage.ImageUrl
-                        : null,
-
-                    FirstImageUrl = p.Images!
-                        .Select(i => i.ImageUrl)
-                        .FirstOrDefault()
-                })
-                .Take(batchSize)
-                .ToListAsync(ct)
-        );
+        try
+        {
+            var publications = await publicationRepository.GetPublicationsToRemindAsync(postedAt, batchSize, ct);
+            return Result<List<PublicationNotificationDto>>.Success(publications);
+        }
+        catch
+        {
+            return Result<List<PublicationNotificationDto>>.Failure("Publication fetching was unsuccessful", 500);
+        }
     }
 
     public async Task<Result<List<PublicationCalendarDto>>> GetPublicationsCalendarAsync(string userId, 
         CancellationToken ct)
     {
-        var publications = await context.Publications
-            .Where(a => a.AuthorId == userId && a.PublicationType == PublicationTypes.planned)
-            .ProjectTo<PublicationCalendarDto>(mapper.ConfigurationProvider)
-            .ToListAsync(ct);
+        bool userExists = await userRepository.IsUserExistsByIdAsync(userId, ct);
+        if (!userExists)
+            return Result<List<PublicationCalendarDto>>
+                .Failure("User was not found", 404);
+        try
+        {
+            var publications = await publicationRepository.GetPublicationsForCalendarAsync(userId, ct);
+            return Result<List<PublicationCalendarDto>>.Success(publications);
+        }
+        catch
+        {
+            return Result<List<PublicationCalendarDto>>.Failure("Calendar fetching was unsuccessful", 500);
+        }
 
-        return Result<List<PublicationCalendarDto>>.Success(publications);
     }
 
     public async Task<Result<PagedList<PublicationCardDto>>> GetPublicationsByUniqueNameIdentifierAsync(
         string uniqueName, string userId, int page, int pageSize, CancellationToken ct)
     {
-        var userExists = await context.Users
-            .AnyAsync(u => u.Id == userId, ct);
-
+        bool userExists = await userRepository.IsUserExistsByIdAsync(userId, ct);
         if (!userExists)
             return Result<PagedList<PublicationCardDto>>
                 .Failure("User was not found", 404);
-        
-        var query = context.Publications
-            .AsNoTracking()
-            .Where(p => p.Author.UniqueNameIdentifier == uniqueName)
-            .OrderByDescending(p => p.PostedAt)
-            .Select(p => new PublicationCardDto
-            {
-                Id = p.Id,
-                Content = p.Content,
-                PostedAt = p.PostedAt,
-                UpdatedAt = p.UpdatedAt,
 
-                ImageUrls = p.Images!
-                    .Select(i => i.ImageUrl)
-                    .ToList(),
-
-                Author = new PublicUserBriefDto
-                {
-                    Id = p.Author.Id,
-                    Username = p.Author.Username,
-                    UniqueNameIdentifier = p.Author.UniqueNameIdentifier,
-                    Blocked = p.Author.Blocked,
-                    ImageUrl = p.Author.ProfileImage != null
-                        ? p.Author.ProfileImage.ImageUrl
-                        : null
-                },
-
-                LikesAmount = p.Likes.Count(),
-
-                IsLikedByCurrentUser = p.Likes
-                    .Any(l => l.LikedById == userId),
-
-                CommentAmount = p.Comments!.Count(),
-
-                PublicationType = p.PublicationType,
-                ViewCount = p.ViewCount,
-                IsDeleted = p.IsDeleted
-            });
-
-        var pagedResult = await query.ToPagedListAsync(page, pageSize, ct);
-
-        return Result<PagedList<PublicationCardDto>>
-            .Success(pagedResult);
+        try
+        {
+            var pagedResult = await publicationRepository.GetBatchOfPublicationCardsDto(uniqueName, userId, page,
+                pageSize, ct);
+            return Result<PagedList<PublicationCardDto>>
+                .Success(pagedResult);
+        }
+        catch
+        {
+            return Result<PagedList<PublicationCardDto>>
+                .Failure("Publication loading was unsuccessful", 400);
+        }
     }
 
     public async Task<Result<PublicationDto>> GetPublicationByIdAsync(string publicationId, string userId, 
         CancellationToken ct)
     {
-        var publication = await context.Publications
-            .Where(p => p.Id == publicationId)
-            .Select(p => new PublicationDto
-            {
-                Id = p.Id,
-                Content = p.Content,
-                PostedAt = p.PostedAt,
-                UpdatedAt = p.UpdatedAt,
-                RemindAt = p.RemindAt,
-                PublicationType = p.PublicationType,
-                ConditionType = p.ConditionType,
-                ConditionTarget = p.ConditionTarget,
-                ComparisonOperator = p.ComparisonOperator,
-                ViewCount = p.ViewCount,
-                IsDeleted = p.IsDeleted,
-                LikesAmount = p.Likes.Count,
-                CommentAmount = p.Comments!.Count(c => c.ParentCommentId == null),
-                IsLikedByCurrentUser = p.Likes.Any(l => l.LikedById == userId),
-                Images = p.Images!.Select(i => i.ImageUrl).ToList(),
-                Author = new PublicUserBriefDto
-                {
-                    Id = p.Author.Id,
-                    Username = p.Author.Username,
-                    UniqueNameIdentifier = p.Author.UniqueNameIdentifier,
-                    Blocked = p.Author.Blocked,
-                    ImageUrl = p.Author.ProfileImage == null ? null : p.Author.ProfileImage.ImageUrl
-                }
-            })
-            .FirstOrDefaultAsync(ct);
+        bool userExists = await userRepository.IsUserExistsByIdAsync(userId, ct);
+        if (!userExists)
+            return Result<PublicationDto>
+                .Failure("User was not found", 404);
+        
+        var publication = await publicationRepository.GetPublicationByIdAsync(publicationId, userId, ct);
 
         if (publication == null)
             return Result<PublicationDto>.Failure("Publication was not found", 404);
@@ -172,24 +103,32 @@ public class PublicationService(ApplicationDbContext context, IMapper mapper, IL
 
     public async Task<Result<List<PublicationDto>>> GetPlannedPublicationsAsync(string userId, CancellationToken ct)
     {
-        var publications = await context.Publications
-            .Where(a => a.RemindAt != null && a.AuthorId == userId)
-            .ToListAsync(ct);
-
-        var mapped = mapper.Map<List<PublicationDto>>(publications);
-        return Result<List<PublicationDto>>.Success(mapped);
+        bool userExists = await userRepository.IsUserExistsByIdAsync(userId, ct);
+        if (!userExists)
+            return Result<List<PublicationDto>>
+                .Failure("User was not found", 404);
+        try
+        {
+            var publications = await publicationRepository.GetPlannedPublicationsAsync(userId, ct);
+            return Result<List<PublicationDto>>.Success(publications);
+        }
+        catch
+        {
+            return Result<List<PublicationDto>>.Failure("Fetching planned publications was unsuccessful", 500);
+        }
     }
 
     public async Task<Result<int>> UpdatePublicationViewsAsync(string publicationId, CancellationToken ct)
     {
-        await context.Publications.Where(p => p.Id == publicationId)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(p => p.ViewCount, p => p.ViewCount + 1), ct);
-
-        var viewCount = await context.Publications.Where(a => a.Id == publicationId)
-            .Select(x => x.ViewCount).FirstOrDefaultAsync(ct);
-
-        return Result<int>.Success(viewCount);
+        try
+        {
+            var viewCount = await publicationRepository.UpdatePublicationViewsAsync(publicationId, ct);
+            return Result<int>.Success(viewCount);
+        }
+        catch
+        {
+            return Result<int>.Failure("Publication view update was unsuccessful", 500);
+        }
     }
 
     public async Task<Result<PublicationDto>> UpdatePublicationAsync(UpdatePublicationDto updateDto, string userId, 
@@ -365,6 +304,7 @@ public class PublicationService(ApplicationDbContext context, IMapper mapper, IL
             
         return Result<bool>.Success(true);
     }
+    
     
     private async Task<bool> IsPublicationSpamming(string userId, DateOnly userCreationDate, CancellationToken ct)
     {

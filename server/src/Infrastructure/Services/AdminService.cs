@@ -4,11 +4,10 @@ using Application.Interfaces.Logger;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public class AdminService(ApplicationDbContext context, IViolationNotificationService violationNotificationService,
+public class AdminService(IUserService userService, IViolationNotificationService violationNotificationService,
     IUserActionLogger<AdminService> logger) 
     : IAdminService
 {
@@ -16,14 +15,17 @@ public class AdminService(ApplicationDbContext context, IViolationNotificationSe
     {
         try
         {
-            User? user = await context.Users.FindAsync(userId, ct);
-            if (user == null) throw new Exception("User was not found");
+            var userResult = await userService.GetUserByIdAsync(userId, ct);
+            if (!userResult.IsSuccess)
+                return Result<bool>.Failure(userResult.Error!, userResult.Code);
+            
+            userResult.Value!.Blocked = false;
+            userResult.Value.BlockedAt = null;
+            userResult.Value.ViolationScore = 0;
 
-            user.Blocked = false;
-            user.BlockedAt = null;
-            user.ViolationScore = 0;
-
-            context.Users.Update(user);
+            var updateResult = await userService.UpdateUser(userResult.Value, ct);
+            if (updateResult!.IsSuccess)
+                return Result<bool>.Failure(updateResult.Error!, updateResult.Code);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)

@@ -27,6 +27,10 @@ public static class ApplicationServiceExtensions
         services.AddMediatR(cfg => 
             cfg.RegisterServicesFromAssemblyContaining<Application.Features.Users.Queries.GetUsersList.Handler>());
 
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+        services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
         // Validators
         services.AddValidatorsFromAssemblyContaining<LoginDtoValidator>();
 

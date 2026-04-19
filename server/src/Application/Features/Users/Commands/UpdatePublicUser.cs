@@ -10,14 +10,14 @@ public class UpdatePublicUser
 {
     public class Command : IRequest<Result<PublicUserDto>>
     {
-        public required UpdatePublicUserDto UpdateUserModel { get; set; }
+        public required UpdateUserMainInfoDto UpdateUserMainInfoModel { get; set; }
     }
 
     public class Handler(IUserService userService) : IRequestHandler<Command, Result<PublicUserDto>>
     {
         public async Task<Result<PublicUserDto>> Handle(Command request, CancellationToken cancellationToken)
         {
-            return await userService.UpdateUser(request.UpdateUserModel, cancellationToken);
+            return await userService.UpdateUser(request.UpdateUserMainInfoModel, cancellationToken);
         }
     }
 }

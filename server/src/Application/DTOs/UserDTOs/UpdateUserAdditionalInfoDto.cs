@@ -1,5 +1,6 @@
-﻿namespace Application.DTOs.DetailedUserInfoDTOs;
-public class SetUserProfileDetailsDto
+﻿namespace Application.DTOs.UserDTOs;
+
+public class UpdateUserAdditionalInfoDto
 {
     public string? Pronouns { get; set; }
     public string? MainProfileDescription { get; set; }

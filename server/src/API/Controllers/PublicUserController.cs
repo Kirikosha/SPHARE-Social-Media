@@ -28,9 +28,27 @@ public class PublicUserController : BaseApiController
 
     [Authorize]
     [HttpPut("edit")]
-    public async Task<ActionResult<PublicUserDto>> UpdateProfile([FromForm]UpdatePublicUserDto updateUser)
+    public async Task<ActionResult<PublicUserDto>> UpdateProfile([FromForm]UpdateUserMainInfoDto updateUserMainInfo)
     {
-        return HandleResult(await Mediator.Send(new UpdatePublicUser.Command { UpdateUserModel = updateUser }));
+        return HandleResult(await Mediator.Send(new UpdatePublicUser.Command { UpdateUserMainInfoModel = updateUserMainInfo }));
+    }
+
+    [Authorize]
+    [HttpPut("update-main-info")]
+    public async Task<ActionResult<PublicUserDto>> UpdateMainInfo([FromForm] UpdateUserMainInfoDto
+        updateUserMainInfoDto)
+    {
+        var userId = User.GetUserId();
+        var result = await Mediator.Send(new UpdateUserMainInfo.Command()
+        {
+            MainInfo = updateUserMainInfoDto,
+            UserId = userId
+        });
+
+        return result.Match(
+            user => Ok(user),
+            options => Conflict(new { Options = options }),
+            error => Problem(error.Message, statusCode: error.Code));
     }
 
     [HttpGet("user-search")]

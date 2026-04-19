@@ -16,8 +16,11 @@ public interface IUserRepository
     Task<List<PublicUserBriefDto>> SearchUsersBySearchStringAsync(string searchString, CancellationToken ct);
     Task<PagedList<AdminUserDto>> GetUserList(PaginationParams paginationParams, CancellationToken ct);
     void UpdateUser(User user, CancellationToken ct);
+    Task UpdateUserMainInfoAsync(UpdateUserMainInfoDto mainInfo, string userId, CancellationToken ct);
+    Task<bool> IsUserUniqueNameIdentifierIsAlreadyTaken(string uniqueNameIdentifier, CancellationToken ct);
     Task<User?> GetUserForUpdateByIdAsync(string id, CancellationToken ct);
     Task<bool> IsUserExistsByEmailAsync(string email, CancellationToken ct);
+    Task<bool> IsUserExistsByIdAsync(string id, CancellationToken ct);
     Task<bool> CreateUserAsync(User user, CancellationToken ct);
     Task<string> BuildUniqueNameIdentifier(string username, CancellationToken ct);
 

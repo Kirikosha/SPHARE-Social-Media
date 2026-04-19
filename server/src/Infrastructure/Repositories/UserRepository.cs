@@ -127,6 +127,21 @@ public class UserRepository : IUserRepository
         context.Users.Update(user);
     }
 
+    public async Task UpdateUserMainInfoAsync(UpdateUserMainInfoDto mainInfo, string userId, CancellationToken ct)
+    {
+        await context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(u => u.Username, mainInfo.Username)
+                    .SetProperty(u => u.UniqueNameIdentifier, mainInfo.UniqueNameIdentifier),
+                ct);
+    }
+
+    public async Task<bool> IsUserUniqueNameIdentifierIsAlreadyTaken(string uniqueNameIdentifier, CancellationToken ct)
+    {
+        return await context.Users.AnyAsync(u => u.UniqueNameIdentifier == uniqueNameIdentifier, ct);
+    }
+
     public async Task<User?> GetUserForUpdateByIdAsync(string id, CancellationToken ct)
     {
         User? user = await context.Users
@@ -139,8 +154,12 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> IsUserExistsByEmailAsync(string email, CancellationToken ct)
     {
-        return await context.Users.AnyAsync(a => a.Email == email, ct);
+        return await UserExistsAsync(a => a.Email == email, ct);
+    }
 
+    public async Task<bool> IsUserExistsByIdAsync(string id, CancellationToken ct)
+    {
+        return await UserExistsAsync(a => a.Id == id, ct);
     }
 
     public async Task<bool> CreateUserAsync(User user, CancellationToken ct)
@@ -153,19 +172,24 @@ public class UserRepository : IUserRepository
 
     public async Task<string> BuildUniqueNameIdentifier(string username, CancellationToken ct)
     {
-        StringBuilder sb = new StringBuilder(username);
-        bool nameIdentifierExists = await context.Users
-            .AnyAsync(a => string.Equals(a.UniqueNameIdentifier, sb.ToString()), ct);
-        
-        while (nameIdentifierExists)
-        {
-            sb.Append('-');
-            sb.Append(GenerateRandomString());
-            nameIdentifierExists = await context.Users
-                .AnyAsync(a => string.Equals(a.UniqueNameIdentifier, sb.ToString()), ct);
-        }
+        if (!await context.Users.AnyAsync(a => a.UniqueNameIdentifier == username, ct))
+            return username;
 
-        return sb.ToString(); 
+        var prefix = username + '-';
+        var existing = (await context.Users
+            .Where(a => a.UniqueNameIdentifier == username 
+                     || a.UniqueNameIdentifier.StartsWith(prefix))
+            .Select(a => a.UniqueNameIdentifier)
+            .ToListAsync(ct))
+            .ToHashSet();
+
+        string candidate;
+        do
+        {
+            candidate = $"{username}-{GenerateRandomString()}";
+        } while (existing.Contains(candidate));
+
+        return candidate;
     }
     
     private static string GenerateRandomString()
@@ -216,4 +240,11 @@ public class UserRepository : IUserRepository
             }
             : null
     };
+
+    private async Task<bool> UserExistsAsync(
+        Expression<Func<User, bool>> predicate, CancellationToken ct)
+    {
+        return await context.Users.AnyAsync(predicate, ct);
+    }
+
 }

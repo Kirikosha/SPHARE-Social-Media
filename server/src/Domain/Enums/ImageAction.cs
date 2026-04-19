@@ -3,5 +3,6 @@ public enum ImageAction
 {
     Keep,
     Delete,
-    New
+    New,
+    Update
 }

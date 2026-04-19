@@ -1,11 +1,13 @@
 ﻿using Application.Core;
 using Application.Core.Pagination;
 using Application.DTOs.UserDTOs;
+using Application.Errors;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
+using MediatR;
 
 namespace Infrastructure.Services;
 
@@ -33,6 +35,14 @@ public class UserService(IUserRepository userRepository, ICloudinaryService clou
     public async Task<Result<User>> GetUserByEmailAsync(string email, CancellationToken ct)
     {
         var user = await userRepository.GetUserByEmailAsync(email, ct);
+        return user == null
+            ? Result<User>.Failure("User was not found", 404)
+            : Result<User>.Success(user); 
+    }
+
+    public async Task<Result<User>> GetUserByIdAsync(string id, CancellationToken ct)
+    {
+        var user = await userRepository.GetUserByIdAsync(id, ct);
         return user == null
             ? Result<User>.Failure("User was not found", 404)
             : Result<User>.Success(user); 
@@ -103,30 +113,73 @@ public class UserService(IUserRepository userRepository, ICloudinaryService clou
         }
     }
 
-    public async Task<Result<PublicUserDto>> UpdateUser(UpdatePublicUserDto updateDto, CancellationToken ct)
+    // Update main info (username, unique name identifier)
+    public async Task<OneOf<Unit, UniqueNamesOptions, Error>> UpdateUserMainInformation(UpdateUserMainInfoDto 
+            updateModel, string userId, 
+        CancellationToken ct)
     {
-        var user = await userRepository.GetUserForUpdateByIdAsync(updateDto.Id, ct);
+        var userExists = await userRepository.IsUserExistsByIdAsync(userId, ct);
+        if (!userExists)
+            return UserErrors.UserNotFound();
+
+        updateModel.Username = updateModel.Username.Trim();
+        //TODO: perhaps add here some name verification mechanism for bad words
+
+        updateModel.UniqueNameIdentifier = new string(updateModel.UniqueNameIdentifier.Where(c => !char.IsWhiteSpace(c)).ToArray());
+
+        var uniqueNameIdentifier = await userRepository.BuildUniqueNameIdentifier(updateModel
+            .UniqueNameIdentifier, ct);
+
+        if (uniqueNameIdentifier != updateModel.UniqueNameIdentifier)
+            return new UniqueNamesOptions() { UniqueNameOption = uniqueNameIdentifier };
+
+        try
+        {
+            await userRepository.UpdateUserMainInfoAsync(updateModel, userId, ct);
+            return Unit.Value;
+        }
+        catch
+        {
+            return UserErrors.UserMainInfoUpdateFailed();
+        }
+    }
+
+    //TODO: Update additional info(pronouns, main profile description, interests, date of birth)
+    public async Task<Result<Unit>> UpdateAdditionalInfo(UpdateUserAdditionalInfoDto updateModel, string userId, 
+        CancellationToken ct)
+    {
+        var userExists = await userRepository.IsUserExistsByIdAsync(userId, ct);
+        if (!userExists)
+            return Result<Unit>.Failure(UserErrors.UserNotFound());
+    }
+
+    //TODO: Update image
+    //TODO: Change email (with verification on new email and old email)
+    //TODO: Change password (with verification via OTP code on email + comparison with the old password)
+    public async Task<Result<PublicUserDto>> UpdateUser(UpdateUserMainInfoDto updateMainInfoDto, CancellationToken ct)
+    {
+        var user = await userRepository.GetUserForUpdateByIdAsync(updateMainInfoDto.Id, ct);
 
         if (user == null)
             return Result<PublicUserDto>.Failure("User was not found", 404);
 
-        if (!string.IsNullOrWhiteSpace(updateDto.Username))
-            user.Username = updateDto.Username;
+        if (!string.IsNullOrWhiteSpace(updateMainInfoDto.Username))
+            user.Username = updateMainInfoDto.Username;
 
-        if (!string.IsNullOrWhiteSpace(updateDto.UniqueNameIdentifier))
-            user.UniqueNameIdentifier = updateDto.UniqueNameIdentifier;
+        if (!string.IsNullOrWhiteSpace(updateMainInfoDto.UniqueNameIdentifier))
+            user.UniqueNameIdentifier = updateMainInfoDto.UniqueNameIdentifier;
 
         ImageAction action;
-        if (updateDto.ProfileImage != null)
+        if (updateMainInfoDto.ProfileImage != null)
             action = ImageAction.New;
-        else if (updateDto.RemoveProfileImage && user.ProfileImage != null)
+        else if (updateMainInfoDto.RemoveProfileImage && user.ProfileImage != null)
             action = ImageAction.Delete;
         else
             action = ImageAction.Keep;
 
         if (action == ImageAction.New)
         {
-            var response = await cloudinaryService.AddPhotoAsync(updateDto.ProfileImage!);
+            var response = await cloudinaryService.AddPhotoAsync(updateMainInfoDto.ProfileImage!);
             if (response.Error != null)
                 return Result<PublicUserDto>.Failure("Image was not uploaded", 500);
 
@@ -150,44 +203,57 @@ public class UserService(IUserRepository userRepository, ICloudinaryService clou
         }
 
 
-        if (updateDto.UserProfileDetails != null)
+        if (updateMainInfoDto.UserProfileDetails != null)
         {
             if (user.ProfileDetails == null)
             {
-                user.ProfileDetails = mapper.Map<UserProfileDetails>(updateDto.UserProfileDetails);
+                user.ProfileDetails = mapper.Map<UserProfileDetails>(updateMainInfoDto.UserProfileDetails);
                 user.ProfileDetails.UserId = user.Id;
                 context.ProfileDetails.Add(user.ProfileDetails);
             }
             else
             {
-                mapper.Map(updateDto.UserProfileDetails, user.ProfileDetails);
+                mapper.Map(updateMainInfoDto.UserProfileDetails, user.ProfileDetails);
             }
         }
-        else if (user.ProfileDetails != null && updateDto.UserProfileDetails == null)
+        else if (user.ProfileDetails != null && updateMainInfoDto.UserProfileDetails == null)
         {
             context.ProfileDetails.Remove(user.ProfileDetails);
             user.ProfileDetails = null;
         }
 
-        if (updateDto.Address != null)
+        if (updateMainInfoDto.Address != null)
         {
             if (user.Address == null)
             {
-                user.Address = mapper.Map<Address>(updateDto.Address);
+                user.Address = mapper.Map<Address>(updateMainInfoDto.Address);
                 user.Address.UserId = user.Id;
                 context.Addresses.Add(user.Address);
             }
             else
             {
-                mapper.Map(updateDto.Address, user.Address);
+                mapper.Map(updateMainInfoDto.Address, user.Address);
             }
         }
-        else if (user.Address != null && updateDto.Address == null)
+        else if (user.Address != null && updateMainInfoDto.Address == null)
         {
             context.Addresses.Remove(user.Address);
             user.Address = null;
         }
 
         return Result<PublicUserDto>.Success(mapper.Map<PublicUserDto>(user));
+    }
+
+    public async Task<Result<Unit>> UpdateUser(User user, CancellationToken ct)
+    {
+        try
+        {
+            userRepository.UpdateUser(user, ct);
+            return Result<Unit>.Success(Unit.Value);
+        }
+        catch (Exception)
+        {
+            return Result<Unit>.Failure("Update was unsuccessful", 500);
+        }
     }
 }

@@ -25,15 +25,10 @@ public class MappingProfiles : Profile
             .ForMember(u => u.UserProfileDetails, opt => opt.MapFrom(u => u.ProfileDetails));
         CreateMap<UserProfileDetails, UserProfileDetailsDto>();
         CreateMap<Address, AddressDto>();
-        CreateMap<UpdatePublicUserDto, User>();
-        CreateMap<SetAddressDto, Address>()
+        CreateMap<UpdateUserMainInfoDto, User>();
+        CreateMap<UpdateUserAddressDto, Address>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.UserId, opt => opt.Ignore());
-
-        CreateMap<SetUserProfileDetailsDto, UserProfileDetails>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.UserId, opt => opt.Ignore());
-
         CreateMap<Address, Address>();
         CreateMap<UserProfileDetails, UserProfileDetails>();
         CreateMap<PublicationComplaint, PublicationComplaintDto>();

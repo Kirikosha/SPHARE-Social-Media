@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using Application.Core.Pagination;
+using Application.DTOs.DetailedUserInfoDTOs;
 using Application.DTOs.UserDTOs;
 
 namespace Application.Interfaces.Services;
@@ -14,11 +15,14 @@ public interface IUserService
     Task<Result<List<PublicUserBriefDto>>> GetUsersBySearchString(string searchString, CancellationToken ct);
     Task<Result<PagedList<AdminUserDto>>> GetUserListAsync(PaginationParams paginationParams, CancellationToken ct);
     Task<Result<bool>> UpdateViolationScore(string userId, int violationScore, CancellationToken ct);
-    Task<Result<PublicUserDto>> UpdateUser(UpdateUserMainInfoDto updateMainInfoDto, CancellationToken ct);
-    Task<Result<Unit>> UpdateUser(User user, CancellationToken ct);
-    Task<OneOf<Unit, UniqueNamesOptions, Error>> UpdateUserMainInformation(UpdateUserMainInfoDto updateModel, string userId,
+    Task<OneOf<Unit, UniqueNamesOptions, Error>> UpdateUserMainInformationAsync(UpdateUserMainInfoDto updateModel, string userId,
         CancellationToken ct);
-
-    Task<Result<Unit>> UpdateAdditionalInfo(UpdateUserAdditionalInfoDto updateModel, string userId, 
+    Task<Result<UserProfileDetailsDto>> UpdateUserAdditionalInfoAsync(UpdateUserAdditionalInfoDto updateModel,
+        string userId,
         CancellationToken ct);
+    Task<Result<AddressDto>> SetUserAddressAsync(UpdateUserAddressDto updateModel, string userId, CancellationToken ct);
+    Task<Result<Unit>> UpdateProfileImageAsync(UpdateUserProfileImageDto updateModel, string userId,
+        CancellationToken ct);
+    Task<Result<Unit>> DeleteProfileImageAsync(string userId, CancellationToken ct);
+    
 }

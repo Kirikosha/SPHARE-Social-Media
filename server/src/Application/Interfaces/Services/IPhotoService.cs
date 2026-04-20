@@ -5,7 +5,8 @@ namespace Application.Interfaces.Services;
 
 public interface IPhotoService
 {
-    Task<Result<bool>> DeleteProfileImageAsync(string publicId, CancellationToken ct);
+    Task<Result<Unit>> DeleteProfileImageAsync(string userId, CancellationToken ct);
     Task<Result<List<Image>>> UploadPublicationImages(List<IFormFile> images, CancellationToken ct);
-    Task<Result<string>> UploadUserProfilePicture(IFormFile imageFile, string userId, CancellationToken ct);
+    Task<Result<Unit>> UploadUserProfilePicture(IFormFile imageFile, string userId, CancellationToken ct);
+    Task<bool> IsProfileImageExists(string userId, CancellationToken ct);
 }

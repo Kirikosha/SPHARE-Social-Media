@@ -16,6 +16,8 @@ public class CloudinaryService : ICloudinaryService
         _cloudinary = new Cloudinary(acc);
     }
 
+
+
     public async Task<ImageUploadResult> AddPhotoAsync(IFormFile image)
     {
         var uploadResult = new ImageUploadResult();
@@ -33,7 +35,7 @@ public class CloudinaryService : ICloudinaryService
         return uploadResult;
     }
 
-    public async Task<ImageUploadResult> AddProfilePhotoAsync(IFormFile image)
+    public async Task<ImageUploadResult> AddProfilePhotoAsync(IFormFile image, string userId)
     {
         var uploadResult = new ImageUploadResult();
 
@@ -42,9 +44,30 @@ public class CloudinaryService : ICloudinaryService
             using var stream = image.OpenReadStream();
             var uploadParmas = new ImageUploadParams
             {
-                File = new FileDescription(image.FileName, stream),
+                File = new FileDescription(userId + "_profile", stream),
                 Transformation = new Transformation().Height(500).Width(500)
                 .Crop("fill").Gravity("face")
+            };
+
+            uploadResult = await _cloudinary.UploadAsync(uploadParmas);
+        }
+        return uploadResult;
+    }
+    
+    public async Task<ImageUploadResult> AddProfilePhotoAsyncWithReplacement(IFormFile image, string userId, string 
+            publicId)
+    {
+        var uploadResult = new ImageUploadResult();
+
+        if (image.Length > 0)
+        {
+            using var stream = image.OpenReadStream();
+            var uploadParmas = new ImageUploadParams
+            {
+                File = new FileDescription(userId + "_profile", stream),
+                Transformation = new Transformation().Height(500).Width(500)
+                    .Crop("fill").Gravity("face"),
+                PublicId = publicId
             };
 
             uploadResult = await _cloudinary.UploadAsync(uploadParmas);

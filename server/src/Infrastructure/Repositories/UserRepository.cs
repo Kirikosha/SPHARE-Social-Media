@@ -137,9 +137,10 @@ public class UserRepository : IUserRepository
                 ct);
     }
 
-    public async Task<bool> IsUserUniqueNameIdentifierIsAlreadyTaken(string uniqueNameIdentifier, CancellationToken ct)
+    public async Task<Address> UpdateUserAddressAsync(Address address, CancellationToken ct)
     {
-        return await context.Users.AnyAsync(u => u.UniqueNameIdentifier == uniqueNameIdentifier, ct);
+        context.Addresses.Update(address);
+        return address;
     }
 
     public async Task<User?> GetUserForUpdateByIdAsync(string id, CancellationToken ct)
@@ -191,7 +192,38 @@ public class UserRepository : IUserRepository
 
         return candidate;
     }
-    
+
+    public async Task<UserProfileDetails?> GetUserProfileDetailsByUserIdAsync(string userId, CancellationToken ct)
+    {
+        return await context.ProfileDetails.Where(p => p.UserId == userId).FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<Address?> GetUserAddressByIdAsync(string userId, CancellationToken ct)
+    {
+        return await context.Addresses.Where(u => u.UserId == userId).FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<UserProfileDetails> SetUserProfileDetailsAsync(UserProfileDetails profileDetails, 
+        CancellationToken ct)
+    {
+        if (string.IsNullOrEmpty(profileDetails.Id))
+        {
+            await context.ProfileDetails.AddAsync(profileDetails, ct);
+            return profileDetails;
+        }
+
+        context.ProfileDetails.Update(profileDetails);
+        return profileDetails;
+    }
+
+    public async Task<bool> SetProfileImageId(string userId, string profileImageId, CancellationToken ct)
+    {
+        await context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.ProfileImageId, profileImageId), ct);
+        return true;
+    }
+
     private static string GenerateRandomString()
     {
         StringBuilder sb = new StringBuilder();

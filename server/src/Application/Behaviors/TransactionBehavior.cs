@@ -29,7 +29,7 @@ public class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TReque
         {
             var response = await next(ct);
 
-            if (response is Result<object> result && !result.IsSuccess)
+            if (response is IResult result && !result.IsSuccess)
             {
                 await _unitOfWork.RollbackTransactionAsync(ct);
                 return response;

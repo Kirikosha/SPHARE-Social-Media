@@ -19,7 +19,7 @@ public class UpdateUserMainInfo
         public async Task<OneOf<PublicUserDto, UniqueNamesOptions, Error>> Handle(Command request, CancellationToken 
                 cancellationToken)
         {
-            var updateResult = await userService.UpdateUserMainInformation(request.MainInfo, request.UserId, 
+            var updateResult = await userService.UpdateUserMainInformationAsync(request.MainInfo, request.UserId, 
                 cancellationToken);
 
             if (updateResult.TryPickT0(out _, out var remainder))

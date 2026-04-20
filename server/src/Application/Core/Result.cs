@@ -1,5 +1,5 @@
 ﻿namespace Application.Core;
-public class Result<T>
+public class Result<T> : IResult
 {
     public bool IsSuccess { get; set; }
     public T? Value { get; set; }
@@ -35,4 +35,11 @@ public class Result<T>
 
     public static implicit operator Result<T>((int code, string error) failure) =>
         Failure(failure.error, failure.code);
+}
+
+public interface IResult
+{
+    bool IsSuccess { get; }
+    string? Error { get; }
+    int Code { get; }
 }

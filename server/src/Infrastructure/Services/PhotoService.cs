@@ -1,6 +1,9 @@
 ﻿using Application.Core;
+using Application.Errors;
 using Application.Interfaces.Services;
+using CloudinaryDotNet.Actions;
 using Domain.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,17 +11,19 @@ namespace Infrastructure.Services;
 
 public class PhotoService(ICloudinaryService cloudinaryService, ApplicationDbContext context) : IPhotoService
 {
-    public async Task<Result<bool>> DeleteProfileImageAsync(string publicId, CancellationToken ct)
+    public async Task<Result<Unit>> DeleteProfileImageAsync(string userId, CancellationToken ct)
     {
-        var result = await cloudinaryService.DeletePhotoAsync(publicId);
+        var profileImage = await context.Images.Where(x => x.UserId == userId).FirstOrDefaultAsync(ct);
+        if (profileImage == null)
+            return Result<Unit>.Failure(ImageErrors.ImageIsAlreadyDeleted());
+        var result = await cloudinaryService.DeletePhotoAsync(profileImage.PublicId);
         if (result.Error != null)
-            return Result<bool>.Failure($"Image was not deleted due to an error. Error: {result.Error}", 500);
+            return Result<Unit>.Failure($"Image was not deleted due to an error. Error: {result.Error}", 500);
 
-        var image = await context.Images.FirstOrDefaultAsync(a => a.PublicId == publicId, ct);
-        if (image == null) return Result<bool>.Failure($"Image does not exist in the database", 500);
-        context.Images.Remove(image);
-        return Result<bool>.Success(true); 
+        context.Images.Remove(profileImage);
+        return Result<Unit>.Success(Unit.Value); 
     }
+    
 
     public async Task<Result<List<Image>>> UploadPublicationImages(List<IFormFile> images, CancellationToken ct)
     {
@@ -46,27 +51,46 @@ public class PhotoService(ICloudinaryService cloudinaryService, ApplicationDbCon
         return Result<List<Image>>.Success(uploadedImages);
     }
 
-    public async Task<Result<string>> UploadUserProfilePicture(IFormFile imageFile, string userId, CancellationToken ct)
+    public async Task<Result<Unit>> UploadUserProfilePicture(IFormFile imageFile, string userId, CancellationToken ct)
     {
+        var userProfilePublicId = await context.Images.Where(u => u.UserId == userId).Select(x => x.PublicId)
+            .FirstOrDefaultAsync(ct);
         try
         {
-            var uploadResult = await cloudinaryService.AddProfilePhotoAsync(imageFile);
-            if (uploadResult.Error != null)
-                return Result<string>.Failure($"Image was not deleted due to an error. Error: {uploadResult.Error}", 500);
-
-            Image image = new Image()
+            ImageUploadResult uploadResult;
+            if (string.IsNullOrEmpty(userProfilePublicId))
             {
-                ImageUrl = uploadResult.Url.AbsoluteUri,
-                PublicId = uploadResult.PublicId,
-                UserId = userId
-            };
+                uploadResult = await cloudinaryService.AddProfilePhotoAsync(imageFile, userId);
+            }
+            else
+            {
+                uploadResult = await cloudinaryService.AddProfilePhotoAsyncWithReplacement(imageFile, userId, userProfilePublicId);
+            }
+            
+            if (uploadResult.Error != null)
+                return Result<Unit>.Failure($"Image was not deleted due to an error. Error: {uploadResult.Error}", 500);
 
-            await context.Images.AddAsync(image, ct);
-            return Result<string>.Success(image.Id);
+            if (string.IsNullOrEmpty(userProfilePublicId))
+            {
+                Image image = new Image()
+                {
+                    ImageUrl = uploadResult.Url.AbsoluteUri,
+                    PublicId = uploadResult.PublicId,
+                    UserId = userId
+                };
+
+                await context.Images.AddAsync(image, ct);
+            }
+            return Result<Unit>.Success(Unit.Value);
         }
         catch (Exception)
         {
-            return Result<string>.Failure("There was a critical error in image loading", 500);
+            return Result<Unit>.Failure("There was a critical error in image loading", 500);
         }
+    }
+
+    public async Task<bool> IsProfileImageExists(string userId, CancellationToken ct)
+    {
+        return await context.Images.Where(u => u.Id == userId).AnyAsync(ct);
     }
 }

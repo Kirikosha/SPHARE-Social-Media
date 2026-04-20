@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using Application.Core.Pagination;
+using Application.DTOs.DetailedUserInfoDTOs;
 using Application.DTOs.UserDTOs;
 using Application.Errors;
 using Application.Interfaces.Repositories;
@@ -12,8 +13,7 @@ using MediatR;
 namespace Infrastructure.Services;
 
 public class UserService(IUserRepository userRepository, ICloudinaryService cloudinaryService, IPhotoService 
-        photoService, IMapper mapper, ApplicationDbContext context) : 
-    IUserService
+        photoService, IMapper mapper, ApplicationDbContext context) : IUserService
 {
     private const int ViolationLimit = 20;
     public async Task<Result<PublicUserDto>> GetPublicUserByIdAsync(string id, CancellationToken ct)
@@ -114,7 +114,7 @@ public class UserService(IUserRepository userRepository, ICloudinaryService clou
     }
 
     // Update main info (username, unique name identifier)
-    public async Task<OneOf<Unit, UniqueNamesOptions, Error>> UpdateUserMainInformation(UpdateUserMainInfoDto 
+    public async Task<OneOf<Unit, UniqueNamesOptions, Error>> UpdateUserMainInformationAsync(UpdateUserMainInfoDto 
             updateModel, string userId, 
         CancellationToken ct)
     {
@@ -144,105 +144,84 @@ public class UserService(IUserRepository userRepository, ICloudinaryService clou
         }
     }
 
-    //TODO: Update additional info(pronouns, main profile description, interests, date of birth)
-    public async Task<Result<Unit>> UpdateAdditionalInfo(UpdateUserAdditionalInfoDto updateModel, string userId, 
+    // Update additional info(pronouns, main profile description, interests, date of birth)
+    public async Task<Result<UserProfileDetailsDto>> UpdateUserAdditionalInfoAsync(UpdateUserAdditionalInfoDto updateModel, 
+        string userId, 
+        CancellationToken ct)
+    {
+        if (!await userRepository.IsUserExistsByIdAsync(userId, ct))
+        {
+            return Result<UserProfileDetailsDto>.Failure(UserErrors.UserNotFound());
+        }
+
+        var profile = await userRepository.GetUserProfileDetailsByUserIdAsync(userId, ct) 
+                      ?? new UserProfileDetails { UserId = userId };
+
+        profile.Pronouns = updateModel.Pronouns;
+        profile.MainProfileDescription = updateModel.MainProfileDescription;
+        profile.DateOfBirth = updateModel.DateOfBirth;
+        profile.Interests = updateModel.Interests;
+
+        // TODO: it returns UserProfileDetails so think about using it
+        var details = await userRepository.SetUserProfileDetailsAsync(profile, ct);
+
+        return mapper.Map<UserProfileDetailsDto>(details);
+    }
+
+    // TODO: Update user address
+    public async Task<Result<AddressDto>> SetUserAddressAsync(UpdateUserAddressDto updateModel, string userId,
+        CancellationToken ct)
+    {
+        var userExists = await userRepository.IsUserExistsByIdAsync(userId, ct);
+        if (!userExists)
+            return Result<AddressDto>.Failure(UserErrors.UserNotFound());
+
+        var userAddress = await userRepository.GetUserAddressByIdAsync(userId, ct)
+                          ?? new Address { UserId = userId };
+
+        userAddress.City = updateModel.City;
+        userAddress.Country = updateModel.Country;
+        
+        // TODO: it returns Address so think about using it
+        var address = await userRepository.UpdateUserAddressAsync(userAddress, ct);
+        return mapper.Map<AddressDto>(address);
+    }
+
+    // Update image
+    public async Task<Result<Unit>> UpdateProfileImageAsync(UpdateUserProfileImageDto updateModel, string userId, 
         CancellationToken ct)
     {
         var userExists = await userRepository.IsUserExistsByIdAsync(userId, ct);
         if (!userExists)
             return Result<Unit>.Failure(UserErrors.UserNotFound());
+
+        var imageExists = await photoService.IsProfileImageExists(userId, ct);
+        Result<Unit> result = await photoService.UploadUserProfilePicture(updateModel.ProfileImage, userId, ct);
+
+        if (result.IsSuccess)
+        {
+            return Unit.Value;
+        }
+
+        return Result<Unit>.Failure(result.Error!, result.Code);
+
     }
 
-    //TODO: Update image
+    // Delete image
+    public async Task<Result<Unit>> DeleteProfileImageAsync(string userId, CancellationToken ct)
+    {
+        var userExists = await userRepository.IsUserExistsByIdAsync(userId, ct);
+        if (!userExists)
+            return Result<Unit>.Failure(UserErrors.UserNotFound()); 
+        var deletionResult = await photoService.DeleteProfileImageAsync(userId, ct);
+        if (deletionResult.IsSuccess)
+            return Result<Unit>.Success(Unit.Value);
+
+        return Result<Unit>.Failure(deletionResult.Error!, deletionResult.Code);
+    }
+    
     //TODO: Change email (with verification on new email and old email)
     //TODO: Change password (with verification via OTP code on email + comparison with the old password)
-    public async Task<Result<PublicUserDto>> UpdateUser(UpdateUserMainInfoDto updateMainInfoDto, CancellationToken ct)
-    {
-        var user = await userRepository.GetUserForUpdateByIdAsync(updateMainInfoDto.Id, ct);
-
-        if (user == null)
-            return Result<PublicUserDto>.Failure("User was not found", 404);
-
-        if (!string.IsNullOrWhiteSpace(updateMainInfoDto.Username))
-            user.Username = updateMainInfoDto.Username;
-
-        if (!string.IsNullOrWhiteSpace(updateMainInfoDto.UniqueNameIdentifier))
-            user.UniqueNameIdentifier = updateMainInfoDto.UniqueNameIdentifier;
-
-        ImageAction action;
-        if (updateMainInfoDto.ProfileImage != null)
-            action = ImageAction.New;
-        else if (updateMainInfoDto.RemoveProfileImage && user.ProfileImage != null)
-            action = ImageAction.Delete;
-        else
-            action = ImageAction.Keep;
-
-        if (action == ImageAction.New)
-        {
-            var response = await cloudinaryService.AddPhotoAsync(updateMainInfoDto.ProfileImage!);
-            if (response.Error != null)
-                return Result<PublicUserDto>.Failure("Image was not uploaded", 500);
-
-            Image image = new Image { PublicId = response.PublicId, ImageUrl = response.Url.AbsoluteUri };
-
-            if (user.ProfileImage != null)
-            {
-                var result = await photoService.DeleteProfileImageAsync(user.ProfileImage.PublicId, ct);
-                if (!result.IsSuccess)
-                    return Result<PublicUserDto>.Failure(result.Error!, result.Code);
-            }
-
-            user.ProfileImage = image;
-        }
-        else if (action == ImageAction.Delete)
-        {
-            var result = await photoService.DeleteProfileImageAsync(user.ProfileImage!.PublicId, ct);
-            if (!result.IsSuccess)
-                return Result<PublicUserDto>.Failure(result.Error!, 500);
-            user.ProfileImage = null;
-        }
-
-
-        if (updateMainInfoDto.UserProfileDetails != null)
-        {
-            if (user.ProfileDetails == null)
-            {
-                user.ProfileDetails = mapper.Map<UserProfileDetails>(updateMainInfoDto.UserProfileDetails);
-                user.ProfileDetails.UserId = user.Id;
-                context.ProfileDetails.Add(user.ProfileDetails);
-            }
-            else
-            {
-                mapper.Map(updateMainInfoDto.UserProfileDetails, user.ProfileDetails);
-            }
-        }
-        else if (user.ProfileDetails != null && updateMainInfoDto.UserProfileDetails == null)
-        {
-            context.ProfileDetails.Remove(user.ProfileDetails);
-            user.ProfileDetails = null;
-        }
-
-        if (updateMainInfoDto.Address != null)
-        {
-            if (user.Address == null)
-            {
-                user.Address = mapper.Map<Address>(updateMainInfoDto.Address);
-                user.Address.UserId = user.Id;
-                context.Addresses.Add(user.Address);
-            }
-            else
-            {
-                mapper.Map(updateMainInfoDto.Address, user.Address);
-            }
-        }
-        else if (user.Address != null && updateMainInfoDto.Address == null)
-        {
-            context.Addresses.Remove(user.Address);
-            user.Address = null;
-        }
-
-        return Result<PublicUserDto>.Success(mapper.Map<PublicUserDto>(user));
-    }
 
     public async Task<Result<Unit>> UpdateUser(User user, CancellationToken ct)
     {

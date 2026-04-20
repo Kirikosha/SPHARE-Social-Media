@@ -5,6 +5,5 @@ namespace Application.DTOs.UserDTOs;
 
 public class UpdateUserProfileImageDto
 {
-    public IFormFile? ProfileImage { get; set; }
-    public ImageAction ImageAction { get; set; }
+    public IFormFile ProfileImage { get; set; } = null!;
 }

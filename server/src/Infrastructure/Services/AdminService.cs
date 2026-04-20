@@ -23,7 +23,7 @@ public class AdminService(IUserService userService, IViolationNotificationServic
             userResult.Value.BlockedAt = null;
             userResult.Value.ViolationScore = 0;
 
-            var updateResult = await userService.UpdateUser(userResult.Value, ct);
+            var updateResult = await userService.UpdateUserMainInfo(userResult.Value, ct);
             if (updateResult!.IsSuccess)
                 return Result<bool>.Failure(updateResult.Error!, updateResult.Code);
             return Result<bool>.Success(true);

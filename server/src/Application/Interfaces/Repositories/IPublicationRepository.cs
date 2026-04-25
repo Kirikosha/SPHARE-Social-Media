@@ -16,4 +16,5 @@ public interface IPublicationRepository
     Task<PublicationDto?> GetPublicationByIdAsync(string publicationId, string userId, CancellationToken ct);
     Task<List<PublicationDto>> GetPlannedPublicationsAsync(string userId, CancellationToken ct);
     Task<int> UpdatePublicationViewsAsync(string publicationId, CancellationToken ct);
+    Task<bool> IsPublicationExistsAsync(string id, CancellationToken ct);
 }

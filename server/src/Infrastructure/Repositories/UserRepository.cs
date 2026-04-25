@@ -1,11 +1,13 @@
 ﻿using System.Linq.Expressions;
 using System.Text;
 using Application.Core.Pagination;
+using Application.DTOs.CommentDTOs;
 using Application.DTOs.DetailedUserInfoDTOs;
 using Application.DTOs.UserDTOs;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Extensions;
+using Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -224,6 +226,29 @@ public class UserRepository : IUserRepository
         return true;
     }
 
+    public async Task<UserInfoProjection?> GetUserInfoAsync(string userId, string publicationId, 
+        CancellationToken ct)
+    {
+        return await context.Users
+            .Where(u => u.Id == userId)
+            .Select(u => new UserInfoProjection
+            {
+                Id = u.Id,
+                Username = u.Username,
+                UniqueNameIdentifier = u.UniqueNameIdentifier,
+                Blocked = u.Blocked,
+                ImageUrl = u.ProfileImage == null ? null : u.ProfileImage.ImageUrl,
+                LastCommentDate = context.Comments
+                    .Where(c => c.AuthorId == u.Id)
+                    .OrderByDescending(c => c.CreationDate)
+                    .Select(c => c.CreationDate)
+                    .FirstOrDefault(),
+                PublicationExists = context.Publications
+                    .Any(p => p.Id == publicationId)
+            })
+            .FirstOrDefaultAsync(ct);
+    }
+    
     private static string GenerateRandomString()
     {
         StringBuilder sb = new StringBuilder();

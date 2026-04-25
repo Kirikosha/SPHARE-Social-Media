@@ -1,4 +1,5 @@
 ﻿using Application.Core.Pagination;
+using Application.DTOs.CommentDTOs;
 using Application.DTOs.UserDTOs;
 
 namespace Application.Interfaces.Repositories;
@@ -28,4 +29,7 @@ public interface IUserRepository
     Task<UserProfileDetails?> GetUserProfileDetailsByUserIdAsync(string userId, CancellationToken ct);
     Task<Address?> GetUserAddressByIdAsync(string userId, CancellationToken ct);
     Task<bool> SetProfileImageId(string userId, string profileImageId, CancellationToken ct);
+
+    Task<UserInfoProjection?> GetUserInfoAsync(string userId, string publicationId,
+        CancellationToken ct);
 }

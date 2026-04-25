@@ -181,4 +181,10 @@ public class PublicationRepository(ApplicationDbContext context, IMapper mapper)
             .Select(x => x.ViewCount).FirstOrDefaultAsync(ct);
         return viewCount;
     }
+
+    public async Task<bool> IsPublicationExistsAsync(string id, CancellationToken ct)
+    {
+        return await context.Publications
+            .AnyAsync(a => a.Id == id, ct);
+    }
 }

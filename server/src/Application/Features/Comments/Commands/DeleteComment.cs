@@ -9,6 +9,7 @@ public class DeleteComment
     public class Command : IRequest<Result<bool>>
     {
         public required string CommentId { get; set; }
+        public required string UserId { get; set; }
     }
 
     public class Handler(ICommentService commentService) : 
@@ -17,7 +18,7 @@ public class DeleteComment
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
-            return await commentService.DeleteCommentAsync(request.CommentId, cancellationToken);
+            return await commentService.DeleteCommentAsync(request.CommentId, request.UserId, false, cancellationToken);
         }
         
     }

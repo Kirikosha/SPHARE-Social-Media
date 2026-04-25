@@ -12,40 +12,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public class CommentService(ApplicationDbContext context, IUserActionLogger<CommentService> logger,
-    ISpamRepository spamRepository) : ICommentService
+public class CommentService(IUserActionLogger<CommentService> logger,
+    ISpamRepository spamRepository, ICommentRepository commentRepository, IPublicationRepository publicationRepository
+    , IUserRepository userRepository) : ICommentService
 {
     private const int CommentRestrictionInSeconds = 10;
     private const int MaxDepth = 10;
     public async Task<Result<PagedList<CommentDto>>> GetRepliesAsync(string parentId, int page, int pageSize, 
         CancellationToken ct)
     {
-        bool parentExists = await context.Comments
-            .AnyAsync(c => c.Id == parentId, ct);
+        bool parentExists = await commentRepository.IsCommentExistsByIdAsync(parentId, ct);
 
         if (!parentExists)
             return Result<PagedList<CommentDto>>.Failure("Parent comment does not exist", 404);
 
-        var query = context.Comments
-            .Where(c => c.ParentCommentId == parentId)
-            .OrderBy(c => c.CreationDate)
-            .Select(c => new CommentDto
-            {
-                Id = c.Id,
-                Content = c.Content,
-                CreationDate = c.CreationDate,
-                PublicationId = c.PublicationId,
-                IsDeleted = c.IsDeleted,
-                Author = new PublicUserBriefDto
-                {
-                    Id = c.Author.Id,
-                    Blocked = c.Author.Blocked,
-                    ImageUrl = c.Author.ProfileImage == null ? null : c.Author.ProfileImage.ImageUrl,
-                    UniqueNameIdentifier = c.Author.UniqueNameIdentifier,
-                    Username = c.Author.Username
-                },
-                RepliesAmount = c.TotalRepliesCount 
-            });
+        var query = commentRepository.GetRepliesByParrentCommentId(parentId);
 
         var pagedReplies = await query.ToPagedListAsync(page, pageSize, ct);
 
@@ -55,31 +36,12 @@ public class CommentService(ApplicationDbContext context, IUserActionLogger<Comm
     public async Task<Result<PagedList<CommentDto>>> GetCommentsByPublicationIdAsync(string publicationId, int page, 
         int pageSize, CancellationToken ct)
     {
-        bool publicationExists = await context.Publications
-            .AnyAsync(a => a.Id == publicationId, ct);
+        bool publicationExists = await publicationRepository.IsPublicationExistsAsync(publicationId, ct);
             
         if (!publicationExists) 
             return Result<PagedList<CommentDto>>.Failure("Publication does not exist", 404);
 
-        var query = context.Comments
-            .Where(c => c.PublicationId == publicationId && c.ParentCommentId == null)
-            .Select(c => new CommentDto
-            {
-                Id = c.Id,
-                Content = c.Content,
-                CreationDate = c.CreationDate,
-                PublicationId = c.PublicationId,
-                IsDeleted = c.IsDeleted,
-                Author = new PublicUserBriefDto
-                {
-                    Id = c.Author.Id,
-                    Blocked = c.Author.Blocked,
-                    ImageUrl = c.Author.ProfileImage == null ? null : c.Author.ProfileImage.ImageUrl,
-                    UniqueNameIdentifier = c.Author.UniqueNameIdentifier,
-                    Username = c.Author.Username
-                },
-                RepliesAmount = c.TotalRepliesCount
-            });
+        var query = commentRepository.GetCommentsByPublicationId(publicationId);
 
         var pagedComments = await query.ToPagedListAsync(page, pageSize, ct);
         return Result<PagedList<CommentDto>>.Success(pagedComments);
@@ -87,56 +49,35 @@ public class CommentService(ApplicationDbContext context, IUserActionLogger<Comm
 
     public async Task<Result<int>> GetCommentAmountAsync(string publicationId, CancellationToken ct)
     {
-        var amount = await context.Comments.CountAsync(a => a.PublicationId == publicationId, ct);
+        var amount = await commentRepository.GetCommentCountByPublicationIdAsync(publicationId, ct);
         return Result<int>.Success(amount);
     }
 
     public async Task<Result<CommentDto>> GetCommentByIdAsync(string commentId, CancellationToken ct)
     {
-        var comment = await context.Comments
-            .Where(c => c.Id == commentId)
-            .Select(c => new CommentDto
-            {
-                Id = c.Id,
-                Content = c.Content,
-                CreationDate = c.CreationDate,
-                PublicationId = c.PublicationId,
-                IsDeleted = c.IsDeleted,
-                Author = new PublicUserBriefDto
-                {
-                    Id = c.Author.Id,
-                    Blocked = c.Author.Blocked,
-                    ImageUrl = c.Author.ProfileImage == null ? null : c.Author.ProfileImage.ImageUrl,
-                    UniqueNameIdentifier = c.Author.UniqueNameIdentifier,
-                    Username = c.Author.Username
-                },
-
-                RepliesAmount = c.TotalRepliesCount
-            }).SingleOrDefaultAsync(ct);
-
+        var comment = await commentRepository.GetCommentByIdAsync(commentId, ct);
         return comment == null ? Result<CommentDto>.Failure("Comment was not found", 404) 
             : Result<CommentDto>.Success(comment);
     }
 
-    public async Task<Result<bool>> DeleteCommentAsync(string commentId, CancellationToken ct)
+    public async Task<Result<bool>> DeleteCommentAsync(string commentId, string userId, bool isUserAdmin, 
+        CancellationToken ct)
     {
-        var comment = await context.Comments
-            .Where(c => c.Id == commentId)
-            .Select(c => new { c.Id, c.AuthorId })
-            .FirstOrDefaultAsync(ct);
+        var commentAuthorId = await commentRepository.GetCommentAuthorIdByCommentIdAsync(commentId, ct);
 
-        if (comment == null) 
+        if (string.IsNullOrEmpty(commentAuthorId)) 
             return Result<bool>.Failure("Comment was not found", 404);
 
-        await context.Comments
-            .Where(c => c.Id == commentId)
-            .ExecuteUpdateAsync(s => s.SetProperty(c => c.IsDeleted, true), ct);
+        if (!isUserAdmin && userId != commentAuthorId)
+            return Result<bool>.Failure("Comment does not belong to you", 401);
 
-        await logger.LogAsync(comment.AuthorId, UserLogAction.DeleteComment, new
+        await commentRepository.DeleteCommentAsync(commentId, ct);
+
+        await logger.LogAsync(commentAuthorId, UserLogAction.DeleteComment, new
         {
-            info = $"Comment {comment.Id} was " +
-                   $"deleted by user {comment.AuthorId}"
-        }, comment.Id, ct);
+            info = $"Comment {commentId} was " +
+                   $"deleted by user {commentAuthorId}"
+        }, commentId, ct);
             
         return Result<bool>.Success(true);
     }
@@ -144,7 +85,7 @@ public class CommentService(ApplicationDbContext context, IUserActionLogger<Comm
     public async Task<Result<CommentDto>> CreateCommentAsync(string userId, CreateCommentDto createDto, 
         CancellationToken ct)
     {
-        var userInfo = await GetUserInfoAsync(userId, createDto.PublicationId, ct);
+        var userInfo = await userRepository.GetUserInfoAsync(userId, createDto.PublicationId, ct);
 
         if (userInfo == null)
             return Result<CommentDto>.Failure("User was not found", 400);
@@ -176,7 +117,7 @@ public class CommentService(ApplicationDbContext context, IUserActionLogger<Comm
             ParentCommentId = effectiveParentId
         };
 
-        await PersistCommentAsync(comment, effectiveParentId, ct);
+        await commentRepository.CreateComment(comment, effectiveParentId, ct);
 
         await logger.LogAsync(userId, UserLogAction.CreateComment, new
         {
@@ -202,52 +143,28 @@ public class CommentService(ApplicationDbContext context, IUserActionLogger<Comm
         });
     }
     
-    private async Task<UserInfoProjection?> GetUserInfoAsync(
-        string userId, string publicationId, CancellationToken cancellationToken)
-    {
-        return await context.Users
-            .Where(u => u.Id == userId)
-            .Select(u => new UserInfoProjection
-            {
-                Id = u.Id,
-                Username = u.Username,
-                UniqueNameIdentifier = u.UniqueNameIdentifier,
-                Blocked = u.Blocked,
-                ImageUrl = u.ProfileImage == null ? null : u.ProfileImage.ImageUrl,
-                LastCommentDate = context.Comments
-                    .Where(c => c.AuthorId == u.Id)
-                    .OrderByDescending(c => c.CreationDate)
-                    .Select(c => c.CreationDate)
-                    .FirstOrDefault(),
-                PublicationExists = context.Publications
-                    .Any(p => p.Id == publicationId)
-            })
-            .FirstOrDefaultAsync(cancellationToken);
-    }
+
 
     private async Task<Result<bool>> ValidateParentAsync(
-        string? parrentCommentId, string publicationId, CancellationToken cancellationToken)
+        string? parrentCommentId, string publicationId, CancellationToken ct)
     {
         if (parrentCommentId == null)
             return Result<bool>.Success(true);
 
         var snapshot = parrentCommentId;
-        var parentInfo = await context.Comments
-            .Where(c => c.Id == snapshot)
-            .Select(c => new { c.PublicationId })
-            .FirstOrDefaultAsync(cancellationToken);
+        var parentInfo = await commentRepository.GetPublicationIdByCommentIdAsync(snapshot, ct);
 
-        if (parentInfo == null)
+        if (string.IsNullOrEmpty(parentInfo))
             return Result<bool>.Failure("Parent comment you are responding to no longer exists", 400);
 
-        if (parentInfo.PublicationId != publicationId)
+        if (parentInfo != publicationId)
             return Result<bool>.Failure("Comment reply internal server error. Try again later!", 500);
 
         return Result<bool>.Success(true);
     }
 
     private async Task<string?> ResolveEffectiveParentIdAsync(
-        string? parentId, CancellationToken cancellationToken)
+        string? parentId, CancellationToken ct)
     {
         if (parentId == null) return null;
 
@@ -257,14 +174,11 @@ public class CommentService(ApplicationDbContext context, IUserActionLogger<Comm
         while (currentId != null)
         {
             var snapshot = currentId;
-            var parent = await context.Comments
-                .Where(c => c.Id == snapshot)
-                .Select(c => new { c.ParentCommentId })
-                .FirstOrDefaultAsync(cancellationToken);
+            var parent = await commentRepository.GetParentCommentId(snapshot, ct);
 
-            if (parent?.ParentCommentId == null) break;
+            if (parent == null) break;
             depth++;
-            currentId = parent.ParentCommentId;
+            currentId = parent;
         }
 
         if (depth + 1 <= MaxDepth)
@@ -276,50 +190,9 @@ public class CommentService(ApplicationDbContext context, IUserActionLogger<Comm
         for (int i = 0; i < stepsUp; i++)
         {
             var snapshot = currentId;
-            currentId = await context.Comments
-                .Where(c => c.Id == snapshot)
-                .Select(c => c.ParentCommentId)
-                .FirstOrDefaultAsync(cancellationToken);
-        }
+            currentId = await commentRepository.GetParentCommentId(snapshot!, ct);
 
+        }
         return currentId;
-    }
-
-    private async Task PersistCommentAsync(
-        Comment comment, string? effectiveParentId, CancellationToken cancellationToken)
-    {
-        context.Comments.Add(comment);
-        await context.SaveChangesAsync(cancellationToken);
-
-        if (effectiveParentId != null)
-        {
-            await context.Database.ExecuteSqlInterpolatedAsync($@"
-            WITH RECURSIVE ancestors AS (
-                SELECT ""Id"", ""ParentCommentId""
-                FROM ""Comments""
-                WHERE ""Id"" = {effectiveParentId}
-
-                UNION ALL
-
-                SELECT c.""Id"", c.""ParentCommentId""
-                FROM ""Comments"" c
-                JOIN ancestors a ON c.""Id"" = a.""ParentCommentId""
-            )
-            UPDATE ""Comments""
-            SET ""TotalRepliesCount"" = ""TotalRepliesCount"" + 1
-            WHERE ""Id"" IN (SELECT ""Id"" FROM ancestors)
-        ", cancellationToken);
-        }
-    }
-
-    private sealed class UserInfoProjection
-    {
-        public string Id { get; init; } = null!;
-        public string Username { get; init; } = null!;
-        public string UniqueNameIdentifier { get; init; } = null!;
-        public bool Blocked { get; init; }
-        public string? ImageUrl { get; init; }
-        public DateTime LastCommentDate { get; init; }
-        public bool PublicationExists { get; init; }
     }
 }

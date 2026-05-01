@@ -1,11 +1,10 @@
-﻿using Application.Core;
-using Application.Core.Pagination;
+﻿using Application.Core.Pagination;
 using Application.DTOs.PublicationDTOs;
 using Application.DTOs.UserDTOs;
 using Application.Interfaces.Repositories;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Domain.Entities;
+using Domain.Entities.Publications;
 using Domain.Enums;
 using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -192,5 +191,18 @@ public class PublicationRepository(ApplicationDbContext context, IMapper mapper)
     {
         return await context.Publications
             .AnyAsync(a => a.Id == id, ct);
+    }
+
+    public async Task<bool> IsUserAuthorAsync(string userId, string publicationId, CancellationToken ct)
+    {
+        return await context.Publications.AnyAsync(x => x.Id == publicationId && x.AuthorId == userId, ct);
+    }
+
+    public async Task UpdatePublicationContentAsync(UpdatePublicationContentDto updateContent, 
+        CancellationToken ct)
+    {
+        await context.Publications.Where(p => p.Id == updateContent.PublicationId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(p => p.Content, updateContent.NewContent)
+                .SetProperty(p => p.UpdatedAt, DateTime.UtcNow), ct);
     }
 }

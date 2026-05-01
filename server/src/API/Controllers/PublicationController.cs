@@ -33,6 +33,16 @@ public class PublicationController : BaseApiController
     }
 
     [Authorize]
+    [HttpPut("update-content")]
+    public async Task<ActionResult<PublicationDto>> UpdatePublicationContent(UpdatePublicationContentDto updateContent,
+        CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        return HandleResult(await Mediator.Send(
+            new UpdatePublicationContent.Command { UpdateContentDto = updateContent, UserId = userId }, ct));
+    }
+
+    [Authorize]
     [HttpGet("publication-of-{uniqueNameIdentifier}")]
     public async Task<ActionResult<List<PublicationDto>>> GetPublicationsOfAuthor(string uniqueNameIdentifier)
     {

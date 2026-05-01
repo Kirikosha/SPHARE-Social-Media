@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities;
+﻿using Domain.Entities.Publications;
+
+namespace Domain.Entities;
 public class Image
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();

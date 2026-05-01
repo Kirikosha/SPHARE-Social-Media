@@ -21,6 +21,9 @@ public interface IPublicationService
     Task<Result<PublicationDto>> UpdatePublicationAsync(UpdatePublicationDto updateDto, string userId,
         CancellationToken ct);
 
+    Task<Result<PublicationDto>> UpdatePublicationContentAsync(UpdatePublicationContentDto updateContentDto,
+        string userId, CancellationToken ct);
+
     Task<Result<Unit>> SetPublicationSentStateAsync(string publicationId, bool state, CancellationToken ct);
     Task<Result<Unit>> DeletePublicationAsync(string publicationId, CancellationToken ct);
     Task<Result<bool>> CreatePublicationAsync(CreatePublicationDto createDto, string creatorId, CancellationToken ct);

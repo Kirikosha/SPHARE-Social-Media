@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Complaints;
+using Domain.Entities.Publications;
 
 namespace Domain.Entities;
 public class Comment

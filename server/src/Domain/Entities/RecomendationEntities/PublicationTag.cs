@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities.RecomendationEntities;
+﻿using Domain.Entities.Publications;
+
+namespace Domain.Entities.RecomendationEntities;
 
 public class PublicationTag
 {

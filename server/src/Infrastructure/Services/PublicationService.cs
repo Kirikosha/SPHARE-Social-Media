@@ -2,6 +2,7 @@
 using Application.Core.Pagination;
 using Application.DTOs.PublicationDTOs;
 using Application.DTOs.UserDTOs;
+using Application.Errors;
 using Application.Features.Images.Commands;
 using Application.Interfaces.Logger;
 using Application.Interfaces.Repositories;
@@ -9,6 +10,7 @@ using Application.Interfaces.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Domain.Entities;
+using Domain.Entities.Publications;
 using Domain.Enums;
 using Infrastructure.Extensions;
 using MediatR;
@@ -213,6 +215,33 @@ public class PublicationService(ApplicationDbContext context, IPublicationReposi
             info = $"User {userId} has updated publication {publication.Id}"
         }, publication.Id, ct);
         return Result<PublicationDto>.Success(readyPublication);
+    }
+
+    public async Task<Result<PublicationDto>> UpdatePublicationContentAsync(UpdatePublicationContentDto 
+            updateContentDto,
+        string userId, CancellationToken ct)
+    {
+        var userAllowed = await publicationRepository.IsUserAuthorAsync(userId, updateContentDto.PublicationId, ct);
+        if (!userAllowed)
+            return Result<PublicationDto>.Failure(
+                PublicationErrors.NotAuthorised());
+
+        try
+        {
+            await publicationRepository.UpdatePublicationContentAsync(updateContentDto, ct);
+
+            var publication = await publicationRepository.GetPublicationByIdAsync(updateContentDto.PublicationId,
+                userId, ct);
+
+            return publication == null
+                ? Result<PublicationDto>.Failure(PublicationErrors.FetchingUnsuccessful())
+                : Result<PublicationDto>.Success(publication);
+        }
+        catch
+        {
+            return Result<PublicationDto>.Failure(PublicationErrors.UpdateUnsuccessful());
+        }
+        
     }
 
     public async Task<Result<Unit>> SetPublicationSentStateAsync(string publicationId, bool state, CancellationToken ct)

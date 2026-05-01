@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.Services;
+﻿using Domain.Entities.Publications;
+
+namespace Infrastructure.Services;
 using Application.Core;
 using Application.Core.Pagination;
 using Application.DTOs.PublicationDTOs;

@@ -6,6 +6,7 @@ using Application.DTOs.MessagingDTOs;
 using Application.DTOs.PublicationDTOs;
 using Application.DTOs.UserDTOs;
 using Application.DTOs.ViolationDTOs;
+using Domain.Entities.Publications;
 
 namespace Application.Core;
 using AutoMapper;

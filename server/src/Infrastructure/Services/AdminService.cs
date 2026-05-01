@@ -4,6 +4,7 @@ using Application.Interfaces.Logger;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
+using Domain.Entities.Publications;
 using Domain.Enums;
 
 namespace Infrastructure.Services;

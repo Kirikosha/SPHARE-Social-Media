@@ -1,4 +1,5 @@
-﻿using Domain.Entities.RecomendationEntities;
+﻿using Domain.Entities.Publications;
+using Domain.Entities.RecomendationEntities;
 
 namespace Infrastructure;
 
@@ -10,6 +11,8 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Publication> Publications { get; set; }
+    public DbSet<PlannedPublication> PlannedPublications { get; set; }
+    public DbSet<ConditionalPublication> ConditionalPublications { get; set; }
     public DbSet<Like> Likes { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<Comment> Comments { get; set; }
@@ -187,5 +190,11 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
         
         modelBuilder.Entity<JobCheckpoint>()
             .HasKey(j => j.JobName);
+        
+        modelBuilder.Entity<Publication>()
+            .HasDiscriminator<string>("PublicationType")
+            .HasValue<Publication>("ordinary")
+            .HasValue<PlannedPublication>("planned")
+            .HasValue<ConditionalPublication>("conditional");
     }
 }

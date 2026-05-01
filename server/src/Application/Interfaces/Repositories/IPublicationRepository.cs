@@ -1,5 +1,6 @@
 ﻿using Application.Core.Pagination;
 using Application.DTOs.PublicationDTOs;
+using Domain.Entities.Publications;
 
 namespace Application.Interfaces.Repositories;
 
@@ -18,4 +19,8 @@ public interface IPublicationRepository
     Task<List<PublicationDto>> GetPlannedPublicationsAsync(string userId, CancellationToken ct);
     Task<int> UpdatePublicationViewsAsync(string publicationId, CancellationToken ct);
     Task<bool> IsPublicationExistsAsync(string id, CancellationToken ct);
+    Task<bool> IsUserAuthorAsync(string userId, string publicationId, CancellationToken ct);
+
+    Task UpdatePublicationContentAsync(UpdatePublicationContentDto updateContent,
+        CancellationToken ct);
 }

@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Complaints;
+using Domain.Entities.Publications;
 using Domain.Entities.RecomendationEntities;
 using Domain.Enums;
 

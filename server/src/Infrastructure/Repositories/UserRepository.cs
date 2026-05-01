@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Immutable;
+using System.Linq.Expressions;
 using System.Text;
 using Application.Core.Pagination;
 using Application.DTOs.CommentDTOs;
@@ -248,7 +249,35 @@ public class UserRepository : IUserRepository
             })
             .FirstOrDefaultAsync(ct);
     }
-    
+
+    public async Task<bool> BlockUserAsync(string userId, CancellationToken ct)
+    {
+        await context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(u => u.Blocked, true)
+                .SetProperty(u => u.BlockedAt, DateTime.UtcNow), ct);
+
+        return true;
+    }
+
+    public async Task<bool> UnBlockUserAsync(string userId, CancellationToken ct)
+    {
+        await context.Users
+            .Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(u => u.Blocked, false)
+                .SetProperty(u => u.BlockedAt, u => null)
+                .SetProperty(u => u.ViolationScore, 0), ct);
+
+        return true;
+    }
+
+    public async Task<string?> GetUserEmailByIdAsync(string userId, CancellationToken ct)
+    {
+        return await context.Users.Where(x => x.Id == userId).Select(x => x.Email).FirstOrDefaultAsync(ct);
+    }
+
     private static string GenerateRandomString()
     {
         StringBuilder sb = new StringBuilder();

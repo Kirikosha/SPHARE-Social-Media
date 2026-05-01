@@ -19,8 +19,7 @@ public class CreateViolation
     {
         public async Task<Result<bool>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var res = await violationService.CreateViolation(request.Violation, cancellationToken);
-            return res ? Result<bool>.Success(true) : Result<bool>.Failure("Something went wrong", 400);
+            return await violationService.CreateViolation(request.Violation, cancellationToken);
         }
     }
 }

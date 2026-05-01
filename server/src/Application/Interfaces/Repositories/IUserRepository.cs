@@ -32,4 +32,10 @@ public interface IUserRepository
 
     Task<UserInfoProjection?> GetUserInfoAsync(string userId, string publicationId,
         CancellationToken ct);
+    
+    // TODO: perhaps think about replacing boolean with an enum to show the state of users other than ban or not
+    Task<bool> BlockUserAsync(string userId, CancellationToken ct);
+    Task<bool> UnBlockUserAsync(string userId, CancellationToken ct);
+
+    Task<string?> GetUserEmailByIdAsync(string userId, CancellationToken ct);
 }

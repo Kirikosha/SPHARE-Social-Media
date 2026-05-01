@@ -12,8 +12,8 @@ using MediatR;
 
 namespace Infrastructure.Services;
 
-public class UserService(IUserRepository userRepository, ICloudinaryService cloudinaryService, IPhotoService 
-        photoService, IMapper mapper, ApplicationDbContext context) : IUserService
+public class UserService(IUserRepository userRepository, IPhotoService 
+        photoService, IMapper mapper) : IUserService
 {
     private const int ViolationLimit = 20;
     public async Task<Result<PublicUserDto>> GetPublicUserByIdAsync(string id, CancellationToken ct)
@@ -219,7 +219,7 @@ public class UserService(IUserRepository userRepository, ICloudinaryService clou
 
         return Result<Unit>.Failure(deletionResult.Error!, deletionResult.Code);
     }
-    
+
     //TODO: Change email (with verification on new email and old email)
     //TODO: Change password (with verification via OTP code on email + comparison with the old password)
 
@@ -235,4 +235,7 @@ public class UserService(IUserRepository userRepository, ICloudinaryService clou
             return Result<Unit>.Failure("Update was unsuccessful", 500);
         }
     }
+    
+    public async Task<string?> GetUserEmailByIdAsync(string userId, CancellationToken ct)
+        => await userRepository.GetUserEmailByIdAsync(userId, ct);
 }

@@ -14,4 +14,5 @@ public interface ICommentRepository
     Task<string?> GetParentCommentId(string commentId, CancellationToken ct);
     Task CreateComment(Comment comment, string? effectiveParentId, CancellationToken ct);
     Task<string?> GetPublicationIdByCommentIdAsync(string commentId, CancellationToken ct);
+    Task<Comment?> GetRawCommentByIdAsync(string id, CancellationToken ct);
 }

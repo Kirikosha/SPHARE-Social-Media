@@ -30,7 +30,11 @@ public class AdminController : BaseApiController
     [HttpPost("delete-publication")]
     public async Task<ActionResult> DeletePublication(CreateViolationDto violation)
     {
-        return HandleResult(await Mediator.Send(new DeletePublication.Command() { Violation = violation }));
+        var adminId = User.GetUserId();
+        return HandleResult(await Mediator.Send(new DeletePublication.Command() 
+        {
+            Violation = violation, AdminId = adminId
+        }));
     }
 
     [HttpPost("block-user")]

@@ -96,6 +96,11 @@ public class CommentRepository(ApplicationDbContext context) : ICommentRepositor
         return comment;
     }
 
+    public async Task<Comment?> GetRawCommentByIdAsync(string id, CancellationToken ct)
+    {
+        return await context.Comments.Where(a => a.Id == id).FirstOrDefaultAsync(ct);
+    }
+
     public async Task<string?> GetCommentAuthorIdByCommentIdAsync(string id, CancellationToken ct)
     {
         var commentData = await context.Comments

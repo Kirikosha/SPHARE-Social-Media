@@ -1,4 +1,5 @@
-﻿using Application.DTOs.ViolationDTOs;
+﻿using Application.Core;
+using Application.DTOs.ViolationDTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using AutoMapper;
@@ -14,16 +15,16 @@ public class ViolationService(IViolationRepository violationRepository, IMapper 
         return mapper.Map<List<ViolationDto>>(violations);
     }
 
-    public async Task<bool> CreateViolation(Violation violation, CancellationToken ct)
+    public async Task<Result<bool>> CreateViolation(Violation violation, CancellationToken ct)
     {
         try
         {
             await violationRepository.CreateViolation(violation, ct);
-            return true;
+            return Result<bool>.Success(true);
         }
         catch(Exception)
         {
-            return false;
+            return Result<bool>.Failure("Violation was not registered successfully", 500);
         }
     }
 }

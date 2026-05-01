@@ -5,6 +5,7 @@ using Application.DTOs.UserDTOs;
 using Application.Interfaces.Repositories;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -134,6 +135,11 @@ public class PublicationRepository(ApplicationDbContext context, IMapper mapper)
             })
             .FirstOrDefaultAsync(ct);
         return publication;
+    }
+
+    public async Task<Publication?> GetRawPublicationByIdAsync(string publicationId, CancellationToken ct)
+    {
+        return await context.Publications.Where(p => p.Id == publicationId).FirstOrDefaultAsync(ct);
     }
 
     public async Task<List<PublicationDto>> GetPlannedPublicationsAsync(string userId, CancellationToken ct)

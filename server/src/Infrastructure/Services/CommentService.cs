@@ -8,7 +8,6 @@ using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Extensions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 

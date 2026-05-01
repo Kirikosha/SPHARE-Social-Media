@@ -1,30 +1,30 @@
-﻿using Application.Features.Users.Commands;
-using Application.Features.Violations.Commands;
+﻿using Application.Core;
 using Application.Interfaces.Services;
 using Domain.Entities;
-using MediatR;
 
 namespace Infrastructure.Services;
 
-public class ViolationNotificationNotificationService(IEmailService emailService, IMediator mediator) : IViolationNotificationService
+public class ViolationNotificationNotificationService(IEmailService emailService, IUserService userService, 
+    IViolationService violationService) : IViolationNotificationService
 {
-    public async Task<bool> RegisterViolationAsync(User user, Violation violation, int scoreIncrease, bool isPublication)
+    public async Task<Result<bool>> RegisterViolationAsync(Violation violation, int scoreIncrease, bool 
+            isPublication, CancellationToken ct)
     {
         string item = isPublication ? "publication" : "comment";
         string body = MakeBody(isPublication, violation.ViolationText, item);
         try
         {
-            var violationCreationResult = await mediator.Send(new CreateViolation.Command { Violation = violation });
+            var violationCreationResult = await violationService.CreateViolation(violation, ct);
 
-            var violationScoreUpdateResult = await mediator.Send(new UpdateViolationScore.Command
-            {
-                ScoreIncreaseValue = scoreIncrease,
-                UserId = user.Id
-            });
+            var violationScoreUpdateResult = await userService.UpdateViolationScore(violation.ViolatedById,
+                scoreIncrease, ct);
 
             if (!violationCreationResult.Value || !violationScoreUpdateResult.Value) return false;
+            var userEmail = await userService.GetUserEmailByIdAsync(violation.ViolatedById, ct);
+            if (string.IsNullOrEmpty(userEmail))
+                return false;
             await emailService.SendEmailAsync(
-                user.Email,
+                userEmail,
                 $"Your {item} was removed by administration",
                 body,
                 true);

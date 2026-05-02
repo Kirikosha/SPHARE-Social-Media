@@ -173,15 +173,16 @@ public class PublicationService(ApplicationDbContext context, IPublicationReposi
         return !isSuccess ? Result<Unit>.Failure(PublicationErrors.NotFound()) : Result<Unit>.Success(Unit.Value);
     }
 
-    public async Task<Result<Unit>> DeletePublicationAsync(string publicationId, CancellationToken ct)
+    public async Task<Result<Unit>> DeletePublicationAsync(string publicationId, string userId, CancellationToken ct)
     {
         var publicationNavProps = await publicationRepository
             .GetPublicationNavigationPropertiesAsync(publicationId, ct);
 
-
         if (publicationNavProps == null)
             return Result<Unit>.Failure(PublicationErrors.NotFound());
 
+        if (userId != publicationNavProps.AuthorId)
+            return Result<Unit>.Failure(PublicationErrors.NotAuthorised());
 
         await publicationRepository.DeletePublicationAsync(publicationId, ct);
         

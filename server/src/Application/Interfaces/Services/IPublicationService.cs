@@ -28,6 +28,6 @@ public interface IPublicationService
         CancellationToken ct);
 
     Task<Result<Unit>> SetPublicationSentStateAsync(string publicationId, bool state, CancellationToken ct);
-    Task<Result<Unit>> DeletePublicationAsync(string publicationId, CancellationToken ct);
+    Task<Result<Unit>> DeletePublicationAsync(string publicationId, string userId, CancellationToken ct);
     Task<Result<bool>> CreatePublicationAsync(CreatePublicationDto createDto, string creatorId, CancellationToken ct);
 }

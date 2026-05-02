@@ -23,7 +23,20 @@ public class PhotoService(ICloudinaryService cloudinaryService, ApplicationDbCon
         context.Images.Remove(profileImage);
         return Result<Unit>.Success(Unit.Value); 
     }
-    
+
+    public async Task<Result<Unit>> DeletePublicationImagesAsync(List<string> imageIds, CancellationToken ct)
+    {
+        var deletionResult = await cloudinaryService.DeletePhotosAsync(imageIds);
+        if (deletionResult.Error != null)
+            return Result<Unit>.Failure($"Images weren't deleted due to an error. Error: {deletionResult.Error}", 500);
+        
+        await context.Images
+            .Where(x => imageIds.Contains(x.Id))
+            .ExecuteDeleteAsync(ct);
+        
+        return Result<Unit>.Success(Unit.Value);
+    }
+
 
     public async Task<Result<List<Image>>> UploadPublicationImages(List<IFormFile> images, CancellationToken ct)
     {

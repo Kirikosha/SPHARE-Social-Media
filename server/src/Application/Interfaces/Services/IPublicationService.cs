@@ -18,11 +18,14 @@ public interface IPublicationService
     Task<Result<List<PublicationDto>>> GetPlannedPublicationsAsync(string userId, CancellationToken ct);
     Task<Result<int>> UpdatePublicationViewsAsync(string publicationId, CancellationToken ct);
 
-    Task<Result<PublicationDto>> UpdatePublicationAsync(UpdatePublicationDto updateDto, string userId,
-        CancellationToken ct);
-
     Task<Result<PublicationDto>> UpdatePublicationContentAsync(UpdatePublicationContentDto updateContentDto,
         string userId, CancellationToken ct);
+
+    Task<Result<PublicationDto>> UpdateConditionalPublicationAsync(UpdateConditionalPublicationDto updateDto,
+        CancellationToken ct);
+
+    Task<Result<PublicationDto>> UpdatePlannedPublicationAsync(UpdatePlannedPublicationDto updateDto,
+        CancellationToken ct);
 
     Task<Result<Unit>> SetPublicationSentStateAsync(string publicationId, bool state, CancellationToken ct);
     Task<Result<Unit>> DeletePublicationAsync(string publicationId, CancellationToken ct);

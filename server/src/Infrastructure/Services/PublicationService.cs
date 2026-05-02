@@ -1,25 +1,21 @@
 ﻿using Application.Core;
 using Application.Core.Pagination;
 using Application.DTOs.PublicationDTOs;
-using Application.DTOs.UserDTOs;
 using Application.Errors;
-using Application.Features.Images.Commands;
 using Application.Interfaces.Logger;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Domain.Entities;
 using Domain.Entities.Publications;
 using Domain.Enums;
-using Infrastructure.Extensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
 public class PublicationService(ApplicationDbContext context, IPublicationRepository publicationRepository, 
-    IMapper mapper, ILikeService likeService, IUserActionLogger<PublicationService> logger,
+    IMapper mapper, IUserActionLogger<PublicationService> logger,
     ICloudinaryService cloudinaryService, ISpamRepository spamRepository, IPhotoService photoService,
     IUserRepository userRepository) 
     : IPublicationService
@@ -133,89 +129,6 @@ public class PublicationService(ApplicationDbContext context, IPublicationReposi
         }
     }
 
-    public async Task<Result<PublicationDto>> UpdatePublicationAsync(UpdatePublicationDto updateDto, string userId, 
-        CancellationToken ct)
-    {
-        var publication = await context.Publications
-        .Where(p => p.Id == updateDto.Id)
-        .Select(p => new
-        {
-            p.Id,
-            p.AuthorId,
-            p.PublicationType,
-            p.RemindAt
-        })
-        .FirstOrDefaultAsync(ct);
-
-        if (publication == null)
-            return Result<PublicationDto>.Failure("Publication was not found", 404);
-
-        await context.Publications
-            .Where(p => p.Id == updateDto.Id)
-            .ExecuteUpdateAsync(s => s
-                    .SetProperty(p => p.Content, updateDto.Content)
-                    .SetProperty(p => p.UpdatedAt, DateTime.UtcNow),
-                ct);
-
-        if (publication.PublicationType == PublicationTypes.planned
-            && updateDto.RemindAt > DateTime.UtcNow
-            && publication.RemindAt != updateDto.RemindAt)
-        {
-            await context.Publications
-                .Where(p => p.Id == updateDto.Id)
-                .ExecuteUpdateAsync(s => s
-                .SetProperty(p => p.RemindAt, updateDto.RemindAt), ct);
-        }
-        
-        var success = await context.SaveChangesAsync(ct) > 0;
-        if (!success) return Result<PublicationDto>.Failure("Publication was not updated", 500);
-        
-        var readyPublication = await context.Publications
-            .Where(p => p.Id == updateDto.Id)
-            .Select(p => new PublicationDto
-            {
-                Id = p.Id,
-                Content = p.Content,
-                PostedAt = p.PostedAt,
-                UpdatedAt = p.UpdatedAt,
-                RemindAt = p.RemindAt,
-                LikesAmount = p.Likes.Count,
-                CommentAmount = p.Comments == null ? 0 : p.Comments.Count,
-                PublicationType = p.PublicationType,
-                ConditionType = p.ConditionType,
-                ConditionTarget = p.ConditionTarget,
-                Author = new PublicUserBriefDto
-                {
-                    Id = p.Author.Id,
-                    Username = p.Author.Username,
-                    UniqueNameIdentifier = p.Author.UniqueNameIdentifier,
-                    Blocked = p.Author.Blocked,
-                    ImageUrl = p.Author.ProfileImage == null ? null : p.Author.ProfileImage.ImageUrl
-                },
-                ComparisonOperator = p.ComparisonOperator,
-                ViewCount = p.ViewCount,
-                IsDeleted = p.IsDeleted,
-                Images = p.Images!
-                    .Select(x => x.ImageUrl)
-                    .ToList()
-            })
-            .FirstOrDefaultAsync(ct);
-
-        var isLikedResult = await likeService.IsLikedByAsync(userId, publication.Id, ct);
-        if (isLikedResult.IsSuccess)
-        {
-            readyPublication.IsLikedByCurrentUser = isLikedResult.Value;
-        }
-        else
-        {
-            return Result<PublicationDto>.Failure(isLikedResult.Error!, isLikedResult.Code);
-        }
-        await logger.LogAsync(userId, UserLogAction.EditPublication, new
-        {
-            info = $"User {userId} has updated publication {publication.Id}"
-        }, publication.Id, ct);
-        return Result<PublicationDto>.Success(readyPublication);
-    }
 
     public async Task<Result<PublicationDto>> UpdatePublicationContentAsync(UpdatePublicationContentDto 
             updateContentDto,
@@ -244,45 +157,48 @@ public class PublicationService(ApplicationDbContext context, IPublicationReposi
         
     }
 
+    public Task<Result<PublicationDto>> UpdateConditionalPublicationAsync(UpdateConditionalPublicationDto updateDto, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Result<PublicationDto>> UpdatePlannedPublicationAsync(UpdatePlannedPublicationDto updateDto, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<Result<Unit>> SetPublicationSentStateAsync(string publicationId, bool state, CancellationToken ct)
     {
-        bool exists = await context.Publications.AnyAsync(c => c.Id == publicationId, ct);
-        if (!exists)
-            return Result<Unit>.Failure("Publication was not found", 404);
-
-        await context.Publications.Where(a => a.Id == publicationId).ExecuteUpdateAsync(c => c.SetProperty(x => x
-            .WasSent, state), ct);
-        return Result<Unit>.Success(Unit.Value);
+        var isSuccess = await publicationRepository.SetPublicationStateToSentAsync(publicationId, ct);
+        return !isSuccess ? Result<Unit>.Failure(PublicationErrors.NotFound()) : Result<Unit>.Success(Unit.Value);
     }
 
     public async Task<Result<Unit>> DeletePublicationAsync(string publicationId, CancellationToken ct)
     {
-        var publication = await context.Publications
-            .Select(p => new
-            {
-                p.Id,
-                p.AuthorId,
-                ImagePublicIds = p.Images != null ? p.Images.Select(i => i.PublicId).ToList() : null
-            }).FirstOrDefaultAsync(a => a.Id == publicationId, ct);
-
-        if (publication == null)
-            return Result<Unit>.Failure("Publication was not deleted because it does not exist", 404);
+        var publicationNavProps = await publicationRepository
+            .GetPublicationNavigationPropertiesAsync(publicationId, ct);
 
 
-        await context.Publications
-            .Where(p => p.Id == publicationId)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsDeleted, true), ct);
-        if (publication.ImagePublicIds is { Count: > 0 })
+        if (publicationNavProps == null)
+            return Result<Unit>.Failure(PublicationErrors.NotFound());
+
+
+        await publicationRepository.DeletePublicationAsync(publicationId, ct);
+        
+        if (publicationNavProps.ImageIds is { Count: > 0 })
         {
-            await Task.WhenAll(publication.ImagePublicIds
-                .Select(id => cloudinaryService.DeletePhotoAsync(id)));
+            var deletionResult = await photoService.DeletePublicationImagesAsync(publicationNavProps.ImageIds, ct);
+            if (!deletionResult.IsSuccess) return deletionResult;
         }
             
+        //TODO: Fix the logging
+        /*
         await logger.LogAsync(publication.AuthorId, UserLogAction.DeletePublication, new
         {
             info = $"Publication " +
                    $"was deleted by {publication.AuthorId}"
         }, publication.Id, ct);
+        */
         return Result<Unit>.Success(Unit.Value);
     }
 

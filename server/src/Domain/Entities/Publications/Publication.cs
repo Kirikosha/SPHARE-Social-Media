@@ -12,7 +12,7 @@ public class Publication
     public DateTime? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
     public int ViewCount { get; set; }
-
+    public bool WasPublished { get; set; }
     // Navigation properties
     public string AuthorId { get; set; } = string.Empty;
     public User Author { get; set; } = null!;

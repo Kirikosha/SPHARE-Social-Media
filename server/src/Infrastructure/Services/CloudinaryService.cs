@@ -80,4 +80,10 @@ public class CloudinaryService : ICloudinaryService
         var deleteParams = new DeletionParams(publicId);
         return await _cloudinary.DestroyAsync(deleteParams);
     }
+
+    public async Task<DelResResult> DeletePhotosAsync(List<string> imageIds)
+    {
+        var deletionResult = await _cloudinary.DeleteResourcesAsync(imageIds.ToArray());
+        return deletionResult;
+    }
 }

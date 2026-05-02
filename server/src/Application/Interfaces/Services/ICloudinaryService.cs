@@ -9,4 +9,5 @@ public interface ICloudinaryService
     Task<ImageUploadResult> AddProfilePhotoAsyncWithReplacement(IFormFile image, string userId, string publicId);
     Task<ImageUploadResult> AddPhotoAsync(IFormFile image);
     Task<DeletionResult> DeletePhotoAsync(string publicId);
+    Task<DelResResult> DeletePhotosAsync(List<string> imageIds);
 }

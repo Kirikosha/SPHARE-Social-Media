@@ -20,7 +20,18 @@ public interface IPublicationRepository
     Task<int> UpdatePublicationViewsAsync(string publicationId, CancellationToken ct);
     Task<bool> IsPublicationExistsAsync(string id, CancellationToken ct);
     Task<bool> IsUserAuthorAsync(string userId, string publicationId, CancellationToken ct);
-
-    Task UpdatePublicationContentAsync(UpdatePublicationContentDto updateContent,
+    Task<bool> UpdatePublicationContentAsync(UpdatePublicationContentDto updateContent,
         CancellationToken ct);
+    Task<bool> SetPublicationStateToSentAsync(string publicationId, CancellationToken ct);
+    Task<PublicationNavigationProperties?> GetPublicationNavigationPropertiesAsync(string publicationId, 
+        CancellationToken ct);
+
+    Task DeletePublicationAsync(string publicationId, CancellationToken ct);
+}
+
+public sealed class PublicationNavigationProperties
+{
+    public required string PublicationId { get; set; }
+    public required string AuthorId { get; set; }
+    public List<string>? ImageIds { get; set; }
 }

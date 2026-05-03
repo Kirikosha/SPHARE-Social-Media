@@ -46,13 +46,15 @@ public class AdminService(IUserRepository userRepository, IViolationNotification
                 return Result<bool>.Failure("User unblocking was unsucessful", 500);
             return Result<bool>.Success(true);
 
+            
+            // TODO: fix the logger
+            /*
             await logger.LogAsync(blockedById, UserLogAction.BlockUser, new
             {
                 info = $"User " +
                        $"{userId} was blocked by {blockedById} at {user.BlockedAt}"
             }, userId, ct);
-                
-            return Result<bool>.Success(true);
+            */
         }
         catch
         {
@@ -71,7 +73,7 @@ public class AdminService(IUserRepository userRepository, IViolationNotification
             if (publication == null) return Result<bool>.Failure("Publication to delete was not found", 404);
 
             publication.IsDeleted = true;
-            context.Publications.Update(publication);
+            await publicationRepository.DeletePublicationAsync(publication.Id, ct);
 
             Violation violation = new Violation
             {
@@ -81,9 +83,12 @@ public class AdminService(IUserRepository userRepository, IViolationNotification
                 ViolatedById = publication.AuthorId
             };
 
-            bool result = await violationNotificationService
-                .RegisterViolationAsync(publication.Author, violation, createDto.ViolationScoreIncrease, true);
-            return Result<bool>.Success(result);
+            var res = await violationNotificationService
+                .RegisterViolationAsync(violation, createDto.ViolationScoreIncrease, true, ct);
+            if (res.IsSuccess)
+                return Result<bool>.Success(true);
+
+            return Result<bool>.Failure(res.Error!, res.Code);
         }
         catch (Exception ex)
         {

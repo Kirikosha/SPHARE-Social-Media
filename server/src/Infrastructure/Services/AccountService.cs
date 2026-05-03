@@ -56,8 +56,6 @@ public class AccountService(IUserRepository userRepository, IPhotoService photoS
             {
                 return Result<AccountClaimsDto>.Failure(imageUploadResult.Error!, 500);
             }
-                
-            user.ProfileImageId = imageUploadResult.Value;
         }
 
         var spamInitialisationResult = await spamRepository.CreateSpamRating(user.Id, ct);

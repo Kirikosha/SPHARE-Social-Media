@@ -1,4 +1,5 @@
 ﻿using Domain.Entities.Publications;
+using Domain.Enums;
 
 namespace Infrastructure.Services;
 using Application.Core;
@@ -129,7 +130,9 @@ public class RecommendationService(ApplicationDbContext context) : IRecommendati
                 LikesAmount = p.Likes.Count(),
                 IsLikedByCurrentUser = p.Likes.Any(l => l.LikedById == userId),
                 CommentAmount = p.Comments!.Count(),
-                PublicationType = p.PublicationType,
+                PublicationType = p is PlannedPublication ? PublicationTypes.planned
+                    : p is ConditionalPublication ? PublicationTypes.conditional
+                    : PublicationTypes.ordinary,
                 ViewCount = p.ViewCount,
                 IsDeleted = p.IsDeleted
             })
@@ -154,7 +157,9 @@ public class RecommendationService(ApplicationDbContext context) : IRecommendati
         LikesAmount = p.Likes.Count(),
         IsLikedByCurrentUser = p.Likes.Any(l => l.LikedById == userId),
         CommentAmount = p.Comments!.Count(),
-        PublicationType = p.PublicationType,
+        PublicationType = p is PlannedPublication ? PublicationTypes.planned
+            : p is ConditionalPublication ? PublicationTypes.conditional
+            : PublicationTypes.ordinary,
         ViewCount = p.ViewCount,
         IsDeleted = p.IsDeleted
     };

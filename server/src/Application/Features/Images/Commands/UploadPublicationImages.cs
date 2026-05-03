@@ -18,7 +18,7 @@ public class UploadPublicationImages
     {
         public async Task<Result<List<Image>>> Handle(Command request, CancellationToken cancellationToken)
         {
-            return await photoService.UploadPublicationImages(request.Images, cancellationToken);
+            return await photoService.UploadPublicationImages(request.Images, TODO, cancellationToken);
         }
     }
 }

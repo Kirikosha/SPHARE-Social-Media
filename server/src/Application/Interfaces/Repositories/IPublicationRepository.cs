@@ -19,14 +19,17 @@ public interface IPublicationRepository
     Task<List<PublicationDto>> GetPlannedPublicationsAsync(string userId, CancellationToken ct);
     Task<int> UpdatePublicationViewsAsync(string publicationId, CancellationToken ct);
     Task<bool> IsPublicationExistsAsync(string id, CancellationToken ct);
-    Task<bool> IsUserAuthorAsync(string userId, string publicationId, CancellationToken ct);
     Task<bool> UpdatePublicationContentAsync(UpdatePublicationContentDto updateContent,
         CancellationToken ct);
+
+    Task<bool> UpdateConditionalPublicationAsync(UpdateConditionalPublicationDto updateDto, CancellationToken ct);
+    Task<bool> UpdatePlannedPublicationAsync(UpdatePlannedPublicationDto updateDto, CancellationToken ct);
+    Task<bool> IsUserAuthorAsync(string userId, string publicationId, CancellationToken ct);
     Task<bool> SetPublicationStateToSentAsync(string publicationId, CancellationToken ct);
     Task<PublicationNavigationProperties?> GetPublicationNavigationPropertiesAsync(string publicationId, 
         CancellationToken ct);
-
     Task DeletePublicationAsync(string publicationId, CancellationToken ct);
+    Task AddPublication(Publication publication, CancellationToken ct);
 }
 
 public sealed class PublicationNavigationProperties

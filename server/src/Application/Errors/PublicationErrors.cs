@@ -8,4 +8,7 @@ public static class PublicationErrors
     public static Error FetchingUnsuccessful() => new("Publication fetching was unsuccessful", 400);
     public static Error UpdateUnsuccessful() => new("Publication update was unsuccessful", 500);
     public static Error NotFound() => new("Publication was not found", 404);
+
+    public static Error UpdateSpecialError() => new("You can't change publishing properties of already published " +
+        "publication of special type", 400);
 }

@@ -1,4 +1,5 @@
-﻿using Application.Core;
+﻿using System.Text;
+using Application.Core;
 using Application.Errors;
 using Application.Interfaces.Services;
 using CloudinaryDotNet.Actions;
@@ -38,30 +39,23 @@ public class PhotoService(ICloudinaryService cloudinaryService, ApplicationDbCon
     }
 
 
-    public async Task<Result<List<Image>>> UploadPublicationImages(List<IFormFile> images, CancellationToken ct)
+    public async Task<Result<List<Image>>> UploadPublicationImages(
+        List<IFormFile> images, string publicationId, CancellationToken ct)
     {
-        var uploadedImages = new List<Image>();
+        var uploadResults = await cloudinaryService.AddPhotosAsync(images);
+    
+        if (uploadResults.Any(x => x.Error != null))
+            return Result<List<Image>>.Failure(ImageErrors.ImageUploadUnsuccessful());
 
-        foreach (var image in images)
+        var imagesList = uploadResults.Select(x => new Image
         {
-            try
-            {
-                var response = await cloudinaryService.AddPhotoAsync(image);
-                if (response.Error != null) continue;
+            Id = x.PublicId,
+            ImageUrl = x.Url.AbsoluteUri,
+            PublicId = x.PublicId,
+            PublicationId = publicationId
+        }).ToList();
 
-                uploadedImages.Add(new Image
-                {
-                    PublicId = response.PublicId,
-                    ImageUrl = response.Url.AbsoluteUri
-                });
-            }
-            catch (Exception ex)
-            {
-                return Result<List<Image>>.Failure($"During image upload error arised. Error: {ex.Message}", 500);
-            }
-        }
-
-        return Result<List<Image>>.Success(uploadedImages);
+        return Result<List<Image>>.Success(imagesList);
     }
 
     public async Task<Result<Unit>> UploadUserProfilePicture(IFormFile imageFile, string userId, CancellationToken ct)

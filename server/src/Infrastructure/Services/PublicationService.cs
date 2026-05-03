@@ -6,18 +6,15 @@ using Application.Interfaces.Logger;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using AutoMapper;
-using Domain.Entities;
 using Domain.Entities.Publications;
 using Domain.Enums;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public class PublicationService(ApplicationDbContext context, IPublicationRepository publicationRepository, 
-    IMapper mapper, IUserActionLogger<PublicationService> logger,
-    ICloudinaryService cloudinaryService, ISpamRepository spamRepository, IPhotoService photoService,
-    IUserRepository userRepository) 
+public class PublicationService(IPublicationRepository publicationRepository, 
+    IUserActionLogger<PublicationService> logger, ISpamRepository spamRepository,
+    IPhotoService photoService, IUserRepository userRepository) 
     : IPublicationService
 {
     // normal user
@@ -157,14 +154,40 @@ public class PublicationService(ApplicationDbContext context, IPublicationReposi
         
     }
 
-    public Task<Result<PublicationDto>> UpdateConditionalPublicationAsync(UpdateConditionalPublicationDto updateDto, CancellationToken ct)
+    public async Task<Result<PublicationDto>> UpdateConditionalPublicationAsync(UpdateConditionalPublicationDto 
+            updateDto,
+        string userId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var publication = await publicationRepository.GetRawPublicationByIdAsync(updateDto.PublicationId, ct);
+
+        var verificationResult = await VerifyPublication(publication, userId, ct);
+        if (!verificationResult.IsSuccess)
+            return verificationResult;
+
+        var res = await publicationRepository.UpdateConditionalPublicationAsync(updateDto, ct);
+        if (!res)
+            return Result<PublicationDto>.Failure(PublicationErrors.UpdateUnsuccessful());
+
+        var publicationResult = await publicationRepository.GetPublicationByIdAsync(publication!.Id, userId, ct);
+        return publicationResult!;
+
     }
 
-    public Task<Result<PublicationDto>> UpdatePlannedPublicationAsync(UpdatePlannedPublicationDto updateDto, CancellationToken ct)
+    public async Task<Result<PublicationDto>> UpdatePlannedPublicationAsync(UpdatePlannedPublicationDto updateDto,
+        string userId, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var publication = await publicationRepository.GetRawPublicationByIdAsync(updateDto.PublicationId, ct);
+        var verificationResult = await VerifyPublication(publication, userId, ct);
+        if (!verificationResult.IsSuccess)
+            return verificationResult;
+
+        var res = await publicationRepository.UpdatePlannedPublicationAsync(updateDto, ct);
+        if (!res)
+            return Result<PublicationDto>.Failure(PublicationErrors.UpdateUnsuccessful());
+
+        var publicationResult = await publicationRepository.GetPublicationByIdAsync(publication!.Id, userId, ct);
+        return publicationResult!;
+
     }
 
     public async Task<Result<Unit>> SetPublicationSentStateAsync(string publicationId, bool state, CancellationToken ct)
@@ -206,30 +229,53 @@ public class PublicationService(ApplicationDbContext context, IPublicationReposi
     public async Task<Result<bool>> CreatePublicationAsync(CreatePublicationDto createDto, string creatorId, 
         CancellationToken ct)
     {
-        User? user = await context.Users.FindAsync(creatorId, ct);
+        var user = await userRepository.GetUserByIdAsync(creatorId, ct);
         if (user == null)
             return Result<bool>
-                .Failure("Account does not exist therefore publication cannot be created", 403);
-
-        bool isPublicationSpamming = await IsPublicationSpamming(user.Id, user.DateOfCreation, ct);
+                .Failure(PublicationErrors.NotAuthorised());
+        
+        bool isPublicationSpamming = await spamRepository.IsPublicationSpamming(user.Id, user.DateOfCreation, ct);
         if (isPublicationSpamming)
             return Result<bool>
-                .Failure("You cannot make that many publications in short period of time", 400);
+                .Failure(SpamErrors.PublicationSpam);
 
+        // TODO: Move it down
+        /*
         var res = await spamRepository.MakePublication(user.Id, ct);
         if (!res)
         {
             return Result<bool>.Failure(
                 "You cannot make more publications for today due to our anti spam rules", 400);
         }
+        */
             
-        Publication publication = mapper.Map<Publication>(createDto);
+        Publication publication = createDto.PublicationType switch
+        {
+            PublicationTypes.planned => new PlannedPublication
+            {
+                PublishAt = createDto.PublishAt!.Value,
+                WasPublished = false
+            },
+            PublicationTypes.conditional => new ConditionalPublication
+            {
+                ConditionType = createDto.ConditionType!.Value,
+                ConditionTarget = createDto.ConditionTarget!.Value,
+                ComparisonOperator = createDto.ConditionOperator!.Value,
+                WasPublished = false
+            },
+            _ => new Publication()
+        };
+
+        // shared fields — replaces what mapper was doing
+        publication.Id = Guid.NewGuid().ToString();
+        publication.Content = createDto.Content;
         publication.Author = user;
         publication.AuthorId = user.Id;
+        publication.PostedAt = DateTime.UtcNow;
 
         if (createDto.Images != null && createDto.Images.Count > 0)
         {
-            var images = await photoService.UploadPublicationImages(createDto.Images, ct);
+            var images = await photoService.UploadPublicationImages(createDto.Images, publication.Id, ct);
             if (images.IsSuccess)
             {
                 publication.Images = images.Value;
@@ -241,32 +287,30 @@ public class PublicationService(ApplicationDbContext context, IPublicationReposi
 
         }
 
-        context.Add(publication);
+        await publicationRepository.AddPublication(publication, ct);
 
+        //TODO: Fix logger
+        /*
         await logger.LogAsync(creatorId, UserLogAction.CreatePublication, new
         {
             info = $"User {createDto} has created a publication {publication.Id}"
         }, publication.Id, ct);
-            
+        */
         return Result<bool>.Success(true);
     }
-    
-    
-    private async Task<bool> IsPublicationSpamming(string userId, DateOnly userCreationDate, CancellationToken ct)
+
+    private async Task<Result<PublicationDto>> VerifyPublication(Publication? publication, string userId, 
+        CancellationToken ct)
     {
-        bool isUserNew = userCreationDate >= DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
-            
-        // Set limits based on user status
-        int timeLimitMinutes = isUserNew ? NewUserPublicationTimeLimit : PublicationTimeLimit;
-        int? maxPublications = isUserNew ? NewUserPublicationNumberLimit : PublicationNumberLimit;
+        if (publication == null)
+            return Result<PublicationDto>.Failure(PublicationErrors.NotFound());
 
-        // BUG FIX: Subtract minutes to look into the past, not the future
-        var cutOffTime = DateTime.UtcNow.AddMinutes(-timeLimitMinutes);
+        if (publication.AuthorId != userId)
+            return Result<PublicationDto>.Failure(PublicationErrors.NotAuthorised());
+        
+        if (publication.WasPublished)
+            return Result<PublicationDto>.Failure(PublicationErrors.UpdateSpecialError());
 
-        // Run a single, clean query
-        int recentPublicationCount = await context.Publications
-            .CountAsync(a => a.AuthorId == userId && a.PostedAt >= cutOffTime, ct);
-
-        return recentPublicationCount >= maxPublications;
+        return null!;
     }
 }

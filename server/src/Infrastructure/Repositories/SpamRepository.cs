@@ -15,6 +15,14 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
     private const double NormalLikeSpamValueIncrease = 0.01;
     private const double NormalComplaintSpamValueIncrease = 0.05;
 
+    // normal user
+    private const int PublicationTimeLimit = 5; // in minutes
+    private const int PublicationNumberLimit = 50;
+    
+    // new user
+    private const int NewUserPublicationNumberLimit = 1;
+    private const int NewUserPublicationTimeLimit = 10; // in minutes
+    
     private const double SpamLimit = 1.0;
 
     public async Task<bool> MakePublication(string userId, CancellationToken ct)
@@ -70,6 +78,24 @@ public class SpamRepository(ApplicationDbContext context, IUserActivityLogReposi
         {
             return Result<Unit>.Failure("User registration was unsuccessful", 500);
         }
+    }
+
+    public async Task<bool> IsPublicationSpamming(string userId, DateOnly creationDate, CancellationToken ct)
+    {
+        bool isUserNew = creationDate >= DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1));
+            
+        // Set limits based on user status
+        int timeLimitMinutes = isUserNew ? NewUserPublicationTimeLimit : PublicationTimeLimit;
+        int? maxPublications = isUserNew ? NewUserPublicationNumberLimit : PublicationNumberLimit;
+
+        // BUG FIX: Subtract minutes to look into the past, not the future
+        var cutOffTime = DateTime.UtcNow.AddMinutes(-timeLimitMinutes);
+
+        // Run a single, clean query
+        int recentPublicationCount = await context.Publications
+            .CountAsync(a => a.AuthorId == userId && a.PostedAt >= cutOffTime, ct);
+
+        return recentPublicationCount >= maxPublications;
     }
 
     private async Task<bool> VerifyThePermissionToMakeAction(UserActionType actionType, string userId, 

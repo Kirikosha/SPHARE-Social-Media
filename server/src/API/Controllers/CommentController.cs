@@ -51,7 +51,12 @@ public class CommentController : BaseApiController
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteComment(string id)
     {
-        return HandleResult(await Mediator.Send(new DeleteComment.Command() { CommentId = id }));
+        var userId = User.GetUserId();
+        return HandleResult(await Mediator.Send(new DeleteComment.Command()
+        {
+            CommentId = id,
+            UserId = userId
+        }));
     }
 
 }

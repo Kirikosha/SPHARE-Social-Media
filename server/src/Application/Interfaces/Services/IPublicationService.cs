@@ -21,10 +21,10 @@ public interface IPublicationService
     Task<Result<PublicationDto>> UpdatePublicationContentAsync(UpdatePublicationContentDto updateContentDto,
         string userId, CancellationToken ct);
 
-    Task<Result<PublicationDto>> UpdateConditionalPublicationAsync(UpdateConditionalPublicationDto updateDto,
-        CancellationToken ct);
+    Task<Result<PublicationDto>> UpdateConditionalPublicationAsync(UpdateConditionalPublicationDto updateDto, 
+        string userId, CancellationToken ct);
 
-    Task<Result<PublicationDto>> UpdatePlannedPublicationAsync(UpdatePlannedPublicationDto updateDto,
+    Task<Result<PublicationDto>> UpdatePlannedPublicationAsync(UpdatePlannedPublicationDto updateDto, string userId,
         CancellationToken ct);
 
     Task<Result<Unit>> SetPublicationSentStateAsync(string publicationId, bool state, CancellationToken ct);

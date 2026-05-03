@@ -35,6 +35,23 @@ public class CloudinaryService : ICloudinaryService
         return uploadResult;
     }
 
+    public async Task<List<ImageUploadResult>> AddPhotosAsync(List<IFormFile> images)
+    {
+        var uploadTasks = images
+            .Where(image => image.Length > 0)
+            .Select(async image =>
+            {
+                await using var stream = image.OpenReadStream();
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(image.FileName, stream)
+                };
+                return await _cloudinary.UploadAsync(uploadParams);
+            });
+
+        return [.. await Task.WhenAll(uploadTasks)];
+    }
+
     public async Task<ImageUploadResult> AddProfilePhotoAsync(IFormFile image, string userId)
     {
         var uploadResult = new ImageUploadResult();

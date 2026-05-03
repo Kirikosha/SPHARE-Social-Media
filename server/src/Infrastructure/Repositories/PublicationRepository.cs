@@ -8,6 +8,7 @@ using Domain.Entities.Publications;
 using Domain.Enums;
 using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
+using MimeKit;
 
 namespace Infrastructure.Repositories;
 
@@ -217,6 +218,18 @@ public class PublicationRepository(ApplicationDbContext context, IMapper mapper)
         return rowsAffected == 1;
     }
 
+    public async Task<bool> UpdateConditionalPublicationAsync(UpdateConditionalPublicationDto updateDto, 
+        CancellationToken ct)
+    {
+        int rowsAffected = await context.ConditionalPublications.Where(p => p.Id == updateDto.PublicationId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(p => p.ComparisonOperator, updateDto.ComparisonOperator)
+                .SetProperty(p => p.ConditionTarget, updateDto.ConditionTarget)
+                .SetProperty(p => p.ConditionType, updateDto.ConditionType), ct);
+
+        return rowsAffected == 1;
+    }
+    
+
     public async Task<bool> SetPublicationStateToSentAsync(string publicationId, CancellationToken ct)
     {
         int rowsAffected = await context.Publications.Where(a => a.Id == publicationId).ExecuteUpdateAsync(c => c
@@ -224,6 +237,14 @@ public class PublicationRepository(ApplicationDbContext context, IMapper mapper)
             .WasPublished, true), ct);
 
         return rowsAffected > 0;
+    }
+    
+    public async Task<bool> UpdatePlannedPublicationAsync(UpdatePlannedPublicationDto updateDto, CancellationToken ct)
+    {
+        int rowsAffected = await context.PlannedPublications.Where(p => p.Id == updateDto.PublicationId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(p => p.PublishAt, updateDto.PublishAt), ct);
+
+        return rowsAffected == 1;
     }
 
     public async Task<PublicationNavigationProperties?> GetPublicationNavigationPropertiesAsync(string publicationId, 
@@ -245,5 +266,10 @@ public class PublicationRepository(ApplicationDbContext context, IMapper mapper)
         await context.Publications
             .Where(p => p.Id == publicationId)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsDeleted, true), ct);
+    }
+
+    public async Task AddPublication(Publication publication, CancellationToken ct)
+    {
+        await context.Publications.AddAsync(publication, ct);
     }
 }

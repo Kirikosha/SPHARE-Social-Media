@@ -22,17 +22,6 @@ public class PublicationController : BaseApiController
     }
 
     [Authorize]
-    [HttpPut("update-publication")]
-    public async Task<ActionResult<PublicationDto>> UpdatePublication(UpdatePublicationDto publication)
-    {
-        var userId = User.GetUserId();
-
-         return HandleResult(await Mediator
-            .Send(new UpdatePublication.Command { Publication = publication, UserId = userId }));
-
-    }
-
-    [Authorize]
     [HttpPut("update-content")]
     public async Task<ActionResult<PublicationDto>> UpdatePublicationContent(UpdatePublicationContentDto updateContent,
         CancellationToken ct)
@@ -41,6 +30,27 @@ public class PublicationController : BaseApiController
         return HandleResult(await Mediator.Send(
             new UpdatePublicationContent.Command { UpdateContentDto = updateContent, UserId = userId }, ct));
     }
+
+    [Authorize]
+    [HttpPut("update-planned")]
+    public async Task<ActionResult<PublicationDto>> UpdatePlannedPublication(UpdatePlannedPublicationDto updateDto,
+        CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        return HandleResult(await Mediator.Send(
+            new UpdatePlannedPublication.Command { UserId = userId, UpdateDto = updateDto }, ct));
+    }
+
+    [Authorize]
+    [HttpPut("update-conditional")]
+    public async Task<ActionResult<PublicationDto>> UpdateConditionalPublication(
+        UpdateConditionalPublicationDto updateDto, CancellationToken ct)
+    {
+        var userId = User.GetUserId();
+        return HandleResult(await Mediator.Send(
+            new UpdateConditionalPublication.Command { UserId = userId, UpdateDto = updateDto }, ct));
+    }
+    
 
     [Authorize]
     [HttpGet("publication-of-{uniqueNameIdentifier}")]
@@ -74,7 +84,12 @@ public class PublicationController : BaseApiController
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeletePublication(string id)
     {
-        return HandleResult(await Mediator.Send(new DeletePublication.Command { Id = id }));
+        var userId = User.GetUserId();
+        return HandleResult(await Mediator.Send(new DeletePublication.Command
+        {
+            Id = id,
+            UserId = userId
+        }));
     }
 
     [Authorize]

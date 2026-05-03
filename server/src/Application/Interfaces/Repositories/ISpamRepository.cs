@@ -9,4 +9,5 @@ public interface ISpamRepository
     Task<bool> MakeLike(string userId, CancellationToken ct);
     Task<bool> MakeComplaint(string userId, CancellationToken ct);
     Task<Result<Unit>> CreateSpamRating(string userId, CancellationToken ct);
+    Task<bool> IsPublicationSpamming(string userId, DateOnly creationDate, CancellationToken ct);
 }

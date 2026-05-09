@@ -1,4 +1,6 @@
-﻿namespace API.Extensions;
+﻿using Microsoft.OpenApi.Models;
+
+namespace API.Extensions;
 
 public static class WebServiceExtensions
 {
@@ -6,7 +8,33 @@ public static class WebServiceExtensions
     {
         services.AddControllers();
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(options =>
+        {
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name         = "Authorization",
+                Type         = SecuritySchemeType.Http,
+                Scheme       = "Bearer",
+                BearerFormat = "JWT",
+                In           = ParameterLocation.Header,
+                Description  = "Enter your JWT token. Example: eyJhbGci..."
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id   = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
 
         services.AddCors(options =>
         {

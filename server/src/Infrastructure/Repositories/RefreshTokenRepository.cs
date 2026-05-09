@@ -19,7 +19,6 @@ public class RefreshTokenRepository(ApplicationDbContext context) : IRefreshToke
         {
             return null!;
         }
-
     }
 
     public async Task<bool> RemoveStaleTokens(string userId, CancellationToken ct)
@@ -30,7 +29,7 @@ public class RefreshTokenRepository(ApplicationDbContext context) : IRefreshToke
             context.RefreshTokens.RemoveRange(staleTokens);
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             return false;
         }
@@ -38,21 +37,30 @@ public class RefreshTokenRepository(ApplicationDbContext context) : IRefreshToke
 
     public async Task<List<RefreshToken>> GetUserActiveRefreshTokens(string userId, CancellationToken ct)
     {
-        var refreshTokens = await context.RefreshTokens.Where(x => x.UserId == userId && x.IsActive)
-            .OrderBy(x => x.Created).ToListAsync(ct);
-        return refreshTokens;
+        var tokens = await context.RefreshTokens
+            .Where(r => r.UserId == userId && !r.IsRevoked && r.Expires > DateTime.UtcNow)
+            .ToListAsync(ct);
+        return tokens;
     }
 
     public async Task<List<RefreshToken>> GetUserStaleRefreshTokens(string userId, CancellationToken ct)
     {
-        var refreshTokens = await context.RefreshTokens
-            .Where(rt => rt.IsExpired).ToListAsync(ct);
-        return refreshTokens;
+        return await context.RefreshTokens
+            .Where(rt => rt.UserId == userId &&
+                         (rt.Expires < DateTime.UtcNow ||
+                          rt.IsRevoked))
+            .ToListAsync(ct);
     }
 
     public Task RemoveUserRefreshTokensAsync(ICollection<RefreshToken> refreshTokens, CancellationToken ct)
     {
         context.RemoveRange(refreshTokens, ct);
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveExcessTokens(List<RefreshToken> tokens, CancellationToken ct)
+    {
+        context.RefreshTokens.RemoveRange(tokens);
         return Task.CompletedTask;
     }
 

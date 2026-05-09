@@ -11,7 +11,7 @@ using Application.Features.Users.Queries;
 using Application.Features.Violations.Queries;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class AdminController : BaseApiController
 {
     [HttpGet("get-users")]

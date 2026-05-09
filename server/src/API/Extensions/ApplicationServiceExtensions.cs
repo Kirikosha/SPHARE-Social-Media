@@ -51,6 +51,11 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IUserInterestUpdater, UserInterestUpdateService>();
         services.AddScoped(typeof(IUserActionLogger<>), typeof(UserActionLogger<>));
 
+        services.AddScoped<IPublicationRepository, PublicationRepository>();
+        services.AddScoped<ICommentRepository, CommentRepository>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
         services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddScoped<IAccountService, AccountService>();

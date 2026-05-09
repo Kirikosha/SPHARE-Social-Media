@@ -90,7 +90,8 @@ public class CommentService(IUserActionLogger<CommentService> logger,
             return Result<CommentDto>.Failure("User was not found", 400);
 
         if (!userInfo.PublicationExists)
-            return Result<CommentDto>.Failure("Publication you are trying to comment on no longer exists", 400);
+            return Result<CommentDto>.Failure("Publication you are trying to leave a comment to a publication " +
+            "that no longer exists", 400);
 
         var cutOff = DateTime.UtcNow.AddSeconds(-CommentRestrictionInSeconds);
         if (userInfo.LastCommentDate > cutOff)

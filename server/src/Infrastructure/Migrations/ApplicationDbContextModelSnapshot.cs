@@ -223,55 +223,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Publication", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("AuthorId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("ComparisonOperator")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("ConditionTarget")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("ConditionType")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime>("PostedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("PublicationType")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("RemindAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("ViewCount")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("WasSent")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuthorId");
-
-                    b.ToTable("Publications");
-                });
-
             modelBuilder.Entity("Domain.Entities.PublicationView", b =>
                 {
                     b.Property<string>("Id")
@@ -298,6 +249,49 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId", "ViewedAt");
 
                     b.ToTable("PublicationViews");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Publications.Publication", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AuthorId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("PostedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PublicationType")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("character varying(13)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("WasPublished")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("Publications");
+
+                    b.HasDiscriminator<string>("PublicationType").HasValue("ordinary");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Domain.Entities.RecomendationEntities.JobCheckpoint", b =>
@@ -595,6 +589,32 @@ namespace Infrastructure.Migrations
                     b.HasDiscriminator().HasValue("PublicationComplaint");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Publications.ConditionalPublication", b =>
+                {
+                    b.HasBaseType("Domain.Entities.Publications.Publication");
+
+                    b.Property<int>("ComparisonOperator")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ConditionTarget")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ConditionType")
+                        .HasColumnType("integer");
+
+                    b.HasDiscriminator().HasValue("conditional");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Publications.PlannedPublication", b =>
+                {
+                    b.HasBaseType("Domain.Entities.Publications.Publication");
+
+                    b.Property<DateTime>("PublishAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasDiscriminator().HasValue("planned");
+                });
+
             modelBuilder.Entity("Domain.Entities.Address", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
@@ -638,7 +658,7 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("ParentCommentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Domain.Entities.Publication", "Publication")
+                    b.HasOne("Domain.Entities.Publications.Publication", "Publication")
                         .WithMany("Comments")
                         .HasForeignKey("PublicationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -653,7 +673,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Image", b =>
                 {
-                    b.HasOne("Domain.Entities.Publication", "Publication")
+                    b.HasOne("Domain.Entities.Publications.Publication", "Publication")
                         .WithMany("Images")
                         .HasForeignKey("PublicationId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -669,7 +689,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Publication", "Publication")
+                    b.HasOne("Domain.Entities.Publications.Publication", "Publication")
                         .WithMany("Likes")
                         .HasForeignKey("PublicationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -699,20 +719,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Sender");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Publication", b =>
-                {
-                    b.HasOne("Domain.Entities.User", "Author")
-                        .WithMany("CreatedPublications")
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-                });
-
             modelBuilder.Entity("Domain.Entities.PublicationView", b =>
                 {
-                    b.HasOne("Domain.Entities.Publication", "Publication")
+                    b.HasOne("Domain.Entities.Publications.Publication", "Publication")
                         .WithMany("Views")
                         .HasForeignKey("PublicationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -729,9 +738,20 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Publications.Publication", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "Author")
+                        .WithMany("CreatedPublications")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+                });
+
             modelBuilder.Entity("Domain.Entities.RecomendationEntities.PublicationTag", b =>
                 {
-                    b.HasOne("Domain.Entities.Publication", "Publication")
+                    b.HasOne("Domain.Entities.Publications.Publication", "Publication")
                         .WithMany("PublicationTags")
                         .HasForeignKey("PublicationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -859,7 +879,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Publication", "Publication")
+                    b.HasOne("Domain.Entities.Publications.Publication", "Publication")
                         .WithMany("PublicationComplaints")
                         .HasForeignKey("PublicationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -889,7 +909,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Publication", b =>
+            modelBuilder.Entity("Domain.Entities.Publications.Publication", b =>
                 {
                     b.Navigation("Comments");
 

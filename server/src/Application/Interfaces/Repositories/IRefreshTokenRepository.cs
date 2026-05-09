@@ -7,4 +7,5 @@ public interface IRefreshTokenRepository
     Task<List<RefreshToken>> GetUserActiveRefreshTokens(string userId, CancellationToken ct);
     Task<List<RefreshToken>> GetUserStaleRefreshTokens(string userId, CancellationToken ct);
     Task RemoveUserRefreshTokensAsync(ICollection<RefreshToken> refreshTokens, CancellationToken ct);
+    Task RemoveExcessTokens(List<RefreshToken> tokens, CancellationToken ct);
 }

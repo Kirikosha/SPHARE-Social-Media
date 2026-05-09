@@ -87,6 +87,11 @@ public class PhotoService(ICloudinaryService cloudinaryService, ApplicationDbCon
                 };
 
                 await context.Images.AddAsync(image, ct);
+                
+                var user = await context.Users.FindAsync([userId], ct);
+                if (user != null)
+                    user.ProfileImageId = image.Id;
+
             }
             return Result<Unit>.Success(Unit.Value);
         }

@@ -22,8 +22,14 @@ where TResponse : class
 
         if (failures.Count == 0) return await next(cancellationToken);
 
-        var errors = string.Join(", ", failures.Select(f => f.ErrorMessage));
-        var result = Result<object>.Failure(errors, 400);
-        return (result as TResponse)!;
+        var errors = string.Join(" ", failures.Select(f => f.ErrorMessage));
+
+        var genericArg = typeof(TResponse).GetGenericArguments()[0];
+        var resultType = typeof(Result<>).MakeGenericType(genericArg);
+
+        var failureResult = resultType.GetMethod("Failure", [typeof(string), typeof(int)])!
+            .Invoke(null, [errors, 400]);
+
+        return (TResponse)failureResult!;
     }
 }

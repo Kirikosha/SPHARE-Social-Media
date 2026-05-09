@@ -25,6 +25,7 @@ public class ComplaintController : BaseApiController
             .Send(new CreateCommentComplaint.Command { Complaint = complaint, UserId = userId }));
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("publication")]
     public async Task<ActionResult> GetPublicationComplaints()
     {
@@ -32,6 +33,7 @@ public class ComplaintController : BaseApiController
             .Send(new GetPublicationComplaints.Query()));
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpGet("comment")]
     public async Task<ActionResult> GetCommentComplaints()
     {

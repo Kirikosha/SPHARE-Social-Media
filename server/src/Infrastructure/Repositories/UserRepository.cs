@@ -142,7 +142,14 @@ public class UserRepository : IUserRepository
 
     public async Task<Address> UpdateUserAddressAsync(Address address, CancellationToken ct)
     {
-        context.Addresses.Update(address);
+        var isNew = context.Entry(address).State == EntityState.Detached 
+                    && !await context.Addresses.AnyAsync(a => a.Id == address.Id, ct);
+
+        if (isNew)
+            await context.Addresses.AddAsync(address, ct);
+        else
+            context.Addresses.Update(address);
+
         return address;
     }
 
@@ -209,15 +216,12 @@ public class UserRepository : IUserRepository
     public async Task<UserProfileDetails> SetUserProfileDetailsAsync(UserProfileDetails profileDetails, 
         CancellationToken ct)
     {
-        if (string.IsNullOrEmpty(profileDetails.Id))
-        {
-            await context.ProfileDetails.AddAsync(profileDetails, ct);
-            return profileDetails;
-        }
+        var isTracked = context.Entry(profileDetails).State != EntityState.Detached;
 
-        context.ProfileDetails.Update(profileDetails);
-        return profileDetails;
-    }
+        if (!isTracked)
+            await context.ProfileDetails.AddAsync(profileDetails, ct);
+
+        return profileDetails;    }
 
     public async Task<bool> SetProfileImageId(string userId, string profileImageId, CancellationToken ct)
     {
@@ -252,25 +256,25 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> BlockUserAsync(string userId, CancellationToken ct)
     {
-        await context.Users
+        var updatedRows = await context.Users
             .Where(u => u.Id == userId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(u => u.Blocked, true)
                 .SetProperty(u => u.BlockedAt, DateTime.UtcNow), ct);
 
-        return true;
+        return updatedRows == 1;
     }
 
     public async Task<bool> UnBlockUserAsync(string userId, CancellationToken ct)
     {
-        await context.Users
+        var updatedRows = await context.Users
             .Where(u => u.Id == userId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(u => u.Blocked, false)
                 .SetProperty(u => u.BlockedAt, u => null)
                 .SetProperty(u => u.ViolationScore, 0), ct);
 
-        return true;
+        return updatedRows == 1;
     }
 
     public async Task<string?> GetUserEmailByIdAsync(string userId, CancellationToken ct)

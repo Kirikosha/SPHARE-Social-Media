@@ -23,7 +23,7 @@ public class AdminService(IUserRepository userRepository, IViolationNotification
                 return Result<bool>.Failure("User does not exist", 404);
 
             var updateResult = await userRepository.UnBlockUserAsync(userId, ct);
-            if (updateResult!)
+            if (!updateResult)
                 return Result<bool>.Failure("User unblocking was unsucessful", 500);
             return Result<bool>.Success(true);
         }
@@ -42,8 +42,8 @@ public class AdminService(IUserRepository userRepository, IViolationNotification
                 return Result<bool>.Failure("User does not exist", 404);
 
             var updateResult = await userRepository.BlockUserAsync(userId, ct);
-            if (updateResult!)
-                return Result<bool>.Failure("User unblocking was unsucessful", 500);
+            if (!updateResult)
+                return Result<bool>.Failure("User blocking was unsuccessful", 500);
             return Result<bool>.Success(true);
 
             

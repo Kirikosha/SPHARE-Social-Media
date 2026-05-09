@@ -71,5 +71,7 @@ public class MappingProfiles : Profile
                     .ImageUrl
                 : null));
 
+        CreateMap<UserProfileDetails, UserProfileDetailsDto>();
+
     }
 }

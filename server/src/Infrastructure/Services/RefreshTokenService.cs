@@ -11,20 +11,21 @@ public class RefreshTokenService(IRefreshTokenRepository refreshTokenRepository)
     private const int MaxActiveRefreshTokens = 5;
     public async Task<Result<RefreshToken>> AddOrUpdateRefreshToken(string userId, CancellationToken ct)
     {
-
         var activeTokens = await refreshTokenRepository.GetUserActiveRefreshTokens(userId, ct);
 
         if (activeTokens.Count >= MaxActiveRefreshTokens)
         {
-            var toRevoke = activeTokens.Take(activeTokens.Count - MaxActiveRefreshTokens + 1);
-            foreach (var rt in toRevoke)
-                rt.IsRevoked = true;
+            var tokensToRemove = activeTokens
+                .OrderBy(t => t.Created)
+                .Take(activeTokens.Count - MaxActiveRefreshTokens + 1)
+                .ToList();
+
+            await refreshTokenRepository.RemoveExcessTokens(tokensToRemove, ct);
         }
 
         var staleResult = await refreshTokenRepository.RemoveStaleTokens(userId, ct);
         if (!staleResult)
             return Result<RefreshToken>.Failure("Stale tokens removal was unsuccessful", 500);
-
 
         var createdRefreshToken = await refreshTokenRepository.AddRefreshToken(userId, ct);
         if (createdRefreshToken == null)

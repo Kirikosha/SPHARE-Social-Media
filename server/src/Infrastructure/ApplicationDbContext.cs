@@ -137,6 +137,11 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
             .WithOne(x => x.User)
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.NoAction);
+        
+        modelBuilder.Entity<Tag>()
+            .HasIndex(t => t.Name)
+            .HasMethod("gin")
+            .HasOperators("gin_trgm_ops");
 
         modelBuilder.Entity<PublicationTag>()
             .HasKey(pt => new { pt.PublicationId, pt.TagId });

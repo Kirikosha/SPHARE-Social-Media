@@ -77,6 +77,12 @@ public static class ApplicationServiceExtensions
         services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
         services.Configure<InterestUpdateSettings>(configuration.GetSection("InterestUpdate"));
 
+        services.AddHttpClient<IMlTaggingService, MlTaggingService>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["MlService:BaseUrl"]!);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+        
         // AutoMapper
         services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 

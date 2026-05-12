@@ -55,6 +55,7 @@ services:
       - Neo4jSettings__Neo4jUser=neo4j
       - Neo4jSettings__Neo4jPassword=password
       - Neo4jSettings__Neo4jDatabase=neo4j
+      - MlService__BaseUrl=http://ml-tagging:8000
     ports:
       - "5000:8080"
       - "5001:8081"
@@ -65,6 +66,8 @@ services:
         condition: service_started
       seq:
         condition: service_started
+      ml-tagging:
+        condition: service_healthy
     networks:
       - socialmedia_network
 
@@ -77,6 +80,22 @@ services:
       - "4200:80"
     networks:
       - socialmedia_network
+  
+  ml-tagging:
+    build:
+      context: ./ml-tagging
+      dockerfile: Dockerfile
+    container_name: socialmedia_ml_tagging
+    ports:
+      - "8000:8000"
+    networks:
+      - socialmedia_network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
   
   seq:
     image: datalust/seq:latest

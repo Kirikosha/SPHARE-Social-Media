@@ -4,9 +4,11 @@ using Application.DTOs.ComplaintDTOs;
 using Application.DTOs.DetailedUserInfoDTOs;
 using Application.DTOs.MessagingDTOs;
 using Application.DTOs.PublicationDTOs;
+using Application.DTOs.TagDTOs;
 using Application.DTOs.UserDTOs;
 using Application.DTOs.ViolationDTOs;
 using Domain.Entities.Publications;
+using Domain.Entities.RecomendationEntities;
 
 namespace Application.Core;
 using AutoMapper;
@@ -72,6 +74,8 @@ public class MappingProfiles : Profile
                 : null));
 
         CreateMap<UserProfileDetails, UserProfileDetailsDto>();
+        CreateMap<Tag, TagDto>();
+        CreateMap<Tag, GeneratedTagDto>();
 
     }
 }

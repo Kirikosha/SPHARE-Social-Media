@@ -69,6 +69,11 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IRecommendationService, RecommendationService>();
         services.AddScoped<ISubscriptionService, SubscriptionService>();
         services.AddScoped<IUserService, UserService>();
+
+        services.AddScoped<ITagRepository, TagRepository>();
+        services.AddScoped<ITagService, TagService>();
+        services.AddScoped<IMlTaggingService, MlTaggingService>();
+        services.AddScoped<IPublicationTagService, PublicationTagService>();
         
         
 

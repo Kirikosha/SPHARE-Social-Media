@@ -8,6 +8,7 @@ public interface ITagRepository
     Task<int> AddTagAsync(Tag tag, CancellationToken ct);
     Task<List<int>> AddTagsAsync(List<Tag> tags, CancellationToken ct);
     Task AddTagsToPublicationAsync(string publicationId, List<Tag> tags, CancellationToken ct);
+    Task SetTagForPublicationAsync(string publicationId, Tag tag, CancellationToken ct);
     Task SetTagForPublicationAsync(string publicationId, int tagId, CancellationToken ct);
     Task SetTagsForPublicationAsync(string publicationId, List<int> tagIds, CancellationToken ct);
     

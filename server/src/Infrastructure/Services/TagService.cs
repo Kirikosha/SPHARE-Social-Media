@@ -30,7 +30,7 @@ public class TagService(ITagRepository tagRepository, IPublicationRepository pub
 
         var tagId = await tagRepository.AddTagAsync(tag, ct);
 
-        await tagRepository.SetTagForPublicationAsync(publicationId, tagId, ct);
+        await tagRepository.SetTagForPublicationAsync(publicationId, tag, ct);
 
         return Result<Unit>.Success(Unit.Value);
     }
@@ -66,6 +66,7 @@ public class TagService(ITagRepository tagRepository, IPublicationRepository pub
         var amountValidationResult = await VerifyTagLimit(tagId, publicationId, ct);
         if (!amountValidationResult.IsSuccess)
             return amountValidationResult;
+        
 
         await tagRepository.SetTagForPublicationAsync(publicationId, tagId, ct);
         return Result<Unit>.Success(Unit.Value);

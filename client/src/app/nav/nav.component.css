@@ -1,6 +1,40 @@
-.header-container {
+/* ===== CSS Variables ===== */
+:host {
+  --deep-space: #1E1E24;
+  --surface-1: #26262D;
+  --accent: #660033;
+  --accent-light: #A30052;
+--accent-glow: rgba(163, 0, 82, 0.2);
+  --text-primary: #050315;
+  --text-secondary: #8A8B9E;
+  --text-muted: #55566A;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --radius-pill: 100px;
+}
+
+/* ===== Header / Navbar ===== */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  margin: 0 auto;
+  z-index: 1000;
+  padding: 20px 0;
+  transition: all 0.4s ease;
+
+  /* Always blurred, not just on scroll */
+  background: rgba(255, 240, 240, 0.75); /* adjust color to match your app's bg */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+header.scrolled {
+  background: rgba(255, 240, 240, 0.88); /* slightly more opaque when scrolled */
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 header .container {
@@ -8,42 +42,39 @@ header .container {
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 24px;
 }
 
-header {
-  background-color:#37353E;
-  position: relative;
-  z-index: 10;
-  box-shadow: 0 6px 18px 0 rgba(34, 48, 62, 0.35);
+/* ===== Brand / Logo ===== */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.logo {
-  padding: 10px 0;
-  margin-right: 32px;
-  font-size: 2rem;
-  font-weight: bold;
+.brand-icon {
+  width: 30px;
+  height: 30px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 0 24px var(--accent-glow);
+  flex-shrink: 0;
 }
 
-.hover {
-  padding: 2px;
-  border: 3px solid; /* Reduced thickness from 8px to 3px */
-  border-image: none;
-  border-color: #000;
-  -webkit-mask:
-    conic-gradient(from 180deg at top 3px right 3px, #0000 90deg,#000 0)
-    var(--_i,200%) 0  /200% var(--_i,3px) border-box no-repeat,
-    conic-gradient(at bottom 3px left  3px,  #0000 90deg,#000 0)
-    0   var(--_i,200%)/var(--_i,3px) 200% border-box no-repeat,
-    linear-gradient(#000 0 0) padding-box no-repeat;
-  transition: .3s, -webkit-mask-position .3s .3s;
-}
-.hover:hover {
-  --_i: 100%;
-  color: black;
-  transition: .3s, -webkit-mask-size .3s .3s;
-}
-
+/* ===== Nav Links ===== */
 .main-nav {
   display: flex;
   align-items: center;
@@ -52,9 +83,11 @@ header {
 }
 
 .main-nav ul {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 24px;
+  justify-content: center;  /* ← centers links between logo and actions */
+  gap: 28px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -62,51 +95,85 @@ header {
 
 .main-nav li {
   display: inline-block;
-  margin-left: 0;
-  padding-top: 0;
   position: relative;
 }
 
-.main-nav a {
-  color: #ECECBB;
+.main-nav ul a {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
   text-decoration: none;
-  text-transform: uppercase;
-  font-size: 14px;
+  letter-spacing: -0.01em;
+  transition: color 0.3s;
+  cursor: pointer;
 }
 
-.main-nav a:hover {
-  color: #7ADAA5;
+.main-nav a:hover,
+.main-nav a.active {
+  color: var(--text-primary);
 }
 
-
-.main-nav a.forward::before {
-  content: '';
-  display: block;
-  height: 1px;
-  background-color: #7ADAA5;
-  position: absolute;
-  top: 0;
-  width: 0%;
-  transition: all ease-in-out 250ms;
-}
-
-.main-nav a.forward:hover::before {
-  width: 100%;
-}
-
-/* Remove or comment out the previous nav a::before and nav a:hover::before rules */
-
-.main-nav .dropdown, .main-nav > div {
+/* ===== Right-side actions (dropdown + buttons) ===== */
+.main-nav .nav-actions {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+.main-nav .nav-actions .dropdown {
+  position: relative;
+}
+/* Dropdown welcome text */
+.main-nav .nav-actions .dropdown-toggle {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
+  transition: color 0.3s;
 }
 
+.main-nav .nav-actions .dropdown-toggle:hover {
+  color: var(--text-primary);
+}
+
+
+/* ngx-bootstrap dropdown menu */
+:host ::ng-deep .dropdown-menu {
+  position: absolute !important;
+  right: 0 !important;
+  left: auto !important;
+  top: calc(100% + 8px) !important;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  min-width: 140px;
+}
+
+:host ::ng-deep .dropdown-item {
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+:host ::ng-deep .dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+/* ===== Buttons ===== */
 button {
-  display: inline;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 0;
-  border: 0;
+  border: none;
   font: inherit;
   cursor: pointer;
   background: transparent;
@@ -116,23 +183,99 @@ button {
 }
 
 .btn {
-  position: relative;
-  padding: 0.4rem 1.2rem; /* Smaller vertical and horizontal padding */
-  color: #ECECBB;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  text-align: center;
-  font-size: 0.95rem; /* Slightly smaller font */
-}
-.btn__text {
-  z-index: 1;
-  position: relative;
-  display: inline-block;
-  transition: 250ms all ease;
-  font-size: var(--btn-font-size);
+  padding: 9px 20px;
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: all 0.3s ease;
 }
 
-.btn:active .btn__text {
-  transform: translate(0.5rem, -0.5rem);
-  color: #7ADAA5;
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+  color: var(--text-primary);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 20px var(--accent-glow),
+              0 1px 0 rgba(255, 255, 255, 0.1) inset;
+}
+
+.btn-primary:hover {
+  background: var(--accent-light);
+  box-shadow: 0 0 32px var(--accent-glow),
+              0 1px 0 rgba(255, 255, 255, 0.15) inset;
+  transform: translateY(-1px);
+}
+
+/* ===== Mobile Toggle ===== */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  z-index: 1001;
+}
+
+.nav-toggle span {
+  width: 20px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  display: block;
+  transition: all 0.3s;
+}
+
+.nav-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.nav-toggle.active span:nth-child(2) { opacity: 0; }
+.nav-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: flex;
+  }
+
+  .main-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    background: rgba(30, 30, 36, 0.97);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 16px 24px 24px;
+  }
+
+  .main-nav.open {
+    display: flex;
+  }
+
+  .main-nav ul {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .main-nav .nav-actions {
+    margin-left: 0;
+    margin-top: 16px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
 }

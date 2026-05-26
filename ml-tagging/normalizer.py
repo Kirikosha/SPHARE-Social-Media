@@ -1,7 +1,4 @@
-﻿from keybert import KeyBERT
-
-# Pass the shared model in from tagger instead of loading a second one
-from sentence_transformers import SentenceTransformer, util
+﻿from sentence_transformers import SentenceTransformer, util
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 

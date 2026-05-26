@@ -7,11 +7,15 @@ import { ProfileTabsComponent } from "../profile-tabs/profile-tabs.component";
 import { ActivatedRoute, Router } from '@angular/router';
 import { SubscriptionService } from '../../_services/subscription.service';
 import { ChatService } from '../../_services/chatting/chat.service';
+import { AvatarComponent } from "../avatar/avatar.component";
+import { InterestsComponent } from '../interests/interests.component';
+import { DetailsComponent } from '../details/details.component';
+import { AddressComponent } from '../address/address.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [ProfileTabsComponent],
+  imports: [ProfileTabsComponent, AvatarComponent, InterestsComponent, DetailsComponent, AddressComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -78,16 +82,6 @@ export class ProfileComponent implements OnInit {
     this.checkIfFollowing();
     this.isLoading = false;
   }
-
-formatDate(dateString: string): string {
-  const date = new Date(dateString);
-
-  return date.toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric'
-  });
-}
-
 
   goToUpdate() {
     this.router.navigate(['/edit-profile']);

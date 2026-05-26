@@ -15,7 +15,7 @@ public interface IUserService
     Task<Result<List<PublicUserBriefDto>>> GetUsersBySearchString(string searchString, CancellationToken ct);
     Task<Result<PagedList<AdminUserDto>>> GetUserListAsync(PaginationParams paginationParams, CancellationToken ct);
     Task<Result<bool>> UpdateViolationScore(string userId, int violationScore, CancellationToken ct);
-    Task<OneOf<Unit, UniqueNamesOptions, Error>> UpdateUserMainInformationAsync(UpdateUserMainInfoDto updateModel, string userId,
+    Task<OneOf<Unit, UniqueNamesOption, Error>> UpdateUserMainInformationAsync(UpdateUserMainInfoDto updateModel, string userId,
         CancellationToken ct);
     Task<Result<UserProfileDetailsDto>> UpdateUserAdditionalInfoAsync(UpdateUserAdditionalInfoDto updateModel,
         string userId,

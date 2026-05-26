@@ -1,6 +1,6 @@
 ﻿namespace Application.DTOs.UserDTOs;
 
-public class UniqueNamesOptions
+public class UniqueNamesOption
 {
     public string NameOption { get; set; } = string.Empty;
 }

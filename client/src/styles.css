@@ -15,3 +15,20 @@
     height: 100%;
     object-fit: cover;
 }
+
+
+:root {
+  --accent: #660033;
+  --accent-light: #A30052;
+  --accent-glow: rgba(163, 0, 82, 0.2);
+
+  --bg-base:    #FDE8E9;  /* your current page background */
+  --bg-card:    #FEF3F3;  /* replaces white cards — barely pink, not jarring */
+  --bg-elevated:#FFFFFF;  /* only for things that need to "pop" above cards */
+  --bg-subtle:  #F9D8DA;  /* slightly deeper, for headers/banners like that gray one */
+  --bg-muted:   #F2C8CB;  /* borders, dividers, hover states */
+
+  --text-primary:   #2D1B1C;  /* warm near-black instead of cold #000 */
+  --text-secondary: #7A4F52;  /* muted body text */
+  --text-muted:     #B08A8C;  /* placeholders, labels */
+}

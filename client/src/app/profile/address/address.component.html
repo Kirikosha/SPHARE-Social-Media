@@ -1,0 +1,19 @@
+@if (address && (address.city || address.country)) {
+  <div class="profile-info-section mt-4">
+    <div class="section-divider mb-3">
+      <h5 class="section-title">Location</h5>
+      <div class="divider-line"></div>
+    </div>
+    
+    <div class="profile-info-item">
+      <i class="bi bi-geo-alt me-2 text-muted"></i>
+      @if (address.city && address.country) {
+        <span>{{address.city}}, {{address.country}}</span>
+      } @else if (address.city) {
+        <span>{{address.city}}</span>
+      } @else if (address.country) {
+        <span>{{address.country}}</span>
+      }
+    </div>
+  </div>
+}

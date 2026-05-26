@@ -1,0 +1,31 @@
+@if (userProfileDetails && (userProfileDetails.pronouns || userProfileDetails.mainProfileDescription || userProfileDetails.dateOfBirth)) {
+  <div class="profile-info-section mt-4">
+    <div class="section-divider mb-3">
+      <h5 class="section-title">About</h5>
+      <div class="divider-line"></div>
+    </div>
+    
+    <!-- Pronouns -->
+    @if (userProfileDetails.pronouns) {
+      <div class="profile-info-item mb-2">
+        <i class="bi bi-person-circle me-2 text-muted"></i>
+        <span>{{userProfileDetails.pronouns}}</span>
+      </div>
+    }
+    
+    <!-- Profile Description -->
+    @if (userProfileDetails.mainProfileDescription) {
+      <div class="profile-info-item mb-3">
+        <p class="mb-0">{{userProfileDetails.mainProfileDescription}}</p>
+      </div>
+    }
+    
+    <!-- Date of Birth -->
+    @if (userProfileDetails.dateOfBirth) {
+      <div class="profile-info-item mb-2">
+        <i class="bi bi-calendar3 me-2 text-muted"></i>
+        <span>Born {{formatDate(userProfileDetails.dateOfBirth)}}</span>
+      </div>
+    }
+  </div>
+}

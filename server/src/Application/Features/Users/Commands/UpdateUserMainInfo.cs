@@ -7,16 +7,16 @@ namespace Application.Features.Users.Commands;
 
 public class UpdateUserMainInfo
 {
-    public class Command : IRequest<OneOf<PublicUserDto, UniqueNamesOptions, Error>>
+    public class Command : IRequest<OneOf<PublicUserDto, UniqueNamesOption, Error>>
     {
         public required UpdateUserMainInfoDto MainInfo { get; set; }
         public required string UserId { get; set; }
     }
     
     public class Handler(IUserService userService) 
-        : IRequestHandler<Command, OneOf<PublicUserDto, UniqueNamesOptions, Error>>
+        : IRequestHandler<Command, OneOf<PublicUserDto, UniqueNamesOption, Error>>
     {
-        public async Task<OneOf<PublicUserDto, UniqueNamesOptions, Error>> Handle(Command request, CancellationToken 
+        public async Task<OneOf<PublicUserDto, UniqueNamesOption, Error>> Handle(Command request, CancellationToken 
                 cancellationToken)
         {
             var updateResult = await userService.UpdateUserMainInformationAsync(request.MainInfo, request.UserId, 
@@ -37,7 +37,7 @@ public class UpdateUserMainInfo
                 }
             }
 
-            return remainder.Match<OneOf<PublicUserDto, UniqueNamesOptions, Error>>(
+            return remainder.Match<OneOf<PublicUserDto, UniqueNamesOption, Error>>(
                 options => options,
                 error   => error
             );

@@ -1,0 +1,18 @@
+<div class="profile-pic-wrapper">
+  @if (imageUrl) {
+    <img [src]="imageUrl"
+         alt="Profile Picture"
+         class="profile-pic rounded-circle"
+         [class.blocked-avatar]="blocked">
+  } @else {
+    <img src="assets/user.png"
+         alt="Profile Picture"
+         class="profile-pic rounded-circle"
+         [class.blocked-avatar]="blocked">
+  }
+  @if (blocked) {
+    <div class="blocked-avatar-overlay">
+      <i class="bi bi-lock-fill"></i>
+    </div>
+  }
+</div>

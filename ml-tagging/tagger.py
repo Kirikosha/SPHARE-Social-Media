@@ -1,7 +1,6 @@
 ﻿import spacy
 from keybert import KeyBERT
 from sentence_transformers import SentenceTransformer
-import re
 
 nlp = spacy.load("en_core_web_sm")
 shared_model = SentenceTransformer("all-MiniLM-L6-v2")

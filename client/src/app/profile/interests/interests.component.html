@@ -1,0 +1,17 @@
+@if (interests && interests.length > 0) {
+  <div class="profile-info-section mt-4">
+    <div class="section-divider mb-3">
+      <h5 class="section-title">Interests</h5>
+      <div class="divider-line"></div>
+    </div>
+    
+    <div class="profile-info-item mb-3">
+      <i class="bi bi-tags me-2 text-muted"></i>
+      <div class="d-flex flex-wrap gap-2 mt-1">
+        @for (interest of interests; track $index) {
+          <span class="interest-badge">{{interest}}</span>
+        }
+      </div>
+    </div>
+  </div>
+}

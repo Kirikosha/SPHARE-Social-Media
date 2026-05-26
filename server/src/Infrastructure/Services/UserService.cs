@@ -114,7 +114,7 @@ public class UserService(IUserRepository userRepository, IPhotoService
     }
 
     // Update main info (username, unique name identifier)
-    public async Task<OneOf<Unit, UniqueNamesOptions, Error>> UpdateUserMainInformationAsync(UpdateUserMainInfoDto 
+    public async Task<OneOf<Unit, UniqueNamesOption, Error>> UpdateUserMainInformationAsync(UpdateUserMainInfoDto 
             updateModel, string userId, 
         CancellationToken ct)
     {
@@ -131,7 +131,7 @@ public class UserService(IUserRepository userRepository, IPhotoService
             .UniqueNameIdentifier, ct);
 
         if (uniqueNameIdentifier != updateModel.UniqueNameIdentifier)
-            return new UniqueNamesOptions() { UniqueNameOption = uniqueNameIdentifier };
+            return new UniqueNamesOption() { NameOption = uniqueNameIdentifier };
 
         try
         {

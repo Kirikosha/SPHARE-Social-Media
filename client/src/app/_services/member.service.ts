@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import { environment } from '../../environments/environment.js';
 import { MemberModel } from '../_models/user/memberModel.js';
 import { UpdateMemberModel } from '../_models/user/updateMemberModel.js';

@@ -2,6 +2,10 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
+  background-color: #FDE8E9;
+  color: #050315;
+    font-family: 'Josefin Sans', sans-serif; 
 }
 
 .page-content {

@@ -2,5 +2,5 @@
 
 public class UniqueNamesOptions
 {
-    public string UniqueNameOption { get; set; } = string.Empty;
+    public string NameOption { get; set; } = string.Empty;
 }

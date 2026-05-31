@@ -21,13 +21,13 @@ export interface UpdateProfileImageDto {
 
 
 export interface UserUpdateDataDto {
-  Username: string;
-  UniqueNameIdentifier: string;
-  Pronouns: string | null;
-  ProfileDescription: string | null;
-  DateOfBirth: string | null; // Format dd.MM.yyyy
-  City: string | null;
-  Country: string | null;
-  ProfileImageUrl: string | null;
-  Interests: string[];
+  username: string;
+  uniqueNameIdentifier: string;
+  pronouns: string | null;
+  profileDescription: string | null;
+  dateOfBirth: string | null; // Format dd.MM.yyyy
+  city: string | null;
+  country: string | null;
+  profileImageUrl: string | null;
+  interests: string[];
 }

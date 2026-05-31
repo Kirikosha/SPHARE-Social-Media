@@ -7,6 +7,7 @@ import {EditImageStates} from "../models/states";
 import {EditAddressComponent} from "./edit-address/edit-address.component";
 import {EditMainInfoComponent} from "./edit-main-info/edit-main-info.component";
 import {EditDetailsComponent} from "./edit-details/edit-details.component";
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-edit-user-page',
@@ -15,7 +16,8 @@ import {EditDetailsComponent} from "./edit-details/edit-details.component";
     EditProfileImageComponent,
     EditAddressComponent,
     EditMainInfoComponent,
-    EditDetailsComponent
+    EditDetailsComponent,
+    NgIf
   ],
   templateUrl: './edit-user-page.component.html',
   styleUrl: './edit-user-page.component.css'
@@ -25,6 +27,8 @@ export class EditUserPageComponent implements OnInit {
   private toastrService: ToastrService = inject(ToastrService);
   userData: UserUpdateDataDto | null = null;
 
+  imageCacheBuster = '';
+
   ngOnInit(): void {
     this.loadUser();
   }
@@ -33,6 +37,7 @@ export class EditUserPageComponent implements OnInit {
     this.userEditService.fetchUserUpdateData().subscribe({
       next: (data) => {
         this.userData = data;
+        console.log(this.userData.profileImageUrl)
         console.log('User Data Loaded:', this.userData);
       },
       error: err => {
@@ -45,16 +50,23 @@ export class EditUserPageComponent implements OnInit {
     switch (result) {
       case EditImageStates.deleted:
         if (this.userData) {
-          this.userData.ProfileImageUrl = "assets/user.png";
+          this.userData.profileImageUrl = "assets/user.png";
         }
         break;
       case EditImageStates.updated:
-        if (this.userData && this.userData.ProfileImageUrl) {
-          const timestamp = new Date().getTime();
-          const separator = this.userData.ProfileImageUrl.includes('?') ? '&' : '?';
-
-          this.userData.ProfileImageUrl = `${this.userData.ProfileImageUrl}${separator}v=${timestamp}`;
-        }
+        this.imageCacheBuster = `t=${new Date().getTime()}`;
+        this.loadUser();
+        break;
     }
+  }
+
+  get profileUrlWithCache(): string | null {
+    if (!this.userData?.profileImageUrl) return null;
+
+    const url = this.userData.profileImageUrl;
+    if (!this.imageCacheBuster) return url;
+
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}${this.imageCacheBuster}`;
   }
 }

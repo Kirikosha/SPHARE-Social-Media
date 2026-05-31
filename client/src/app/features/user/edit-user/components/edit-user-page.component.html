@@ -1,16 +1,18 @@
 <div class="edit-profile-container">
   <h2 class="page-title">Edit Profile</h2>
 
-  <app-edit-profile-image [userProfileUrl]="userData!.ProfileImageUrl"
-  (updateOperationResult) = handleImageUpdateResult($event)>
-  </app-edit-profile-image>
+  <ng-container *ngIf="userData; else loading">
+    <app-edit-profile-image
+      [userProfileUrl]="profileUrlWithCache"
+      (updateOperationResult)="handleImageUpdateResult($event)">
+    </app-edit-profile-image>
 
-  <app-edit-main-info>
-  </app-edit-main-info>
+    <app-edit-main-info></app-edit-main-info>
+    <app-edit-details></app-edit-details>
+    <app-edit-address></app-edit-address>
+  </ng-container>
 
-  <app-edit-details>
-  </app-edit-details>
-
-  <app-edit-address>
-  </app-edit-address>
+  <ng-template #loading>
+    <p>Loading...</p>
+  </ng-template>
 </div>

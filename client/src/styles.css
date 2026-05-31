@@ -23,6 +23,11 @@
   --accent-glow: rgba(163, 0, 82, 0.2);
   --navbar-height: 65px;
 
+  --button-edit-col: #F4D58D;
+
+  --secondary-col: #7A97CD;
+  --primary-col: #36558F;
+
   --bg-base:    #FDE8E9;  /* your current page background */
   --bg-card:    #FEF3F3;  /* replaces white cards — barely pink, not jarring */
   --bg-elevated:#FFFFFF;  /* only for things that need to "pop" above cards */

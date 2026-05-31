@@ -11,8 +11,11 @@ export class UserEditService {
   private http = inject(HttpClient);
   baseUrl = environment.apiUrl;
 
-  updateUserProfilePicture(updateModel: UpdateProfileImageDto) {
-    return this.http.put(this.baseUrl + "/PublicUser/update-profile-image", updateModel);
+  updateUserProfilePicture(model: UpdateProfileImageDto) {
+    const formData = new FormData();
+    formData.append('profileImage', model.profileImage); // key must match DTO property name
+
+    return this.http.put(this.baseUrl + "/PublicUser/update-profile-image", formData);
   }
 
   deleteUserProfilePicture() {

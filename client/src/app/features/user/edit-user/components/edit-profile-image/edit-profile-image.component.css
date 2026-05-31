@@ -1,6 +1,14 @@
-.profile-image-wrapper {
+.profile-image-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  display: inline-block;
+}
+
+.profile-image-wrapper {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
 }
 
 .profile-image {
@@ -11,53 +19,103 @@
   border: 2px solid #e0e0e0;
 }
 
+.profile-image-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  position: absolute;
+  left: calc(50% + 60px + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .edit-image-button,
 .remove-image-button,
-app-save-button {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
+.reset-preview-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  border: none;
 }
 
 .edit-image-button {
-  background: white;
-  border: 2px solid #ccc;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
+  background-color: var(--primary-col);
+  color: var(--bg-base);
+}
+
+.edit-image-button i {
+  line-height: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  font-size: 24px;
+}
+
+.edit-col {
+  color: black
 }
 
 .edit-image-button:hover {
-  border-color: #0d6efd;
-  color: #0d6efd;
+  background-color: var(--primary-col);
+  opacity: 0.9;
+  color: var(--bg-base);
 }
 
 .remove-image-button {
+  width: 32px;
+  height: 32px;
   background: #dc3545;
   color: white;
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
+  line-height: 1;
+}
+
+.remove-image-button i {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 16px;
-  transition: opacity 0.2s ease;
+  width: 1em;
+  height: 1em;
+  line-height: 1;
+  font-size: 20px; /* Adjust this if the X is too big or small */
 }
 
 .remove-image-button:hover {
   opacity: 0.9;
 }
 
-/* Position save button slightly offset so it doesn't overlap remove button */
 app-save-button {
-  right: 44px; /* shift left to avoid overlap with remove button */
+  right: 44px;
+}
+
+.save-button-anchor {
+  bottom: 10px;
+  right: 92px;
+}
+
+
+.reset-preview-button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  width: 2rem;
+  padding: 0;
+  border-radius: 50%;
+  border: 0.0625rem solid hsl(0 0% 60%);
+  background: var(--bg-base);
+  color: hsl(0 0% 40%);
+  font-size: 20px;
+  transition: all 0.2s ease;
+  line-height: 0;
+}
+
+.reset-preview-button:hover {
+  border-color: var(--primary-col);
+  color: var(--primary-col);
 }

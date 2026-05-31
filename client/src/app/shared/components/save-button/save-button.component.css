@@ -10,16 +10,17 @@
   height: calc(var(--sz) * 2.5);
   width: calc(var(--sz) * 2.5);
   padding: 0.4rem 0.5rem;
-  border-radius: 0.375rem;
+  border-radius: 50%;
   border: 0.0625rem solid hsl(var(--color));
+  background: var(--bg-base);
 }
 
 .has_saved:hover {
-  border-color: hsl(var(--color-has));
+  border-color: var(--primary-col);
 }
 .has_liked:hover svg,
 .has_saved:hover svg {
-  color: hsl(var(--color-has));
+  color: var(--primary-col);
 }
 
 .action_has.disabled {
@@ -43,7 +44,7 @@
 .has_saved:hover path[data-path="box"] {
   transition: all 0.3s var(--ease);
   animation: has-saved var(--duration) var(--ease) forwards;
-  fill: hsl(var(--color-has) / 0.35);
+  fill: color-mix(in srgb, var(--primary-col) 35%, transparent);
 }
 .has_saved:hover path[data-path="line-top"] {
   animation: has-saved-line-top var(--duration) var(--ease) forwards;

@@ -1,24 +1,26 @@
-import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild} from '@angular/core';
 import {UserEditService} from "../../services/user-edit.service";
 import {ToastrService} from "ngx-toastr";
 import {EditImageStates} from "../../models/states";
 import {UpdateProfileImageDto} from "../../models/update-user.dto";
 import {SaveButtonComponent} from "../../../../../shared/components/save-button/save-button.component";
-import {NgIf} from "@angular/common";
+import {NgClass, NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-edit-profile-image',
   standalone: true,
   imports: [
     SaveButtonComponent,
-    NgIf
+    NgIf,
+    NgClass
   ],
   templateUrl: './edit-profile-image.component.html',
   styleUrl: './edit-profile-image.component.css'
 })
 export class EditProfileImageComponent {
-  @Input() userProfileUrl: string | null = "assets/user.png";
+  @Input() userProfileUrl: string | null = null;
   @Output() updateOperationResult: EventEmitter<EditImageStates> = new EventEmitter();
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   private userEditService: UserEditService = inject(UserEditService);
   private toastrService: ToastrService = inject(ToastrService);
   imagePreview?: string;
@@ -78,5 +80,14 @@ export class EditProfileImageComponent {
       };
       reader.readAsDataURL(this.selectedFile);
     }
+  }
+  resetPreview(): void {
+    this.selectedFile = null;
+    this.imagePreview = undefined;
+    this.fileInput.nativeElement.value = '';
+  }
+
+  get hasCustomImage(): boolean {
+    return !!this.userProfileUrl && this.userProfileUrl !== 'assets/user.png';
   }
 }

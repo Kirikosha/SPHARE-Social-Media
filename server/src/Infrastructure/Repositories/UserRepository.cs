@@ -282,6 +282,27 @@ public class UserRepository : IUserRepository
         return await context.Users.Where(x => x.Id == userId).Select(x => x.Email).FirstOrDefaultAsync(ct);
     }
 
+    public async Task<UserUpdateDataDto?> GetUserUpdateData(string userId, CancellationToken ct)
+    {
+        var updateData = await context.Users.Where(x => x.Id == userId)
+            .Select(x => new UserUpdateDataDto
+            {
+                Username = x.Username,
+                UniqueNameIdentifier = x.UniqueNameIdentifier,
+                Pronouns = x.ProfileDetails.Pronouns,
+                ProfileDescription = x.ProfileDetails.MainProfileDescription,
+                Interests = x.ProfileDetails.Interests,
+                DateOfBirth = x.ProfileDetails.DateOfBirth.HasValue 
+                    ? x.ProfileDetails.DateOfBirth.Value.ToString("dd.MM.yyyy") 
+                    : null,
+                City = x.Address.City,
+                Country = x.Address.Country,
+                ProfileImageUrl = x.ProfileImage.ImageUrl
+            }).FirstOrDefaultAsync(ct);
+
+        return updateData;
+    }
+
     private static string GenerateRandomString()
     {
         StringBuilder sb = new StringBuilder();

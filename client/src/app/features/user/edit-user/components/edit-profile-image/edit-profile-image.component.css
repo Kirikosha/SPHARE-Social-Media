@@ -1,0 +1,63 @@
+.profile-image-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e0e0e0;
+}
+
+.edit-image-button,
+.remove-image-button,
+app-save-button {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+}
+
+.edit-image-button {
+  background: white;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.edit-image-button:hover {
+  border-color: #0d6efd;
+  color: #0d6efd;
+}
+
+.remove-image-button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: opacity 0.2s ease;
+}
+
+.remove-image-button:hover {
+  opacity: 0.9;
+}
+
+/* Position save button slightly offset so it doesn't overlap remove button */
+app-save-button {
+  right: 44px; /* shift left to avoid overlap with remove button */
+}

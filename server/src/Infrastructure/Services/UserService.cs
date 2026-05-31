@@ -158,7 +158,7 @@ public class UserService(IUserRepository userRepository, IPhotoService
                       ?? new UserProfileDetails { UserId = userId };
 
         profile.Pronouns = updateModel.Pronouns;
-        profile.MainProfileDescription = updateModel.MainProfileDescription;
+        profile.MainProfileDescription = updateModel.ProfileDescription;
         profile.DateOfBirth = updateModel.DateOfBirth;
         profile.Interests = updateModel.Interests;
 
@@ -238,4 +238,13 @@ public class UserService(IUserRepository userRepository, IPhotoService
     
     public async Task<string?> GetUserEmailByIdAsync(string userId, CancellationToken ct)
         => await userRepository.GetUserEmailByIdAsync(userId, ct);
+
+    public async Task<Result<UserUpdateDataDto>> FetchUserUpdateData(string userId, CancellationToken ct)
+    {
+        var userUpdateData = await userRepository.GetUserUpdateData(userId, ct);
+        if (userUpdateData == null)
+            return Result<UserUpdateDataDto>.Failure(UserErrors.UserNotFound());
+
+        return userUpdateData;
+    }
 }

@@ -25,4 +25,5 @@ public interface IUserService
         CancellationToken ct);
     Task<Result<Unit>> DeleteProfileImageAsync(string userId, CancellationToken ct);
     Task<string?> GetUserEmailByIdAsync(string userId, CancellationToken ct);
+    Task<Result<UserUpdateDataDto>> FetchUserUpdateData(string userId, CancellationToken ct);
 }

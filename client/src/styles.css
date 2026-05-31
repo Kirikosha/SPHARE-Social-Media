@@ -21,6 +21,7 @@
   --accent: #660033;
   --accent-light: #A30052;
   --accent-glow: rgba(163, 0, 82, 0.2);
+  --navbar-height: 65px;
 
   --bg-base:    #FDE8E9;  /* your current page background */
   --bg-card:    #FEF3F3;  /* replaces white cards — barely pink, not jarring */

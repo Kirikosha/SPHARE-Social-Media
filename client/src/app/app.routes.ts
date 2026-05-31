@@ -1,8 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
-import { ProfileComponent } from './profile/profile/profile.component';
-import { EditComponent } from './profile/edit/edit.component';
+import { ProfileComponent } from './features/user/user-profile/components/profile/profile.component';
 import { PublicationPageComponent } from './publication/publication-page/publication-page.component';
 import { SearchPageComponent } from './search/search-page/search-page.component';
 import { AdminPanelComponent } from './admin/admin-panel/admin-panel.component';
@@ -18,6 +17,7 @@ import { ChatListComponent } from '../chat/chat-list/chat-list.component';
 import { CalendarPageComponent } from './publication/calendar-page/calendar-page.component';
 import { CreatePlannedPublicationComponent } from './publication/create-planned-publication/create-planned-publication.component';
 import { authGuard } from './_guards/auth.guard';
+import {EditUserPageComponent} from "./features/user/edit-user/components/edit-user-page.component";
 
 export const routes: Routes = [
     // Public routes — no guard
@@ -28,7 +28,7 @@ export const routes: Routes = [
     // Protected routes
     { path: '', component: HomeComponent, canActivate: [authGuard] },
     { path: 'profile/:uniqueNameIdentifier', component: ProfileComponent, canActivate: [authGuard] },
-    { path: 'edit-profile', component: EditComponent, canActivate: [authGuard] },
+    { path: 'edit-profile', component: EditUserPageComponent, canActivate: [authGuard] },
     { path: 'publication/:id', component: PublicationPageComponent, canActivate: [authGuard] },
     { path: 'publications/calendar', component: CalendarPageComponent, canActivate: [authGuard] },
     { path: 'publications/planned-create', component: CreatePlannedPublicationComponent, canActivate: [authGuard] },

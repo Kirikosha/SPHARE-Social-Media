@@ -21,7 +21,7 @@ public class UpdateUserAdditionalInfo
             RuleFor(x => x.UpdateModel.Pronouns)
                 .MaximumLength(50).WithMessage("Pronouns must not exceed 50 characters.");
 
-            RuleFor(x => x.UpdateModel.MainProfileDescription)
+            RuleFor(x => x.UpdateModel.ProfileDescription)
                 .MaximumLength(500).WithMessage("Main profile description must not exceed 500 characters.");
 
             RuleFor(x => x.UpdateModel.Interests)

@@ -38,4 +38,5 @@ public interface IUserRepository
     Task<bool> UnBlockUserAsync(string userId, CancellationToken ct);
 
     Task<string?> GetUserEmailByIdAsync(string userId, CancellationToken ct);
+    Task<UserUpdateDataDto?> GetUserUpdateData(string userId, CancellationToken ct);
 }

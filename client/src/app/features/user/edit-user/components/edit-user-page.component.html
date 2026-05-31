@@ -1,0 +1,16 @@
+<div class="edit-profile-container">
+  <h2 class="page-title">Edit Profile</h2>
+
+  <app-edit-profile-image [userProfileUrl]="userData!.ProfileImageUrl"
+  (updateOperationResult) = handleImageUpdateResult($event)>
+  </app-edit-profile-image>
+
+  <app-edit-main-info>
+  </app-edit-main-info>
+
+  <app-edit-details>
+  </app-edit-details>
+
+  <app-edit-address>
+  </app-edit-address>
+</div>

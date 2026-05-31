@@ -1,4 +1,5 @@
-﻿using Application.DTOs.DetailedUserInfoDTOs;
+﻿using System.Reflection.Metadata;
+using Application.DTOs.DetailedUserInfoDTOs;
 using Application.DTOs.UserDTOs;
 using Microsoft.AspNetCore.Authorization;
 
@@ -25,6 +26,15 @@ public class PublicUserController : BaseApiController
         string id = User.GetUserId();
 
         return HandleResult(await Mediator.Send(new GetPublicUserById.Query() { Id = id }));
+    }
+
+    [Authorize]
+    [HttpGet("fetch-update-data")]
+    public async Task<ActionResult> GetDataForUpdate()
+    {
+        string id = User.GetUserId();
+
+        return HandleResult(await Mediator.Send(new GetUpdateData.Query { UserId = id }));
     }
 
     [Authorize]
@@ -91,7 +101,7 @@ public class PublicUserController : BaseApiController
     }
 
     [Authorize]
-    [HttpDelete("delete-user-image")]
+    [HttpDelete("delete-profile-image")]
     public async Task<ActionResult> DeleteProfileImage(CancellationToken ct)
     {
         var userId = User.GetUserId();

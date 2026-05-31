@@ -1,9 +1,10 @@
 import { Component, inject, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import {MatTabsModule} from '@angular/material/tabs'
-import { CreatePublicationComponent } from "../../publication/create-publication/create-publication.component";
-import { PublicationListComponent } from "../../publication/publication-list/publication-list.component";
-import { AccountService } from '../../_services/account.service';
+
 import { ActivatedRoute } from '@angular/router';
+import {CreatePublicationComponent} from "../../../../../publication/create-publication/create-publication.component";
+import {PublicationListComponent} from "../../../../../publication/publication-list/publication-list.component";
+import {AccountService} from "../../../../../_services/account.service";
 
 
 @Component({
@@ -17,7 +18,7 @@ import { ActivatedRoute } from '@angular/router';
 export class ProfileTabsComponent implements OnInit {
   accountService = inject(AccountService);
   private route = inject(ActivatedRoute);
-  
+
   // Icons
 
   // Tab management

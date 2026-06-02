@@ -12,7 +12,10 @@
     [uniqueNameIdentifier]="userData.uniqueNameIdentifier">
     </app-edit-main-info>
     <app-edit-details></app-edit-details>
-    <app-edit-address></app-edit-address>
+    <app-edit-address
+    [city]="userData.city"
+    [country]="userData.country">
+    </app-edit-address>
   </ng-container>
 
   <ng-template #loading>

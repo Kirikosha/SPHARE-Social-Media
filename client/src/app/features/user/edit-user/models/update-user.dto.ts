@@ -7,7 +7,7 @@ export interface UpdateAdditionalInfoDto {
     pronouns?: string;
     profileDescription?: string;
     interests?: string[];
-    dateOfBirth?: Date;
+    dateOfBirth?: Date; // format - dd.MM.yyyy
 }
 
 export interface UpdateAddressDto {

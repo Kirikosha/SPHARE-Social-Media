@@ -1,1 +1,35 @@
-<p>edit-address works!</p>
+<div class="main-info-card">
+  <h4 class="section-title">Address Information</h4>
+
+  <form [formGroup]="addressForm" (ngSubmit)="onSubmit()" novalidate>
+
+    <div class="field-group">
+      <app-input-field
+        label="City (Optional)"
+        formControlName="city">
+      </app-input-field>
+    </div>
+
+    <div class="field-group">
+      <app-input-field
+        label="Country (Optional)"
+        formControlName="country">
+      </app-input-field>
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success mt-2">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-danger mt-2">
+      {{ errorMessage }}
+    </div>
+
+    <div class="form-footer">
+      <button type="submit" class="btn-save" [disabled]="isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+        {{ isLoading ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+
+  </form>
+</div>

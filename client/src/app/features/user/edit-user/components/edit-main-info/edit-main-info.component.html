@@ -1,0 +1,60 @@
+<div class="main-info-card">
+  <h4 class="section-title">Main Information</h4>
+
+  <form [formGroup]="mainInfoForm" (ngSubmit)="onSubmit()" novalidate>
+
+    <div class="field-group">
+      <app-input-field
+        label="Username"
+        formControlName="username">
+      </app-input-field>
+
+      <div *ngIf="usernameControl?.invalid && usernameControl?.touched" class="field-error">
+        <span *ngIf="usernameControl?.errors?.['required']">Username is required.</span>
+        <span *ngIf="usernameControl?.errors?.['minlength']">Minimum 3 characters.</span>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <ng-container *ngIf="!suggestedOption; else suggestionBlock">
+        <app-input-field
+          label="Unique Name Identifier"
+          formControlName="uniqueNameIdentifier">
+        </app-input-field>
+
+        <div *ngIf="uniqueNameIdentifierControl?.invalid && uniqueNameIdentifierControl?.touched" class="field-error">
+          <span *ngIf="uniqueNameIdentifierControl?.errors?.['required']">Unique name identifier is required.</span>
+          <span *ngIf="uniqueNameIdentifierControl?.errors?.['minlength']">Minimum 3 characters.</span>
+        </div>
+      </ng-container>
+
+      <ng-template #suggestionBlock>
+        <div class="suggestion-box">
+          <p class="suggestion-label">Suggested available identifier:</p>
+          <div class="suggestion-option">
+            <span class="suggestion-value">{{ suggestedOption }}</span>
+            <div class="suggestion-actions">
+              <button type="button" class="btn-use-suggestion" (click)="applySuggestion()">Use this</button>
+              <button type="button" class="btn-dismiss" (click)="dismissSuggestion()">Edit manually</button>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success mt-2">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-danger mt-2">
+      {{ errorMessage }}
+    </div>
+
+    <div class="form-footer">
+      <button type="submit" class="btn-save" [disabled]="mainInfoForm.invalid || isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+        {{ isLoading ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+
+  </form>
+</div>

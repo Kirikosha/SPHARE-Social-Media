@@ -2,6 +2,7 @@
 using Application.DTOs.UserDTOs;
 using Application.Errors;
 using Application.Interfaces.Services;
+using FluentValidation;
 
 namespace Application.Features.Users.Commands;
 

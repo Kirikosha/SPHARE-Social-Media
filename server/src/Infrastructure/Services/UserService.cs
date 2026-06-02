@@ -128,7 +128,7 @@ public class UserService(IUserRepository userRepository, IPhotoService
         updateModel.UniqueNameIdentifier = new string(updateModel.UniqueNameIdentifier.Where(c => !char.IsWhiteSpace(c)).ToArray());
 
         var uniqueNameIdentifier = await userRepository.BuildUniqueNameIdentifier(updateModel
-            .UniqueNameIdentifier, ct);
+            .UniqueNameIdentifier, userId, ct);
 
         if (uniqueNameIdentifier != updateModel.UniqueNameIdentifier)
             return new UniqueNamesOption() { NameOption = uniqueNameIdentifier };

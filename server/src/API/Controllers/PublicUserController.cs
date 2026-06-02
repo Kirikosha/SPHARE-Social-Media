@@ -39,7 +39,7 @@ public class PublicUserController : BaseApiController
 
     [Authorize]
     [HttpPut("update-main-info")]
-    public async Task<ActionResult<PublicUserDto>> UpdateMainInfo([FromForm] UpdateUserMainInfoDto
+    public async Task<ActionResult<PublicUserDto>> UpdateMainInfo([FromBody] UpdateUserMainInfoDto
         updateUserMainInfoDto, CancellationToken ct)
     {
         var userId = User.GetUserId();
@@ -58,7 +58,7 @@ public class PublicUserController : BaseApiController
     [Authorize]
     [HttpPut("update-additional-info")]
     public async Task<ActionResult<UserProfileDetailsDto>> UpdateAdditionalInfo(
-        [FromForm] UpdateUserAdditionalInfoDto updateUserAdditionalInfoDto, CancellationToken ct )
+        [FromBody] UpdateUserAdditionalInfoDto updateUserAdditionalInfoDto, CancellationToken ct )
     {
         var userId = User.GetUserId();
         var result = await Mediator.Send(new UpdateUserAdditionalInfo.Command
@@ -72,7 +72,7 @@ public class PublicUserController : BaseApiController
 
     [Authorize]
     [HttpPut("update-address")]
-    public async Task<ActionResult<AddressDto>> UpdateAddress([FromForm] UpdateUserAddressDto updateUserAddressDto,
+    public async Task<ActionResult<AddressDto>> UpdateAddress([FromBody] UpdateUserAddressDto updateUserAddressDto,
         CancellationToken ct)
     {
         var userId = User.GetUserId();

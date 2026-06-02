@@ -181,17 +181,28 @@ public class UserRepository : IUserRepository
         return result;
     }
 
-    public async Task<string> BuildUniqueNameIdentifier(string username, CancellationToken ct)
+    public async Task<string> BuildUniqueNameIdentifier(string username, string? userId, CancellationToken ct)
     {
-        if (!await context.Users.AnyAsync(a => a.UniqueNameIdentifier == username, ct))
-            return username;
+        if (string.IsNullOrEmpty(userId))
+        {
+            if (!await context.Users.AnyAsync(a => a.UniqueNameIdentifier == username, ct))
+                return username;
+        }
+        else
+        {
+            bool existsForOtherUser = await context.Users
+                .AnyAsync(a => a.UniqueNameIdentifier == username && a.Id != userId, ct);
+        
+            if (!existsForOtherUser)
+                return username;
+        }
 
         var prefix = username + '-';
         var existing = (await context.Users
-            .Where(a => a.UniqueNameIdentifier == username 
-                     || a.UniqueNameIdentifier.StartsWith(prefix))
-            .Select(a => a.UniqueNameIdentifier)
-            .ToListAsync(ct))
+                .Where(a => a.UniqueNameIdentifier == username 
+                            || a.UniqueNameIdentifier.StartsWith(prefix))
+                .Select(a => a.UniqueNameIdentifier)
+                .ToListAsync(ct))
             .ToHashSet();
 
         string candidate;

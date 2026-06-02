@@ -7,7 +7,10 @@
       (updateOperationResult)="handleImageUpdateResult($event)">
     </app-edit-profile-image>
 
-    <app-edit-main-info></app-edit-main-info>
+    <app-edit-main-info
+    [username]="userData.username"
+    [uniqueNameIdentifier]="userData.uniqueNameIdentifier">
+    </app-edit-main-info>
     <app-edit-details></app-edit-details>
     <app-edit-address></app-edit-address>
   </ng-container>

@@ -1,5 +1,6 @@
 ﻿using Application.Behaviors;
 using Application.Core;
+using Application.Features.Users.Commands;
 using Application.Interfaces;
 using Application.Interfaces.Logger;
 using Application.Interfaces.Repositories;
@@ -29,11 +30,7 @@ public static class ApplicationServiceExtensions
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
-        services.AddValidatorsFromAssembly(typeof(Program).Assembly);
-
-        // Validators
-        services.AddValidatorsFromAssemblyContaining<LoginDtoValidator>();
-
+        services.AddValidatorsFromAssemblyContaining<LoginDtoValidator>(includeInternalTypes:true);
         // Pipeline Behaviors
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>));

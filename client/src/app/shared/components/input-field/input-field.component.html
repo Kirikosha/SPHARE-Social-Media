@@ -1,0 +1,13 @@
+<div class="input-form">
+  <input
+    class="input"
+    [id]="id()"
+    [type]="type()"
+    [value]="value()"
+    [disabled]="disabled()"
+    placeholder=" "
+    (input)="onInput($event)"
+    (blur)="onTouched()"
+  />
+  <label class="textUser" [for]="id()">{{ label() }}</label>
+</div>

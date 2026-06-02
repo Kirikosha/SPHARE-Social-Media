@@ -24,7 +24,7 @@ public interface IUserRepository
     Task<bool> IsUserExistsByEmailAsync(string email, CancellationToken ct);
     Task<bool> IsUserExistsByIdAsync(string id, CancellationToken ct);
     Task<bool> CreateUserAsync(User user, CancellationToken ct);
-    Task<string> BuildUniqueNameIdentifier(string username, CancellationToken ct);
+    Task<string> BuildUniqueNameIdentifier(string username, string? userId, CancellationToken ct);
 
     Task<UserProfileDetails?> GetUserProfileDetailsByUserIdAsync(string userId, CancellationToken ct);
     Task<Address?> GetUserAddressByIdAsync(string userId, CancellationToken ct);

@@ -6,10 +6,8 @@ namespace Application.Validators;
 public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
     : IPipelineBehavior<TRequest, TResponse>
 where TRequest : IRequest<TResponse>
-where TResponse : class
 {
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken 
-            cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         if (!validators.Any()) return await next(cancellationToken);
 
@@ -22,14 +20,33 @@ where TResponse : class
 
         if (failures.Count == 0) return await next(cancellationToken);
 
-        var errors = string.Join(" ", failures.Select(f => f.ErrorMessage));
+        var errorMessage = string.Join(" ", failures.Select(f => f.ErrorMessage));
 
-        var genericArg = typeof(TResponse).GetGenericArguments()[0];
-        var resultType = typeof(Result<>).MakeGenericType(genericArg);
+        if (typeof(TResponse).IsGenericType && typeof(TResponse).GetGenericTypeDefinition() == typeof(Result<>))
+        {
+            var genericArg = typeof(TResponse).GetGenericArguments()[0];
+            var resultType = typeof(Result<>).MakeGenericType(genericArg);
+            var failureResult = resultType.GetMethod("Failure", [typeof(string), typeof(int)])!
+                .Invoke(null, [errorMessage, 400]);
+            return (TResponse)failureResult!;
+        }
 
-        var failureResult = resultType.GetMethod("Failure", [typeof(string), typeof(int)])!
-            .Invoke(null, [errors, 400]);
+        if (typeof(TResponse).IsGenericType && typeof(TResponse).GetGenericTypeDefinition()
+                .FullName!.StartsWith("OneOf.OneOf`"))
+        {
+            var error = new Error(errorMessage, 400);
 
-        return (TResponse)failureResult!;
+            var implicitOp = typeof(TResponse)
+                .GetMethods()
+                .FirstOrDefault(m =>
+                    m.Name == "op_Implicit" &&
+                    m.GetParameters().Length == 1 &&
+                    m.GetParameters()[0].ParameterType == typeof(Error));
+
+            if (implicitOp != null)
+                return (TResponse)implicitOp.Invoke(null, [error])!;
+        }
+
+        throw new ValidationException(failures);
     }
 }

@@ -24,7 +24,8 @@ public class AccountService(IUserRepository userRepository, IPhotoService photoS
 
         using var hmac = new HMACSHA512();
 
-        string uniqueNameIdentifier = await userRepository.BuildUniqueNameIdentifier(registerDto.Username, ct);
+        string uniqueNameIdentifier = await userRepository.BuildUniqueNameIdentifier(registerDto.Username, null, 
+            ct);
 
         var user = new User
         {

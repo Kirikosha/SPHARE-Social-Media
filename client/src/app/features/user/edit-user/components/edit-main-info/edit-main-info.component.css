@@ -1,0 +1,124 @@
+/* ── Container Layout ── */
+.main-info-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 1rem;
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #ececec;
+}
+
+.field-group {
+  margin-bottom: 1.4rem;
+}
+
+/* ── Validation Messages ── */
+.field-error {
+  margin-top: 0.35rem;
+  padding-left: 1rem;
+  font-size: 0.82rem;
+  color: #dc3545;
+}
+
+/* ── Suggestion Card Configuration ── */
+.suggestion-box {
+  border: 1.9px dashed #9e9e9e;
+  border-radius: 1.3rem;
+  padding: 1rem 1.25rem;
+  background: #fafafa;
+}
+
+.suggestion-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.suggestion-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.suggestion-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #222;
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-use-suggestion {
+  border: none;
+  background: #222;
+  color: #fff;
+  border-radius: 2rem;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-use-suggestion:hover {
+  background: #444;
+}
+
+.btn-dismiss {
+  border: 1.5px solid #9e9e9e;
+  background: transparent;
+  color: #444;
+  border-radius: 2rem;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.btn-dismiss:hover {
+  border-color: #222;
+  color: #222;
+}
+
+/* ── Form Actions / Footer ── */
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.btn-save {
+  border: none;
+  background: #222;
+  color: #fff;
+  border-radius: 2rem;
+  padding: 0.6rem 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #444;
+  transform: scale(1.03);
+}
+
+.btn-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

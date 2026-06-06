@@ -20,6 +20,7 @@
 :root {
   --accent: #660033;
   --accent-light: #A30052;
+  --accent-dark: #4d0026;
   --accent-glow: rgba(163, 0, 82, 0.2);
   --navbar-height: 65px;
 

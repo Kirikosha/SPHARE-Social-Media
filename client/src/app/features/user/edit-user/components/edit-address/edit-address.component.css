@@ -38,9 +38,9 @@
 .btn-save {
   border: none;
   background-color: var(--accent);
-  color: #fff;
+  color: var(--bg-base);
   border-radius: 2rem;
-  padding: 0.6rem 1.6rem;
+  padding: 0.7rem 1.6rem 0.5rem 1.6rem;
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -50,7 +50,7 @@
 }
 
 .btn-save:hover:not(:disabled) {
-  background: var(--accent-light);
+  background: var(--accent-dark);
   transform: scale(1.03);
 }
 

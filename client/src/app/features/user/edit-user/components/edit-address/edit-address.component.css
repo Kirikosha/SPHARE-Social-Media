@@ -1,6 +1,6 @@
 /* ── Container Layout ── */
 .main-info-card {
-  background: #fff;
+  background: var(--bg-third-lvl);
   border: 1px solid #e0e0e0;
   border-radius: 1rem;
   padding: 1.75rem 2rem;
@@ -37,7 +37,7 @@
 
 .btn-save {
   border: none;
-  background: #222;
+  background-color: var(--accent);
   color: #fff;
   border-radius: 2rem;
   padding: 0.6rem 1.6rem;
@@ -50,7 +50,7 @@
 }
 
 .btn-save:hover:not(:disabled) {
-  background: #444;
+  background: var(--accent-light);
   transform: scale(1.03);
 }
 

@@ -1,0 +1,86 @@
+<div class="main-info-card">
+  <h4 class="section-title">Additional Details</h4>
+
+  <form [formGroup]="detailsForm" (ngSubmit)="onSubmit()" novalidate>
+
+    <div class="field-group">
+      <app-input-field
+        label="Pronouns (Optional)"
+        formControlName="pronouns">
+      </app-input-field>
+    </div>
+
+    <div class="field-group">
+      <div class="textarea-wrapper">
+        <textarea
+          id="profileDescription"
+          class="custom-textarea"
+          formControlName="profileDescription"
+          maxlength="200"
+          placeholder=" "></textarea>
+        <label class="textarea-label" for="profileDescription">Profile Description (Optional)</label>
+      </div>
+      <div class="char-counter">
+        {{ descriptionValue.length }}/200 characters
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="input-form">
+        <input
+          id="interestsInput"
+          class="input"
+          type="text"
+          formControlName="interestsInput"
+          placeholder=" "
+          (input)="onInterestsInput($event)"
+        />
+        <label class="textUser" for="interestsInput">Interests (Separated with commas, Max 20)</label>
+      </div>
+
+      <div class="tags-container" *ngIf="interestsList.length > 0">
+        <div
+          *ngFor="let interest of interestsList; let i = index"
+          class="hobby-tag"
+          [style.background-color]="getTagColor(i)">
+          <span class="tag-text">{{ interest }}</span>
+          <button type="button" class="btn-remove-tag" (click)="removeInterestTag(i)">×</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="date-input-wrapper">
+        <input
+          id="dateOfBirth"
+          class="custom-date-input"
+          type="date"
+          [max]="maxDateString"
+          formControlName="dateOfBirth"
+        />
+        <label class="date-label" for="dateOfBirth">Date of Birth (Minimum age 14 required)</label>
+      </div>
+
+      <div *ngIf="dateOfBirthControl?.invalid && dateOfBirthControl?.touched" class="field-error">
+        <span *ngIf="dateOfBirthControl?.errors?.['tooYoung']">You must be at least 14 years old to register.</span>
+        <span *ngIf="dateOfBirthControl?.errors?.['invalidYear']">Please provide a valid year after 1900.</span>
+        <span *ngIf="dateOfBirthControl?.errors?.['invalidDate']">The provided date format is invalid.</span>
+      </div>
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success mt-2">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-danger mt-2">
+      {{ errorMessage }}
+    </div>
+
+    <div class="form-footer">
+      <button type="submit" class="btn-save" [disabled]="detailsForm.invalid || isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+        {{ isLoading ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+
+  </form>
+</div>

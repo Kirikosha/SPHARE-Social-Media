@@ -19,6 +19,8 @@ export class InputFieldComponent {
   type = input<string>('text');
   id = input<string>('custom-input-' + Math.random().toString(36).substring(2, 9));
 
+  labelBgColor = input<string>("#FFFAFA")
+
   // Internal state tracking
   value = signal<string>('');
   disabled = signal<boolean>(false);

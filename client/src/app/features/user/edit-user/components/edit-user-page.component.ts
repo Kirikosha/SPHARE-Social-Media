@@ -26,6 +26,7 @@ export class EditUserPageComponent implements OnInit {
   private userEditService: UserEditService = inject(UserEditService);
   private toastrService: ToastrService = inject(ToastrService);
   userData: UserUpdateDataDto | null = null;
+  detailsData: any = null;
 
   imageCacheBuster = '';
 
@@ -37,8 +38,12 @@ export class EditUserPageComponent implements OnInit {
     this.userEditService.fetchUserUpdateData().subscribe({
       next: (data) => {
         this.userData = data;
-        console.log(this.userData.profileImageUrl)
-        console.log('User Data Loaded:', this.userData);
+        this.detailsData = {
+          pronouns: data.pronouns,
+          profileDescription: data.profileDescription,
+          dateOfBirth: data.dateOfBirth,
+          interests: data.interests
+        };
       },
       error: err => {
         this.toastrService.error(err.message);

@@ -1,0 +1,227 @@
+/* ── Shared Card Layout Metrics ── */
+.main-info-card {
+  background: var(--bg-third-lvl);
+  border: 1px solid #e0e0e0;
+  border-radius: 1rem;
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #ececec;
+}
+
+.field-group {
+  margin-bottom: 1.4rem;
+}
+
+/* ── Custom Textarea Construction ── */
+.textarea-wrapper {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.custom-textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 90px;
+  max-height: 160px;
+  resize: vertical;
+  border: solid 1.9px #9e9e9e;
+  border-radius: 1.1rem;
+  background: transparent;
+  padding: 1rem;
+  font-size: 1rem;
+  color: #000000;
+  transition: border-color 150ms ease;
+}
+
+.custom-textarea:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 1px 2px 5px rgba(133, 133, 133, 0.35);
+}
+
+.textarea-label {
+  position: absolute;
+  left: 15px;
+  color: #666666;
+  pointer-events: none;
+  background-color: #FFFAFA;
+  padding: 0 0.25rem;
+  transform: translateY(1rem);
+  transform-origin: left top;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms ease;
+}
+
+.custom-textarea:focus ~ .textarea-label,
+.custom-textarea:not(:placeholder-shown) ~ .textarea-label {
+  transform: translateY(-50%) scale(0.85);
+  color: #000000be;
+}
+
+.char-counter {
+  text-align: right;
+  font-size: 0.78rem;
+  color: #777777;
+  margin-top: 0.25rem;
+  padding-right: 0.5rem;
+}
+
+/* ── Localized Copy of Input Metrics (For Tag Input Engine Interactivity) ── */
+.input-form {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  border: solid 1.9px #9e9e9e;
+  border-radius: 1.3rem;
+  background: transparent;
+  padding: 1rem;
+  font-size: 1rem;
+  color: #000000;
+  transition: border-color 150ms ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 1px 2px 5px rgba(133, 133, 133, 0.35);
+}
+
+.textUser {
+  position: absolute;
+  left: 15px;
+  color: #666666;
+  pointer-events: none;
+  background-color: #FFFAFA;
+  padding: 0 0.25rem;
+  transform: translateY(1rem);
+  transform-origin: left top;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms ease;
+}
+
+.input:focus ~ .textUser,
+.input:not(:placeholder-shown) ~ .textUser {
+  transform: translateY(-50%) scale(0.85);
+  color: #000000be;
+}
+
+/* ── Horizontal Pastel Tag Component ── */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  padding-left: 0.25rem;
+}
+
+.hobby-tag {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  border-radius: 2rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #333333;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease;
+}
+
+.hobby-tag:hover {
+  transform: translateY(-1px);
+}
+
+.tag-text {
+  margin-right: 0.4rem;
+}
+
+.btn-remove-tag {
+  border: none;
+  background: transparent;
+  color: #666666;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0 0 0.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.btn-remove-tag:hover {
+  color: #000000;
+  font-weight: bold;
+}
+
+/* ── Date Field Style Layout ── */
+.date-input-wrapper {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.custom-date-input {
+  box-sizing: border-box;
+  width: 100%;
+  border: solid 1.9px #9e9e9e;
+  border-radius: 1.3rem;
+  background: transparent;
+  padding: 1rem;
+  font-size: 1rem;
+  color: #000000;
+}
+
+.custom-date-input:focus {
+  outline: none;
+  border-color: #000000;
+  box-shadow: 1px 2px 5px rgba(133, 133, 133, 0.35);
+}
+
+.date-label {
+  position: absolute;
+  left: 15px;
+  pointer-events: none;
+  background-color: #FFFAFA;
+  padding: 0 0.25rem;
+  /* Date fields natively have internal display components, so we leave it locked at top always */
+  transform: translateY(-50%) scale(0.85);
+  color: #000000be;
+}
+
+/* ── Footer Elements ── */
+.form-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.btn-save {
+  border: none;
+  background: #222;
+  color: #fff;
+  border-radius: 2rem;
+  padding: 0.6rem 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #444;
+  transform: scale(1.03);
+}
+
+.btn-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

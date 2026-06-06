@@ -22,7 +22,6 @@ export class EditAddressComponent implements OnInit {
   private _city = '';
   private _country = '';
 
-  /* ── Fix: Accept string | null to match your database/API model type ── */
   @Input()
   set city(value: string | null) {
     this._city = value || '';
@@ -60,12 +59,10 @@ export class EditAddressComponent implements OnInit {
   }
 
   onSubmit(): void {
-    // The form is always valid now, even if completely empty
     this.isLoading = true;
     this.successMessage = '';
     this.errorMessage = '';
 
-    // If cleared, fallback to an empty string '' so the database knows to delete it
     const dto: UpdateAddressDto = {
       city: this.addressForm.value.city?.trim() || '',
       country: this.addressForm.value.country?.trim() || ''

@@ -30,6 +30,7 @@
 
   --bg-base:    #FDE8E9;  /* your current page background */
   --bg-card:    #FEF3F3;  /* replaces white cards — barely pink, not jarring */
+  --bg-third-lvl: #FFFAFA;
   --bg-elevated:#FFFFFF;  /* only for things that need to "pop" above cards */
   --bg-subtle:  #F9D8DA;  /* slightly deeper, for headers/banners like that gray one */
   --bg-muted:   #F2C8CB;  /* borders, dividers, hover states */

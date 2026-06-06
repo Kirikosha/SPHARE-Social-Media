@@ -9,5 +9,6 @@
     (input)="onInput($event)"
     (blur)="onTouched()"
   />
-  <label class="textUser" [for]="id()">{{ label() }}</label>
+  <label class="textUser" [for]="id()"
+  [style.background-color]="labelBgColor()">{{ label() }}</label>
 </div>

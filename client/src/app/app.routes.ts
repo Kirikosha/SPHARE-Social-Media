@@ -18,6 +18,7 @@ import { CalendarPageComponent } from './publication/calendar-page/calendar-page
 import { CreatePlannedPublicationComponent } from './publication/create-planned-publication/create-planned-publication.component';
 import { authGuard } from './_guards/auth.guard';
 import {EditUserPageComponent} from "./features/user/edit-user/components/edit-user-page.component";
+import {ProfilePageComponent} from "./features/user/user-profile/components/profile-page.component";
 
 export const routes: Routes = [
     // Public routes — no guard
@@ -28,6 +29,7 @@ export const routes: Routes = [
     // Protected routes
     { path: '', component: HomeComponent, canActivate: [authGuard] },
     { path: 'profile/:uniqueNameIdentifier', component: ProfileComponent, canActivate: [authGuard] },
+  {path: 'prof/:uNI', component: ProfilePageComponent, canActivate: [authGuard] },
     { path: 'edit-profile', component: EditUserPageComponent, canActivate: [authGuard] },
     { path: 'publication/:id', component: PublicationPageComponent, canActivate: [authGuard] },
     { path: 'publications/calendar', component: CalendarPageComponent, canActivate: [authGuard] },

@@ -9,6 +9,7 @@ public class GetPublicUserByUniqueNameIdentifier
 {
     public class Query : IRequest<Result<PublicUserDto>>
     {
+        public string? UserId { get; set; }
         public required string UniqueNameIdentifier { get; set; }
     }
     public class Handler(IUserService userService) 
@@ -16,7 +17,8 @@ public class GetPublicUserByUniqueNameIdentifier
     {
         public async Task<Result<PublicUserDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            return await userService.GetPublicUserByUniqueNameAsync(request.UniqueNameIdentifier, cancellationToken);
+            return await userService.GetPublicUserByUniqueNameAsync(request.UniqueNameIdentifier, request.UserId, 
+                cancellationToken);
         }
     }
 }

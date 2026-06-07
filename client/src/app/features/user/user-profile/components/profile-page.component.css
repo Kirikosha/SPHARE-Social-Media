@@ -1,0 +1,108 @@
+.page-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 28px;
+
+  width: 1200px;
+  margin: 40px auto;
+}
+
+/* ─── Sidebar ─── */
+
+
+/* ─── Content area ─── */
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.feed-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.tab {
+  width: 90px;
+  height: 38px;
+  background: #e0e0e0;
+  border-radius: 4px 4px 0 0;
+  margin-right: 4px;
+}
+
+.tab.active {
+  background: #ccc;
+}
+
+/* ─── Post cards ─── */
+.post-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.post-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #bbb;
+  flex-shrink: 0;
+}
+
+.post-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.post-name {
+  height: 14px;
+  width: 120px;
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.post-time {
+  height: 11px;
+  width: 80px;
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+.post-body {
+  height: 52px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  margin-bottom: 14px;
+}
+
+.post-image {
+  width: 100%;
+  height: 200px;
+  background: #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.action {
+  width: 52px;
+  height: 22px;
+  background: #e8e8e8;
+  border-radius: 4px;
+}

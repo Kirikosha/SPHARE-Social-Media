@@ -9,6 +9,7 @@ public class PublicUserDto
     public string JoinedAt { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
     public bool Blocked { get; set; }
+    public bool IsOwner { get; set; } = false;
     public UserProfileDetailsDto? UserProfileDetails { get; set; }
     public AddressDto? Address { get; set; }
 }

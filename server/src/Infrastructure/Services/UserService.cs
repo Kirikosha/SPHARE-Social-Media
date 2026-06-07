@@ -24,12 +24,16 @@ public class UserService(IUserRepository userRepository, IPhotoService
             : Result<PublicUserDto>.Success(user); 
     }
 
-    public async Task<Result<PublicUserDto>> GetPublicUserByUniqueNameAsync(string uniqueName, CancellationToken ct)
+    public async Task<Result<PublicUserDto>> GetPublicUserByUniqueNameAsync(string uniqueName, string? userId, 
+            CancellationToken ct)
     {
         var user = await userRepository.GetPublicUserByUniqueNameAsync(uniqueName, ct);
-        return user == null
-            ? Result<PublicUserDto>.Failure("User was not found", 404)
-            : Result<PublicUserDto>.Success(user); 
+        if (user == null)
+            return Result<PublicUserDto>.Failure(UserErrors.UserNotFound());
+
+        if (!string.IsNullOrEmpty(userId) && user.Id == userId)
+            user.IsOwner = true;
+        return Result<PublicUserDto>.Success(user); 
     }
 
     public async Task<Result<User>> GetUserByEmailAsync(string email, CancellationToken ct)

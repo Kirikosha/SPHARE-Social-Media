@@ -15,10 +15,21 @@ public class PublicUserController : BaseApiController
     [HttpGet("by-uni")]
     public async Task<ActionResult<PublicUserDto>> GetPublicUserByUni([FromQuery]string uNi)
     {
+        string? userId;
+        try
+        {
+            userId = User.GetUserId();
+        }
+        catch
+        {
+            return HandleResult(await Mediator.Send(
+                new GetPublicUserByUniqueNameIdentifier.Query() { UniqueNameIdentifier = uNi, UserId = null}));
+        }
         return HandleResult(await Mediator.Send(
-            new GetPublicUserByUniqueNameIdentifier.Query() { UniqueNameIdentifier = uNi }));
+            new GetPublicUserByUniqueNameIdentifier.Query() { UniqueNameIdentifier = uNi, UserId = userId}));
     }
 
+    /*
     [Authorize]
     [HttpGet("my-profile")]
     public async Task<ActionResult> GetMyProfile()
@@ -27,6 +38,7 @@ public class PublicUserController : BaseApiController
 
         return HandleResult(await Mediator.Send(new GetPublicUserById.Query() { Id = id }));
     }
+    */
 
     [Authorize]
     [HttpGet("fetch-update-data")]

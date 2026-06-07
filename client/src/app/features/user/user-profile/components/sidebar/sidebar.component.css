@@ -1,0 +1,126 @@
+.sidebar {
+  width: 340px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.sidebar-banner {
+  height: 100px;
+  background: #ccc;
+}
+
+.sidebar-body {
+  padding: 0 20px 24px;
+}
+
+.avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  background: #aaa;
+  margin-top: -44px;
+  margin-bottom: 14px;
+}
+
+.identity {
+  margin-bottom: 16px;
+}
+
+.display-name {
+  height: 18px;
+  width: 120px;
+  background: #ccc;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.handle {
+  height: 13px;
+  width: 90px;
+  background: #ddd;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.joined {
+  height: 11px;
+  width: 130px;
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.stat {
+  height: 36px;
+  width: 72px;
+  background: #ddd;
+  border-radius: 6px;
+}
+
+.edit-btn {
+  display: block;
+  width: 100%;
+  height: 38px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.divider {
+  height: 1px;
+  background: #ddd;
+  margin-bottom: 16px;
+}
+
+.section-label {
+  height: 11px;
+  width: 64px;
+  background: #ccc;
+  border-radius: 3px;
+  margin-bottom: 12px;
+}
+
+.about-section {
+  margin-bottom: 16px;
+}
+
+.meta-row {
+  height: 13px;
+  width: 180px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.bio {
+  height: 13px;
+  width: 220px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  display: inline-block;
+  width: 60px;
+  height: 26px;
+  background: #ddd;
+  border-radius: 20px;
+}

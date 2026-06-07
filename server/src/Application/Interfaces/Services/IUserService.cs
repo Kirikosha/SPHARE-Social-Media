@@ -8,7 +8,7 @@ namespace Application.Interfaces.Services;
 public interface IUserService
 {
     Task<Result<PublicUserDto>> GetPublicUserByIdAsync(string id, CancellationToken ct);
-    Task<Result<PublicUserDto>> GetPublicUserByUniqueNameAsync(string uniqueName, CancellationToken ct);
+    Task<Result<PublicUserDto>> GetPublicUserByUniqueNameAsync(string uniqueName, string? userId, CancellationToken ct);
     Task<Result<User>> GetUserByEmailAsync(string email, CancellationToken ct);
     Task<Result<User>> GetUserByIdAsync(string id, CancellationToken ct);
     Task<Result<List<string>>> GetUserEmailsByIdsAsync(List<string> ids, CancellationToken ct);
